@@ -18,6 +18,7 @@ add_executable (TarkovInventoryAssistant
 "TImageReader.h"
 "TCore.h"
 "TDataCatalog.h"
+"VPTree.h"
 
 "TarkovInventoryAssistant.cpp"
 "TDataTypes.cpp"
@@ -26,6 +27,7 @@ add_executable (TarkovInventoryAssistant
 "TImageReader.cpp"
 "TCore.cpp"
 "TDataCatalog.cpp"
+"VPTree.cpp"
 )
 
 TARGET_LINK_LIBRARIES (TarkovInventoryAssistant ${OpenCV_LIBS})

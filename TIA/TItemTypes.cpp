@@ -4,6 +4,20 @@
 
 namespace TItemTypes {
 
+
+    std::shared_ptr<TItem> TItem::makePlaceHolder(cv::Mat& image, int cellSize) {
+        int width = lrint(image.cols / cellSize);
+        int height = lrint(image.rows / cellSize);
+        return  std::make_shared<TItem>(TItem(image, std::make_pair(width, height)));
+    };
+
+    void TItem::makeQualified(TItem& to, TItem& from) {
+        to.m_name = from.m_name;
+        to.m_isRotated = from.m_isRotated;
+        to.isPlaceHolder = false;
+    };
+
+
     void TContainerItem::insert(TItem item)
     {
         m_spaceFilled += item.m_dim.first * item.m_dim.second;
@@ -18,6 +32,8 @@ namespace TItemTypes {
         }
     };
 
+
+
     // Return contents of this Container
     std::vector<TItem>& TContainerItem::getContents()
     {
@@ -31,5 +47,10 @@ namespace TItemTypes {
             std::cout << item.m_name << std::endl;
         }
     };
+
+    bool TItemTypes::compareByName(std::shared_ptr<TItem> a, std::shared_ptr<TItem> b)
+    {
+        return a->m_name < b->m_name;
+    }
 
 }
