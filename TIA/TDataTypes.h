@@ -1,8 +1,23 @@
 #pragma once
 #include <iostream>
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/core/ocl.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/img_hash.hpp>
+#include <opencv2/imgproc.hpp>
+
+
 
 namespace TDataTypes
 {
+
+
+
+    // Split on character delimiter.
+    void splitString(std::string s, char del, std::vector<std::string>& out);
+    // Split on character delimiter.
+    void splitString(std::string s, char del, std::vector<int>& out);
 
 
     /*
@@ -47,4 +62,9 @@ namespace TDataTypes
     };
 
   
+}
+
+namespace Hash {
+
+    cv::Mat hashImage(cv::Mat& image);
 }

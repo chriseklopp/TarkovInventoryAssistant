@@ -4,7 +4,6 @@
 
 namespace TItemTypes {
 
-
     std::shared_ptr<TItem> TItem::makePlaceHolder(cv::Mat& image, int cellSize) {
         int width = lrint(image.cols / cellSize);
         int height = lrint(image.rows / cellSize);
@@ -15,21 +14,27 @@ namespace TItemTypes {
         to.m_name = from.m_name;
         to.m_isRotated = from.m_isRotated;
         to.isPlaceHolder = false;
+        // TODO: Needs to cast "to" to derived class if "from" is a derived class type.
     };
 
 
-    void TContainerItem::insert(TItem item)
+    bool TContainerItem::insert(TItem item, cv::Point location)
     {
         m_spaceFilled += item.m_dim.first * item.m_dim.second;
         m_contents.push_back(item);
+        return true;
     };
 
-    void TContainerItem::insert(std::vector<TItem> items)
+    bool TContainerItem::insert(std::vector<std::pair<TItem, cv::Point>> items)
     {
-        for (TItem item : items) {
-            m_spaceFilled += item.m_dim.first * item.m_dim.second;
-            m_contents.push_back(item);
+        for (std::pair<TItem, cv::Point> p : items) {
+            // TODO: this is so so so inefficient. Also needs to use shared ptr.
+            TItem it = p.first;
+            cv::Point loc = p.second;
+            m_spaceFilled += it.m_dim.first * it.m_dim.second;
+            m_contents.push_back(it);
         }
+        return true;
     };
 
 

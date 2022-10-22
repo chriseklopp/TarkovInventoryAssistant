@@ -2,15 +2,18 @@
 //
 
 #include "TarkovInventoryAssistant.h"
-#include "TScreenCapture.h"
-#include "TImageReader.h"
+
 int main()
 {
 	std::cout << "Hello CMake." << std::endl;
-
+    auto x = TGlobal::HOME_PATH;
+    auto y = TGlobal::CATALOG_PATH;
+    auto z = TGlobal::COMPCATS_PATH;
     TImageReader reader = TImageReader();
-
-    std::vector < std::shared_ptr < TItemTypes::TItem>> out;
+    TDataCatalog cat = TDataCatalog();
+    cat.loadRawCatalog();
+    cat.compileCatalogFromRaw();
+    std::vector <std::shared_ptr<TItemTypes::TItem>> out;
     std::string impath = "C:/pyworkspace/tarkovinventoryproject/Data/screenshots/testcontainerbody221008_111257.png";
     reader.parseFromPath(impath, out);
     return 0;

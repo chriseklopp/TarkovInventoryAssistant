@@ -22,7 +22,7 @@ public:
     {}
 
     // Parses a cv::Mat into a vector of items detected.
-    bool TImageReader::parseImage(const cv::Mat& image,
+    bool parseImage(const cv::Mat& image,
         std::vector<std::shared_ptr<TItemTypes::TItem>>& retItems);
 
     // Works like above fucntion, except accepts a path instead of an already made cv::Mat. 
