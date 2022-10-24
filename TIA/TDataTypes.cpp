@@ -8,8 +8,7 @@ namespace TDataTypes
 {
 
     // Split on character delimiter.
-    void splitString(std::string s, char del, std::vector<std::string>& out)
-    {
+    void splitString(std::string s, char del, std::vector<std::string>& out) {
         std::stringstream stream(s);
         std::string word;
         while (getline(stream, word, del)) {
@@ -18,14 +17,37 @@ namespace TDataTypes
     }
 
     // Split on character delimiter.
-    void splitString(std::string s, char del, std::vector<int>& out)
-    {
+    void splitString(std::string s, char del, std::vector<int>& out) {
+        if (s.empty())
+            return;
+
         std::stringstream stream(s);
         std::string word;
         while (getline(stream, word, del)) {
             out.push_back(std::stoi(word));
         }
     }
+
+    // Join vector to std::string on character delimiter.
+    std::string joinVector(std::vector<std::string>& in, char del) {
+        std::string out;
+        for (auto it : in) {
+            out += it + del;
+        }
+        out.pop_back();
+        return out;
+    };
+
+    // Join vector to std::string on character delimiter.
+    std::string joinVector(std::vector<int>& in, char del) {
+        std::string out;
+        for (auto it : in) {
+            out  += std::to_string(it) + del;
+        }
+        out.pop_back();
+        return out;
+    };
+
     TPixelCoordinate::TPixelCoordinate()
     {
         // Default constructor

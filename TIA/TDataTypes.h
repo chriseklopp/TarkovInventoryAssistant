@@ -11,14 +11,16 @@
 
 namespace TDataTypes
 {
-
-
-
     // Split on character delimiter.
     void splitString(std::string s, char del, std::vector<std::string>& out);
     // Split on character delimiter.
     void splitString(std::string s, char del, std::vector<int>& out);
 
+    // Join vector to std::string on character delimiter.
+    std::string joinVector(std::vector<std::string>& in, char del);
+
+    // Join vector to std::string on character delimiter.
+    std::string joinVector(std::vector<int>& in, char del);
 
     /*
     * TPixelCoordinate

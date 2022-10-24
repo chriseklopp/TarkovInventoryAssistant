@@ -11,8 +11,8 @@ int main()
     auto z = TGlobal::COMPCATS_PATH;
     TImageReader reader = TImageReader();
     TDataCatalog cat = TDataCatalog();
-    cat.loadRawCatalog();
-    cat.compileCatalogFromRaw();
+    //cat.compileCatalogFromRaw();
+    cat.loadCatalog();
     std::vector <std::shared_ptr<TItemTypes::TItem>> out;
     std::string impath = "C:/pyworkspace/tarkovinventoryproject/Data/screenshots/testcontainerbody221008_111257.png";
     reader.parseFromPath(impath, out);
