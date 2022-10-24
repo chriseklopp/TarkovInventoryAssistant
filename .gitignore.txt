@@ -1,0 +1,4 @@
+Data/
+.vs/
+out/
+build/
