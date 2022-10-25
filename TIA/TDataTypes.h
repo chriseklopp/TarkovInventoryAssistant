@@ -1,9 +1,26 @@
 #pragma once
 #include <iostream>
-#
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/core/ocl.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/img_hash.hpp>
+#include <opencv2/imgproc.hpp>
+
+
+
 namespace TDataTypes
 {
+    // Split on character delimiter.
+    void splitString(std::string s, char del, std::vector<std::string>& out);
+    // Split on character delimiter.
+    void splitString(std::string s, char del, std::vector<int>& out);
 
+    // Join vector to std::string on character delimiter.
+    std::string joinVector(std::vector<std::string>& in, char del);
+
+    // Join vector to std::string on character delimiter.
+    std::string joinVector(std::vector<int>& in, char del);
 
     /*
     * TPixelCoordinate
@@ -46,36 +63,10 @@ namespace TDataTypes
         DYNAMIC = 1 // Could have disconnected slots of varying sizes and positions.
     };
 
-    struct Node
-    {
-        int index;
-        double threshold;
-        Node* left;
-        Node* right;
+  
+}
 
-        Node() :
-            index(0), threshold(0.), left(0), right(0) {}
+namespace Hash {
 
-        ~Node() {
-            delete left;
-            delete right;
-        }
-    };
-
-
-    /*
-    * Based on http://stevehanov.ca/blog/index.php?id=130
-    */
-    class VPTree {
-    public:
-        VPTree();
-
-    private:
-        
-        //Node* root;
-        Node* root;
-        // I hope I dont actually have to implement by own VPTree....
-    };
-
-   
+    cv::Mat hashImage(cv::Mat& image);
 }

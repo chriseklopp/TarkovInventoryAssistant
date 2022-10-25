@@ -139,7 +139,7 @@ void TImageReader::resolveContainerImage(const cv::Mat& image,
             }
 
 
-            cv::Mat itemImage = image(cv::Range(80, 280), cv::Range(150, 330));
+            cv::Mat itemImage = image(cv::Range(lowerP.y, upperP.y), cv::Range(lowerP.x, upperP.x));
 
             // We create a placeholder TItem with our image and its dimensions.
             retItems.push_back(TItemTypes::TItem::makePlaceHolder(itemImage, m_cellsize));
