@@ -24,7 +24,7 @@ class TDataCatalog {
 public:
 
     TDataCatalog() : 
-        m_dimensionalTrees(std::unordered_map<std::string, TDataTypes::TVpTree>()),
+        m_dimensionalTrees(std::unordered_map<std::pair<int,int>, TDataTypes::TVpTree, Hash::pair_hash>()),
         m_items(std::vector<std::shared_ptr<TItemTypes::TItem>>())
                     
     {};
@@ -72,7 +72,7 @@ public:
 
 private:
 
-
+    void makeVPTrees();
     // Search the referenced VPTree for best matches to the item given. n specifices number to ret.
     void searchVPTree(TItemTypes::TItem& inItem, TDataTypes::TVpTree& tree) ;
 
@@ -80,20 +80,31 @@ private:
     // Sort the item vector by name. Helps facilitate by name lookups of items. 
     void sortItems();
 
-
     // Construct a TItem from a string input. This is to be used when creating items from a compiled catalog.
     // !! This may be deprecated in the future. !!
     std::shared_ptr<TItemTypes::TItem> makeTItemFromCompiledString(const std::string& instring);
 
+    // Methods for handling reading of raw catalog files.
+    void writeFileToCompiledCatalog(const std::filesystem::path& file, std::ofstream& out);
+
+    void addItemToDimMap(std::shared_ptr<TItemTypes::TItem>& item);
+
+
     // Map of L-W dimensions to respective VPTrees.
-    std::unordered_map<std::string, TDataTypes::TVpTree> m_dimensionalTrees;
+    // Uses unordered map because performance is paramount here.
+    // TODO: Do I bother making unordered_map hash work for std::pair<int,int> or just mash them into a string.
+    std::unordered_map<std::pair<int, int>, TDataTypes::TVpTree, Hash::pair_hash> m_dimensionalTrees;
 
     //Contains shared_ptrs to all items in the catalog. Shares ownership of items with the VpTrees.
     std::vector<std::shared_ptr<TItemTypes::TItem>> m_items;
 
-    // Methods for handling reading of raw catalog files.
-    void writeFileToCompiledCatalog(const std::filesystem::path& file, std::ofstream& out);
+
+
+    // Map of dimensions to vectors of items. This structure will be used to generate the VP trees
+    // There will be a different tree for each unique dimension.
+    std::map<std::pair<int, int>, std::vector<std::shared_ptr<TItemTypes::TItem>>> m_dimItemsMap;
 
     std::filesystem::path m_catalogPath;
+
 
 };

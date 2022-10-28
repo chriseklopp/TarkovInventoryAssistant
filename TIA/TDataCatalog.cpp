@@ -159,7 +159,8 @@ std::shared_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
 
         //Hash
         TDataTypes::splitString(fields.at(5), '-', temp);
-        hashVals = cv::Mat(temp).t(); // TODO: is this the correct format, or does it need transposing.
+        hashVals = cv::Mat(temp).t();
+        hashVals.convertTo(hashVals, CV_8U);
 
     }
     catch (std::invalid_argument) {
@@ -194,6 +195,7 @@ std::shared_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
 
 
 bool TDataCatalog::getBestMatch(const TItemTypes::TItem& in, TItemTypes::TItem& out) {
+    m_dimensionalTrees.at(in.m_dim)
     return false;
 };
 
@@ -249,15 +251,32 @@ bool TDataCatalog::loadCatalog(std::filesystem::path& catalog) {
       std::shared_ptr<TItemTypes::TItem> item(makeTItemFromCompiledString(line));
       if (!item)
           continue;
-       m_items.push_back(item);
+
+      addItemToDimMap(item);
+      m_items.push_back(item);
     }
 
+    // Finally make our VPTree structures.
+    makeVPTrees();
     std::cout << "Loaded catalog of size: " << m_items.size() << "\n";
     return true;
 };
+void TDataCatalog::addItemToDimMap(std::shared_ptr<TItemTypes::TItem>& item) {
+    if (m_dimItemsMap.find(item->m_dim) != m_dimItemsMap.end()) {
+        m_dimItemsMap.at(item->m_dim).push_back(item);
+    }
+    else {
+        m_dimItemsMap.insert({ item->m_dim,std::vector<std::shared_ptr<TItemTypes::TItem>>() });
+        m_dimItemsMap.at(item->m_dim).push_back(item);
+    }
+};
 
-
-
+void TDataCatalog::makeVPTrees() {
+    for (auto iter = m_dimItemsMap.begin(); iter != m_dimItemsMap.end(); ++iter) {
+        m_dimensionalTrees.insert({ iter->first, TDataTypes::TVpTree() });
+        m_dimensionalTrees.at(iter->first).create(iter->second);
+    }
+};
 
 void TDataCatalog::clearCatalog(){
     m_items.clear();
