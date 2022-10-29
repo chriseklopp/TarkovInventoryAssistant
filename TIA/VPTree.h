@@ -10,9 +10,9 @@
 
 namespace TDataTypes
 {
-    double TDistance(const TItemTypes::TItem& p1, const TItemTypes::TItem& p2);
-    double TDistance(const std::shared_ptr<TItemTypes::TItem>& p1, const std::shared_ptr<TItemTypes::TItem>& p2);
-
+   // double TDistance(const TItemTypes::TItem& p1, const TItemTypes::TItem& p2);
+   //double TDistance(const std::shared_ptr<TItemTypes::TItem>& p1, const std::shared_ptr<TItemTypes::TItem>& p2);
+    double TDistance(TItemTypes::TItem* const & p1, TItemTypes::TItem* const & p2);
     /*
     * Source: http://stevehanov.ca/blog/index.php?id=130
 
@@ -169,5 +169,8 @@ namespace TDataTypes
         }
     };
 
-    using TVpTree = VpTree<std::shared_ptr<TItemTypes::TItem>, TDistance>;
+    //using TVpTree = VpTree<std::shared_ptr<TItemTypes::TItem>, TDistance>;
+    //using TVpTree2 = VpTree<TItemTypes::TItem*, TDistance>;
+    using TVpTree = VpTree<TItemTypes::TItem*, TDistance>;
 };
+

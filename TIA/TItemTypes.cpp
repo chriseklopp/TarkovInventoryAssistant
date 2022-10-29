@@ -4,10 +4,10 @@
 
 namespace TItemTypes {
 
-    std::shared_ptr<TItem> TItem::makePlaceHolder(cv::Mat& image, int cellSize) {
-        int width = lrint(image.cols / cellSize);
-        int height = lrint(image.rows / cellSize);
-        return  std::make_shared<TItem>(TItem(image, std::make_pair(width, height)));
+    std::unique_ptr<TItem> TItem::makePlaceHolder(cv::Mat& image, double cellSize) {
+        int width = round(image.cols / cellSize);
+        int height = round(image.rows / cellSize);
+        return  std::make_unique<TItem>(TItem(image, std::make_pair(width, height)));
     };
 
     void TItem::makeQualified(TItem& to, TItem& from) {
@@ -53,9 +53,9 @@ namespace TItemTypes {
         }
     };
 
-    bool TItemTypes::compareByName(std::shared_ptr<TItem> a, std::shared_ptr<TItem> b)
+    bool TItemTypes::compareByName(TItem a, TItem b)
     {
-        return a->m_name < b->m_name;
+        return a.m_name < b.m_name;
     }
 
 }

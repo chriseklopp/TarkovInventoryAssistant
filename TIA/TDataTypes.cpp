@@ -71,7 +71,7 @@ namespace TDataTypes
 };
 
 namespace Hash {
-    cv::Mat hashImage(cv::Mat& image) {
+    cv::Mat PhashImage(const cv::Mat& image) {
 
         cv::Mat resized;
         cv::resize(image, resized, cv::Size(32, 32));
@@ -80,9 +80,24 @@ namespace Hash {
         cv::Mat hash;
         phasher->compute(resized, hash);
 
-        //norm(hashOne, hashTwo, NORM_HAMMING); how opencv cimpares hashes
         auto res = phasher->compare(hash, hash);
         return hash;
 
     }
+
+
+    cv::Mat templateMatch(const cv::Mat& a, const cv::Mat& b) {
+        cv::Mat resized_a;
+        cv::resize(a, resized_a, cv::Size(32, 32));
+
+        cv::Mat resized_b;
+        cv::resize(b, resized_b, cv::Size(32, 32));
+
+        cv::Mat res;
+        cv::matchTemplate(resized_a, resized_b,res, cv::TM_SQDIFF_NORMED);
+        return res;
+
+    };
+
+
 } 

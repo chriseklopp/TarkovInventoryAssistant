@@ -78,5 +78,7 @@ namespace Hash {
     };
 
 
-    cv::Mat hashImage(cv::Mat& image);
+    cv::Mat PhashImage(const cv::Mat& image);
+
+    cv::Mat templateMatch(const cv::Mat& a, const cv::Mat& b);
 }

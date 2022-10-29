@@ -1,21 +1,15 @@
 #include "TDataCatalog.h"
 
-
 void TDataCatalog::init() {};
 
 
-std::shared_ptr<TItemTypes::TItem> TDataCatalog::getBestMatch(TItemTypes::TItem& inTtem) {
-    return std::shared_ptr<TItemTypes::TItem>(nullptr);
-};
+TItemTypes::TItem* TDataCatalog::getItem(std::string& name) {
 
-
-std::shared_ptr<const TItemTypes::TItem> TDataCatalog::getItem(std::string& name) {
-
-    // Search by item name.
+    // Search by item name. Switch to std::lower_bound??
     auto res = std::find_if(m_items.begin(), m_items.end(),
         [&](std::shared_ptr<const TItemTypes::TItem> e) { return e->m_name == name; });
     if (res != m_items.end()){
-        return *res;
+        return (*res).get();
     }
     return nullptr;
 };
@@ -97,7 +91,7 @@ void TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
         fields.push_back("0");
 
         // Construct hash, convert it to string and add to vector
-        cv::Mat imHash(Hash::hashImage(image));
+        cv::Mat imHash(Hash::PhashImage(image));
         std::vector<int> hashvec(imHash.begin<cv::uint8_t>(), imHash.end<cv::uint8_t>());
         fields.push_back(TDataTypes::joinVector(hashvec, '-'));
 
@@ -194,11 +188,53 @@ std::shared_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
 };
 
 
-bool TDataCatalog::getBestMatch(const TItemTypes::TItem& in, TItemTypes::TItem& out) {
-    m_dimensionalTrees.at(in.m_dim)
-    return false;
+TItemTypes::TItem* TDataCatalog::getBestMatch(TItemTypes::TItem& in) {
+
+
+    // Get 10 nearest results, then use template matching to more accurately determine the best choice.
+    // TODO: This still needs to be improved. 
+    // TODO: Keys are so oppressive they need to be in their own separate groups.
+    std::vector<TItemTypes::TItem*> items;
+    std::vector<double> dist;
+
+    getNNearestMatches(in, items, dist, 10);
+
+    if (!items.size())
+        return nullptr;
+
+
+    TItemTypes::TItem* bestIt;
+    double best = 10;
+    
+    for (auto it : items) {
+        auto res = Hash::templateMatch(in.getImage(), it->getImage());
+        if (res.at<float>(cv::Point(0,0)) < best) {
+            best = res.at<float>(cv::Point(0, 0));
+            bestIt = it;
+        }
+    }
+
+
+    //DEBUG:
+    cv::imshow("res", bestIt->getImage());
+    cv::imshow("in", in.getImage());
+    cv::waitKey(0);
+
+
+    return bestIt;
 };
 
+
+
+void TDataCatalog::getNNearestMatches(TItemTypes::TItem& in,
+                                   std::vector<TItemTypes::TItem*>& out,
+                                   std::vector<double>& retDistances,
+                                   int N) {
+
+    if (m_dimItemsMap.find(in.m_dim) != m_dimItemsMap.end())
+        m_dimensionalTrees.at(in.m_dim).search(&in, N, &out, &retDistances);
+    return;
+}
 
 bool TDataCatalog::loadCatalog() {
     // No path specifed. Find most recently created catalog.
@@ -252,21 +288,24 @@ bool TDataCatalog::loadCatalog(std::filesystem::path& catalog) {
       if (!item)
           continue;
 
-      addItemToDimMap(item);
       m_items.push_back(item);
+      addItemToDimMap(item.get());
+
     }
 
+    sortItems();
     // Finally make our VPTree structures.
     makeVPTrees();
     std::cout << "Loaded catalog of size: " << m_items.size() << "\n";
     return true;
 };
-void TDataCatalog::addItemToDimMap(std::shared_ptr<TItemTypes::TItem>& item) {
+
+void TDataCatalog::addItemToDimMap(TItemTypes::TItem* item) {
     if (m_dimItemsMap.find(item->m_dim) != m_dimItemsMap.end()) {
         m_dimItemsMap.at(item->m_dim).push_back(item);
     }
     else {
-        m_dimItemsMap.insert({ item->m_dim,std::vector<std::shared_ptr<TItemTypes::TItem>>() });
+        m_dimItemsMap.insert({ item->m_dim,std::vector<TItemTypes::TItem*>() });
         m_dimItemsMap.at(item->m_dim).push_back(item);
     }
 };
@@ -288,7 +327,9 @@ void TDataCatalog::searchVPTree(TItemTypes::TItem& inItem, TDataTypes::TVpTree& 
 };
 
 void TDataCatalog::sortItems() {
-    std::sort(m_items.begin(), m_items.end(), TItemTypes::compareByName);
+    std::sort(m_items.begin(), m_items.end(), 
+        [](std::shared_ptr<TItemTypes::TItem> a,
+        std::shared_ptr<TItemTypes::TItem> b) {return TItemTypes::compareByName(*a, *b); });
 };
 
 bool TDataCatalog::loadRawCatalog(std::vector<std::filesystem::path>& outMods) {

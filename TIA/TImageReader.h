@@ -23,10 +23,10 @@ public:
 
     // Parses a cv::Mat into a vector of items detected.
     bool parseImage(const cv::Mat& image,
-        std::vector<std::shared_ptr<TItemTypes::TItem>>& retItems);
+        std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems);
 
     // Works like above fucntion, except accepts a path instead of an already made cv::Mat. 
-    bool parseFromPath(const std::string path, std::vector<std::shared_ptr<TItemTypes::TItem>>& retItems);
+    bool parseFromPath(const std::string path, std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems);
 
 private:
 
@@ -42,11 +42,11 @@ private:
      // Accept container coordinates. Returns all items in the container.
     void resolveContainerImage(const cv::Mat& image,
         std::vector<std::pair<cv::Point, cv::Point>> locs,
-        std::vector<std::shared_ptr<TItemTypes::TItem>>& retItems);
+        std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems);
 
     void resolveStashImage(const cv::Mat& image,
         std::pair<cv::Point, cv::Point> loc,
-        std::vector<std::shared_ptr<TItemTypes::TItem>>& retItems);
+        std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems);
 
 
     void resolveContainerHeader(); //Find the header in a container image.
