@@ -9,6 +9,8 @@
 #include "TGlobal.h"
 #include <iostream>
 #include <fstream>
+#include <numeric>
+
 /*
 Singleton
 This class will manage the catalog of items and their properties
@@ -32,15 +34,11 @@ public:
     void init();
 
 
-    /*
-    * Given a TItem, return the a ptr to the best matching item from the catalog.
-    */
-    std::shared_ptr<TItemTypes::TItem> getBestMatch(TItemTypes::TItem& inTtem);
-
 
     // Search catalog for item by name. !! This will return nullptr if it fails !!
-    // O(n) lookup. Should not be regularly used. TODO: Improve using Binary Search in futre.
-    std::shared_ptr<const TItemTypes::TItem> getItem(std::string& name);
+
+    // TODO: We are sorting but are still using linear search.Utilize bianry search.
+    TItemTypes::TItem* TDataCatalog::getItem(std::string& name);
 
 
     /* This function will compile the raw information from Data/catalog and build the neccessary tree structures
@@ -51,7 +49,11 @@ public:
 
 
     // This function compares an item to the catalog and populates a reference to the item that best matches it.
-    bool getBestMatch(const TItemTypes::TItem& in, TItemTypes::TItem& out);
+    TItemTypes::TItem* getBestMatch(TItemTypes::TItem& in);
+    
+    // This function compares an item to the catalog and finds the N nearest items.
+    // !! The NEAREST matches are not necessarily the BEST matches.
+    void getNNearestMatches(TItemTypes::TItem& in, std::vector<TItemTypes::TItem*>& out, std::vector<double>& distances, int N=5);
 
 
     // Load a compiled catalog from Data/CompiledCatalog.
@@ -76,7 +78,7 @@ private:
     // Search the referenced VPTree for best matches to the item given. n specifices number to ret.
     void searchVPTree(TItemTypes::TItem& inItem, TDataTypes::TVpTree& tree) ;
 
-    // TODO: We are sorting but are still using linear search.Utilize bianry search.
+
     // Sort the item vector by name. Helps facilitate by name lookups of items. 
     void sortItems();
 
@@ -87,22 +89,21 @@ private:
     // Methods for handling reading of raw catalog files.
     void writeFileToCompiledCatalog(const std::filesystem::path& file, std::ofstream& out);
 
-    void addItemToDimMap(std::shared_ptr<TItemTypes::TItem>& item);
+    void addItemToDimMap(TItemTypes::TItem* item);
 
 
     // Map of L-W dimensions to respective VPTrees.
     // Uses unordered map because performance is paramount here.
-    // TODO: Do I bother making unordered_map hash work for std::pair<int,int> or just mash them into a string.
     std::unordered_map<std::pair<int, int>, TDataTypes::TVpTree, Hash::pair_hash> m_dimensionalTrees;
 
-    //Contains shared_ptrs to all items in the catalog. Shares ownership of items with the VpTrees.
+    //Contains shared_ptrs to all items in the catalog. This is the prime owner (and should be sole tbh) of catalog items.
     std::vector<std::shared_ptr<TItemTypes::TItem>> m_items;
 
 
 
     // Map of dimensions to vectors of items. This structure will be used to generate the VP trees
     // There will be a different tree for each unique dimension.
-    std::map<std::pair<int, int>, std::vector<std::shared_ptr<TItemTypes::TItem>>> m_dimItemsMap;
+    std::map<std::pair<int, int>, std::vector<TItemTypes::TItem*>> m_dimItemsMap;
 
     std::filesystem::path m_catalogPath;
 

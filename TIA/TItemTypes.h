@@ -19,7 +19,7 @@ namespace TItemTypes {
             m_dim(std::make_pair(0, 0)),
             m_isRotated(false),
             isPlaceHolder(true),
-            m_imageHash(Hash::hashImage(cv::Mat()))
+            m_imageHash(Hash::PhashImage(cv::Mat()))
         {};
 
         // Construct a fully-fledged TItem. This should be the most common way to construct a TItem.
@@ -29,7 +29,7 @@ namespace TItemTypes {
             m_dim(dim),
             m_isRotated(rotated),
             isPlaceHolder(placeholder),
-            m_imageHash(Hash::hashImage(image))
+            m_imageHash(Hash::PhashImage(image))
         {};
 
         // Construct a fully-fledged TItem, using an image from a path.
@@ -39,7 +39,7 @@ namespace TItemTypes {
             m_dim(dim),
             m_isRotated(rotated),
             isPlaceHolder(placeholder),
-            m_imageHash(Hash::hashImage(m_image))
+            m_imageHash(Hash::PhashImage(m_image))
         {};
 
         // Construct a fully-fledged TItem, using an image from a path and a premade hash.
@@ -55,7 +55,7 @@ namespace TItemTypes {
         // Construct a NEW placeholder item from an image and populate its dims using cellsize.
         // Will have isPlaceHolder flag = true to signify it is not fully populated.
         // A placeholder is intended to be populated by another fully formed TItem (or derived) object.
-        static std::shared_ptr<TItem> makePlaceHolder(cv::Mat& image, int cellSize);
+        static std::unique_ptr<TItem> makePlaceHolder(cv::Mat& image, double cellSize);
 
         // TItem does not hold items. But we need this functionality for derived TContainerItem
         virtual bool insert(TItem item, cv::Point location) { return false; };
@@ -67,6 +67,8 @@ namespace TItemTypes {
         // !! There is no check that the fully-fledged item ACTUALLY is so !!
         static void makeQualified(TItem& to, TItem& from);
 
+
+        const cv::Mat getImage() const { return m_image; };
 
         cv::Mat m_imageHash; // TODO: change this to proper type.
         std::string m_name;
@@ -88,7 +90,7 @@ namespace TItemTypes {
             m_dim(dim),
             m_isRotated(false),
             isPlaceHolder(true),
-            m_imageHash(Hash::hashImage(image)) {};
+            m_imageHash(Hash::PhashImage(image)) {};
     };
 
     // TODO: We need a way to handle irregular shaped container objects. The solution could be some TIrregularContainerClass.
@@ -150,7 +152,7 @@ namespace TItemTypes {
     };
 
 
-    bool compareByName(std::shared_ptr<TItem> a, std::shared_ptr<TItem> b);
+    bool compareByName(TItem a, TItem b);
 
 
 }
