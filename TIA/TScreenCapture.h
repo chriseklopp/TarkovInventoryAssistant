@@ -135,8 +135,7 @@ namespace ScreenCapture {
         // save as png (method 2)
         CImage image;
         image.Attach(hBmp);
-        image.Save("C:/MyWorkspace/images/Screenshot-m2.png");
-
+        image.Save(L"C:/MyWorkspace/images/Screenshot-m2.png");
         GdiplusShutdown(gdiplusToken);
         return true;
     }
@@ -192,7 +191,7 @@ namespace ScreenCapture {
 
     int mainy() {
 
-        LPCSTR windowTitle = "INSERT TITLE HERE";
+        LPCWSTR windowTitle = L"INSERT TITLE HERE";
         HWND hWND = FindWindow(NULL, windowTitle);
         while (!hWND) {
             std::system("cls");
