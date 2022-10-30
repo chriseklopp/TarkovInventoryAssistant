@@ -1,5 +1,6 @@
 # TarkovInventoryAssistant
 Escape from Tarkov Inventory Assistant.
+
 Motivation:
 ------------------------------------------------------------------------------------------------------------------------
 Escape from Tarkov doesn't have a method of itemizing your hideout Stash (item storage). The only useful information the
