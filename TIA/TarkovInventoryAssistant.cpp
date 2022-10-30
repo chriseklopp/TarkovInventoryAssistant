@@ -8,14 +8,58 @@ wxIMPLEMENT_APP(TIAApp); // wxWidgets entry point
 
 bool TIAApp::OnInit()
 {
+    // Create ini
+    //wxConfigBase::Set();
+
+
     TIAFrame* frame = new TIAFrame();
     frame->Show(true);
+    frame->SetClientSize(1000, 600);
+
     return true;
 }
 
 TIAFrame::TIAFrame()
-    : wxFrame(nullptr, wxID_ANY, "Hello World")
+    : wxFrame(nullptr, wxID_ANY, "Tarkov Inventory Assistant")
 {
+
+    wxBoxSizer* rootSizer = new wxBoxSizer(wxVERTICAL);
+    this->SetBackgroundColour(wxColor(255, 255, 255));
+
+
+    // Make splitter for upper / lower widgets.
+    wxSplitterWindow* upperLowerSplitter = new wxSplitterWindow(this, wxID_ANY);
+    upperLowerSplitter->SetMinimumPaneSize(10);
+    upperLowerSplitter->SetSashGravity(.5);
+
+    rootSizer->Add(upperLowerSplitter, 1, wxEXPAND);
+
+    // Make upper windows and their left / right splitter.
+    wxSplitterWindow* upperSplitter = new wxSplitterWindow(upperLowerSplitter, wxID_ANY);
+    upperSplitter->SetMinimumPaneSize(10);
+    upperSplitter->SetSashGravity(.5);
+
+    m_displayPanel = new DisplayPanel(upperSplitter,wxID_ANY, wxDefaultPosition,wxSize(200,100));
+    m_outputPanel = new OutputPanel(upperSplitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
+
+    upperSplitter->SplitVertically(m_displayPanel, m_outputPanel,0);
+
+
+    // Make lower windows and their left / right splitter.
+    wxSplitterWindow* lowerSplitter = new wxSplitterWindow(upperLowerSplitter, wxID_ANY);
+    lowerSplitter->SetMinimumPaneSize(10);
+    lowerSplitter->SetSashGravity(.5);
+
+    m_consolePanel = new ConsolePanel(lowerSplitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
+    m_catalogPanel = new CatalogPanel(lowerSplitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
+
+    lowerSplitter->SplitVertically(m_consolePanel, m_catalogPanel);
+
+    upperLowerSplitter->SplitHorizontally(upperSplitter, lowerSplitter);
+    upperLowerSplitter->SetSashGravity(.7);
+    this->SetSizerAndFit(rootSizer);
+
+
     wxMenu* menuFile = new wxMenu;
     menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
         "Help string shown in status bar for this menu item");
@@ -58,27 +102,3 @@ void TIAFrame::OnHello(wxCommandEvent& event)
 }
 
 
-//int main()
-//{
-//
-//    TImageReader reader = TImageReader();
-//    TDataCatalog cat = TDataCatalog();
-//    //cat.compileCatalogFromRaw("C:\\MyWorkspace\\TarkovInventoryAssistant\\Data\\Catalogs\\catalog-Keyless");
-//    cat.loadCatalog();
-//    std::vector <std::unique_ptr<TItemTypes::TItem>> out;
-//    std::string impath = "C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\testimage3.png";
-//
-//    reader.parseFromPath(impath, out);
-//
-//
-//    for (auto&& it : out) {
-//        TItemTypes::TItem* res = cat.getBestMatch(*it);
-//        if (res) {
-//            //cv::imshow("Res", res->getImage());
-//            //cv::imshow("IN", it->getImage());
-//            //cv::waitKey(0);
-//        }
-//    }
-//
-//    return 0;
-//}

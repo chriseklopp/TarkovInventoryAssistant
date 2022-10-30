@@ -70,6 +70,11 @@ namespace TItemTypes {
 
         const cv::Mat getImage() const { return m_image; };
 
+        const std::string getName() const { return m_name; };
+
+        const std::pair<int, int> getDim() const { return m_dim; };
+        const std::string getDimAsString(char dlm = 'x') const { return std::to_string(m_dim.first) + dlm + std::to_string(m_dim.second); };
+
         cv::Mat m_imageHash; // TODO: change this to proper type.
         std::string m_name;
         std::pair<int, int> m_dim; // (Width, Height)
