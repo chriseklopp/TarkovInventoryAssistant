@@ -9,10 +9,6 @@
 Processes the screenshot(s) into detected TItems.
 Contains logic for processing a  screenshots into TItems.
 Will determine if screenshot is of stash or of a container object.
-Read items into a dynamic placeholder TContainerItem.
-The contents of this container can then be copied to its rightful container object (be it the Stash or a container)
-later. (and probably in the TStashManager module)
-
 */
 class TImageReader {
 public:
@@ -23,10 +19,10 @@ public:
 
     // Parses a cv::Mat into a vector of items detected.
     bool parseImage(const cv::Mat& image,
-        std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems);
+        std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<cv::Point>& retLocs);
 
     // Works like above fucntion, except accepts a path instead of an already made cv::Mat. 
-    bool parseFromPath(const std::string path, std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems);
+    bool parseFromPath(const std::string path, std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<cv::Point>& retLocs);
 
 private:
 
@@ -42,11 +38,11 @@ private:
      // Accept container coordinates. Returns all items in the container.
     void resolveContainerImage(const cv::Mat& image,
         std::vector<std::pair<cv::Point, cv::Point>> locs,
-        std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems);
+        std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<cv::Point>& retLocs);
 
     void resolveStashImage(const cv::Mat& image,
         std::pair<cv::Point, cv::Point> loc,
-        std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems);
+        std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<cv::Point>& retLocs);
 
 
     void resolveContainerHeader(); //Find the header in a container image.

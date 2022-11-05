@@ -2,7 +2,7 @@
 
 
 bool TImageReader::parseImage(const cv::Mat& image,
-    std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems){
+    std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<cv::Point>& retLocs){
 
 
     m_cellsize = lrint(image.rows / 17.14); // This cell size ratio SEEMS to hold for atleast 1080 and 1440 res.
@@ -12,7 +12,7 @@ bool TImageReader::parseImage(const cv::Mat& image,
     int numDet = detectOpenContainers(image, containerLocations);
 
     if (numDet > 0) {
-        resolveContainerImage(image, containerLocations, retItems);
+        resolveContainerImage(image, containerLocations, retItems, retLocs);
         return true;
     }
     else {
@@ -25,15 +25,15 @@ bool TImageReader::parseImage(const cv::Mat& image,
 
 
 bool TImageReader::parseFromPath(const std::string path,
-    std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems){
+    std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<cv::Point>& retLocs){
 
     cv::Mat image = cv::imread(path);
     
-    return parseImage(image, retItems);
+    return parseImage(image, retItems, retLocs);
 }
 
 int TImageReader::detectOpenContainers(const cv::Mat& image,
-                                       std::vector <std::pair<cv::Point, cv::Point>>&out){
+                                       std::vector <std::pair<cv::Point, cv::Point>>& out){
     int ret = 0;
     cv::Mat imgHSV;
     cv::cvtColor(image, imgHSV, cv::COLOR_BGR2HSV);
@@ -97,7 +97,8 @@ int TImageReader::detectOpenContainers(const cv::Mat& image,
 
 void TImageReader::resolveContainerImage(const cv::Mat& image,
                                          std::vector<std::pair<cv::Point, cv::Point>> locs,
-                                         std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems) {
+                                         std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems,
+                                         std::vector<cv::Point>& retLocs) {
 
     cv::Mat imgHSV;
     cv::cvtColor(image, imgHSV, cv::COLOR_BGR2HSV);
@@ -144,6 +145,7 @@ void TImageReader::resolveContainerImage(const cv::Mat& image,
             //cv::waitKey(0);
             // We create a placeholder TItem with our image and its dimensions.
             retItems.push_back(TItemTypes::TItem::makePlaceHolder(itemImage, m_cellsize));
+            retLocs.push_back(lowerP);
         }
 
     }
@@ -153,7 +155,7 @@ void TImageReader::resolveContainerImage(const cv::Mat& image,
 
 void TImageReader::resolveStashImage(const cv::Mat& image,
     std::pair<cv::Point, cv::Point> loc,
-    std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems) {};
+    std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<cv::Point>& retLocs) {};
 
 bool TImageReader::detectStash(const cv::Mat& image, std::pair<cv::Point, cv::Point>& loc) {
     return false;
