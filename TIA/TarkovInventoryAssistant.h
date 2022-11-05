@@ -11,10 +11,9 @@
 #include <wx/splitter.h>
 #include <iostream>
 #include "TItemTypes.h"
-#include "TImageReader.h"
-//#include "TScreenCapture.h" // TODO: need to figure out why window.h explodes eveything.
-#include "TDataCatalog.h"
+
 #include "TGlobal.h"
+#include "TCore.h"
 #include <filesystem>
 
 
@@ -41,25 +40,22 @@ private:
     void OnHello(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
-
+    void OnSettings(wxCommandEvent& event);
 
     // Pointers to the four main window panels. These are created during TIAFrame construction.
-    OutputPanel* m_outputPanel;
-    DisplayPanel* m_displayPanel;
-    ConsolePanel* m_consolePanel;
-    CatalogPanel* m_catalogPanel;
+    TUI::OutputPanel* m_outputPanel;
+    TUI::DisplayPanel* m_displayPanel;
+    TUI::ConsolePanel* m_consolePanel;
+    TUI::CatalogPanel* m_catalogPanel;
 
 
-    // Do I want to keep the interfacing with my types in a separate class?
-    // I probably do to ensure ui related code stays segregated from backend related code.
-    TDataCatalog m_catalog;
-    TImageReader m_imageReader;
-
+    TCore m_core;
 
 
 };
 enum
 {
-    ID_Hello = 1
+    ID_Hello = 1,
+    ID_Settings =2
 };
 
