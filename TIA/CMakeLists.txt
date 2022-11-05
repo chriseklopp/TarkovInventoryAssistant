@@ -22,6 +22,7 @@ add_executable (TarkovInventoryAssistant WIN32
 "VPTree.h"
 "TGlobal.h"
 "TUIPanels.h"
+"TCore.h"
 
 "TarkovInventoryAssistant.cpp"
 "TDataTypes.cpp"
@@ -32,6 +33,7 @@ add_executable (TarkovInventoryAssistant WIN32
 "VPTree.cpp"
 "TGlobal.cpp"
 "TUIPanels.cpp"
+"TCore.cpp"
 )
 
 
