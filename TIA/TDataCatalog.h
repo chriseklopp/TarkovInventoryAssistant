@@ -27,25 +27,26 @@ public:
 
     TDataCatalog() : 
         m_dimensionalTrees(std::unordered_map<std::pair<int,int>, TDataTypes::TVpTree, Hash::pair_hash>()),
-        m_items(std::vector<std::shared_ptr<TItemTypes::TItem>>())
+        m_items(std::vector<std::unique_ptr<TItemTypes::TItem>>())
                     
-    {};
-
-    void init();
-
-
+    {
+        loadCatalog(); // This may be temporary??
+    };
 
     // Search catalog for item by name. !! This will return nullptr if it fails !!
 
     // TODO: We are sorting but are still using linear search.Utilize bianry search.
     TItemTypes::TItem* TDataCatalog::getItem(std::string& name);
 
+    // Returns const reference to the underlying item list.
+    const std::vector<std::unique_ptr<TItemTypes::TItem>>& getItemList() { return m_items; };
+
 
     /* This function will compile the raw information from Data/catalog and build the neccessary tree structures
      * This information will be saved to Data/CompiledCatalog
      * This should ONLY be used when a compiled catalog isnt present or when the raw catalog has been updated.
      */
-    bool compileCatalogFromRaw(std::string rawpath ="");
+    bool compileCatalogFromRaw(std::string rawpath ="", bool makeRotatedItems=false);
 
 
     // This function compares an item to the catalog and populates a reference to the item that best matches it.
@@ -84,10 +85,10 @@ private:
 
     // Construct a TItem from a string input. This is to be used when creating items from a compiled catalog.
     // !! This may be deprecated in the future. !!
-    std::shared_ptr<TItemTypes::TItem> makeTItemFromCompiledString(const std::string& instring);
+    std::unique_ptr<TItemTypes::TItem> makeTItemFromCompiledString(const std::string& instring);
 
     // Methods for handling reading of raw catalog files.
-    void writeFileToCompiledCatalog(const std::filesystem::path& file, std::ofstream& out);
+    void writeFileToCompiledCatalog(const std::filesystem::path& file, std::ofstream& out, bool makeRotations);
 
     void addItemToDimMap(TItemTypes::TItem* item);
 
@@ -97,7 +98,7 @@ private:
     std::unordered_map<std::pair<int, int>, TDataTypes::TVpTree, Hash::pair_hash> m_dimensionalTrees;
 
     //Contains shared_ptrs to all items in the catalog. This is the prime owner (and should be sole tbh) of catalog items.
-    std::vector<std::shared_ptr<TItemTypes::TItem>> m_items;
+    std::vector<std::unique_ptr<TItemTypes::TItem>> m_items;
 
 
 
@@ -106,6 +107,5 @@ private:
     std::map<std::pair<int, int>, std::vector<TItemTypes::TItem*>> m_dimItemsMap;
 
     std::filesystem::path m_catalogPath;
-
 
 };

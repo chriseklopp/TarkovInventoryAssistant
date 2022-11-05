@@ -70,6 +70,11 @@ namespace TItemTypes {
 
         const cv::Mat getImage() const { return m_image; };
 
+        const std::string getName() const { return m_name; };
+
+        const std::pair<int, int> getDim() const { return m_dim; };
+        const std::string getDimAsString(char dlm = 'x') const { return std::to_string(m_dim.first) + dlm + std::to_string(m_dim.second); };
+
         cv::Mat m_imageHash; // TODO: change this to proper type.
         std::string m_name;
         std::pair<int, int> m_dim; // (Width, Height)
@@ -153,6 +158,50 @@ namespace TItemTypes {
 
 
     bool compareByName(TItem a, TItem b);
+
+
+}
+
+// Contains supporting objects for TItemTypes; using a separate namespace to preserve the
+// original meaning of the TItemTypes space
+namespace TItemSupport {
+
+
+  /* Packaging for the results of an item detection.
+  * By keeping this info together we can more easily access the stuff we need in the GUI without passing
+  * multiple objects and associations around.
+  * Note: This struct OWNs its inputItem.
+  */
+    struct DetectionResult {
+
+        DetectionResult() {};
+
+        DetectionResult(TItemTypes::TItem* catItem,
+                        std::unique_ptr<TItemTypes::TItem> inItem,
+                        cv::Mat* parentImage,
+                        cv::Point itemLoc=cv::Point(-1, -1),
+                        bool isDetectionError=false) :
+
+            catalogItem(catItem),
+            parentImage(parentImage),
+            imageLoc(itemLoc),
+            detectionError(isDetectionError)
+
+        {
+            inputItem = std::move(inItem);
+        };
+
+
+
+
+        TItemTypes::TItem* catalogItem;
+        std::unique_ptr<TItemTypes::TItem> inputItem;
+
+        cv::Mat* parentImage; // Image from where the item was detected. ** Always check this pointer when accessing **
+        cv::Point imageLoc; // Point location in the parent iamge where item was detected. (top left corner).
+
+        bool detectionError = false; // Mostly for testing and debug uses, signify that this detection was wrong.
+    };
 
 
 }

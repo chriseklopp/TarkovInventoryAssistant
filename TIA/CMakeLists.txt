@@ -6,33 +6,40 @@ cmake_minimum_required (VERSION 3.8)
 project ("TarkovInventoryAssistant")
 
 set(OpenCV_DIR "C:/MyWorkspace/opencv/Opencv_4.6/opencv/build")
-FIND_PACKAGE( OpenCV REQUIRED )   
+FIND_PACKAGE( OpenCV REQUIRED )
+find_package(wxWidgets REQUIRED COMPONENTS net core base)
+include(${wxWidgets_USE_FILE})
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 # Add source to this project's executable.
-add_executable (TarkovInventoryAssistant 
+add_executable (TarkovInventoryAssistant WIN32
 
 "TarkovInventoryAssistant.h"
 "TDataTypes.h"
 "TItemTypes.h"
 "TScreenCapture.h"
 "TImageReader.h"
-"TCore.h"
 "TDataCatalog.h"
 "VPTree.h"
 "TGlobal.h"
+"TUIPanels.h"
+"TCore.h"
 
 "TarkovInventoryAssistant.cpp"
 "TDataTypes.cpp"
 "TITemTypes.cpp"
 "TScreenCapture.cpp"
 "TImageReader.cpp"
-"TCore.cpp"
 "TDataCatalog.cpp"
 "VPTree.cpp"
 "TGlobal.cpp"
+"TUIPanels.cpp"
+"TCore.cpp"
 )
+
+
 target_link_libraries(TarkovInventoryAssistant "C:/MyWorkspace/opencv/Opencv_4.6/opencv/build/lib/Debug/opencv_img_hash460d.lib")
 TARGET_LINK_LIBRARIES (TarkovInventoryAssistant ${OpenCV_LIBS})
+target_link_libraries(TarkovInventoryAssistant ${wxWidgets_LIBRARIES})
 set_property(TARGET TarkovInventoryAssistant PROPERTY CXX_STANDARD 17)
 # TODO: Add tests and install targets if needed.
 install (TARGETS TarkovInventoryAssistant DESTINATION "TarkovInventoryAssistant/bin")

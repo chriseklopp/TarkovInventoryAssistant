@@ -1,13 +1,11 @@
 #include "TDataCatalog.h"
 
-void TDataCatalog::init() {};
-
 
 TItemTypes::TItem* TDataCatalog::getItem(std::string& name) {
 
     // Search by item name. Switch to std::lower_bound??
     auto res = std::find_if(m_items.begin(), m_items.end(),
-        [&](std::shared_ptr<const TItemTypes::TItem> e) { return e->m_name == name; });
+        [&](std::unique_ptr<TItemTypes::TItem>& e) { return e->m_name == name; });
     if (res != m_items.end()){
         return (*res).get();
     }
@@ -15,7 +13,7 @@ TItemTypes::TItem* TDataCatalog::getItem(std::string& name) {
 };
 
 
-bool TDataCatalog::compileCatalogFromRaw(std::string rawpath) {
+bool TDataCatalog::compileCatalogFromRaw(std::string rawpath, bool makeRotatedItems) {
 
     // Compiled Catalog will contain a CSV and folder of all images.
     bool success;
@@ -46,7 +44,7 @@ bool TDataCatalog::compileCatalogFromRaw(std::string rawpath) {
         for (auto modFile : modItr) {
             if (std::filesystem::is_directory(modFile))
                 continue;
-            writeFileToCompiledCatalog(modFile.path(), file);
+            writeFileToCompiledCatalog(modFile.path(), file, makeRotatedItems);
         }
         // Copy images to new image directory.
         std::filesystem::copy(modulePath / "images", imPath);
@@ -59,7 +57,9 @@ bool TDataCatalog::compileCatalogFromRaw(std::string rawpath) {
 };
 
 
-void TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file, std::ofstream& out) {
+void TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
+                                              std::ofstream& out,
+                                              bool makeRotations) {
 
     // The defined ordering of read and write to compiled catalog string shall be:
     // Name, path, dims, containerDims, rotation, hash
@@ -87,6 +87,25 @@ void TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
             std::cout << "Attempted to load invalid image: skipping it \n";
                 continue;
         }
+
+        // Make rotated items.
+        if (makeRotations) {
+            std::vector<std::string> rotFields = fields;
+            rotFields.push_back("1");
+
+            // Rotate image clockwise??? 90 degrees.
+            cv::Mat rotImage;
+            cv::transpose(image, rotImage);
+            cv::flip(rotImage, rotImage, 1);
+
+            // Construct hash, convert it to string and add to vector
+
+            cv::Mat rotImHash(Hash::PhashImage(rotImage));
+            std::vector<int> hashvec(rotImHash.begin<cv::uint8_t>(), rotImHash.end<cv::uint8_t>());
+            fields.push_back(TDataTypes::joinVector(hashvec, '-'));
+            out << TDataTypes::joinVector(rotFields, ',') << "\n";
+        }
+
         // Rotation indicator (false)
         fields.push_back("0");
 
@@ -106,7 +125,7 @@ void TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
     return;
 };
 
-std::shared_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(const std::string& instring) {
+std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(const std::string& instring) {
     // The defined ordering of read and write to compiled catalog string shall be:
     // Name, path, dims, containerDims, rotation, hash
     // The file format shall be CSV with - delimiting between array values.
@@ -160,17 +179,17 @@ std::shared_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
     catch (std::invalid_argument) {
         std::cout << "makeTItemFromString: Invalid argument found in string " <<
             instring << " Item will not be created \n";
-        return std::shared_ptr<TItemTypes::TItem>(nullptr);
+        return std::unique_ptr<TItemTypes::TItem>(nullptr);
     }
     catch (std::out_of_range) {
         std::cout << "makeTItemFromString: Invalid argument found in string " <<
             instring << " Item will not be created \n";
-        return std::shared_ptr<TItemTypes::TItem>(nullptr);
+        return std::unique_ptr<TItemTypes::TItem>(nullptr);
     }
 
     // This is a container item.
     if(contDims.first != 0 && contDims.second != 0)
-        return std::make_shared<TItemTypes::TItem>(TItemTypes::TContainerItem(
+        return std::make_unique<TItemTypes::TItem>(TItemTypes::TContainerItem(
                                                     name,
                                                     imagePath,
                                                     dims,
@@ -179,7 +198,7 @@ std::shared_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
                                                     hashVals));
 
     // This is a regular TItem.
-    return std::make_shared<TItemTypes::TItem>(TItemTypes::TItem(
+    return std::make_unique<TItemTypes::TItem>(TItemTypes::TItem(
                                                 name,
                                                 imagePath,
                                                 dims,
@@ -216,9 +235,9 @@ TItemTypes::TItem* TDataCatalog::getBestMatch(TItemTypes::TItem& in) {
 
 
     //DEBUG:
-    cv::imshow("res", bestIt->getImage());
+    /*cv::imshow("res", bestIt->getImage());
     cv::imshow("in", in.getImage());
-    cv::waitKey(0);
+    cv::waitKey(0);*/
 
 
     return bestIt;
@@ -284,12 +303,13 @@ bool TDataCatalog::loadCatalog(std::filesystem::path& catalog) {
     // Skip header. (For now; maybe I'll utilize this in future to make it more robust).
     std::getline(in, line);
     while (std::getline(in, line)) {
-      std::shared_ptr<TItemTypes::TItem> item(makeTItemFromCompiledString(line));
+      std::unique_ptr<TItemTypes::TItem> item(makeTItemFromCompiledString(line));
       if (!item)
           continue;
 
-      m_items.push_back(item);
+
       addItemToDimMap(item.get());
+      m_items.push_back(std::move(item));
 
     }
 
@@ -328,8 +348,8 @@ void TDataCatalog::searchVPTree(TItemTypes::TItem& inItem, TDataTypes::TVpTree& 
 
 void TDataCatalog::sortItems() {
     std::sort(m_items.begin(), m_items.end(), 
-        [](std::shared_ptr<TItemTypes::TItem> a,
-        std::shared_ptr<TItemTypes::TItem> b) {return TItemTypes::compareByName(*a, *b); });
+        [](std::unique_ptr<TItemTypes::TItem>& a,
+        std::unique_ptr<TItemTypes::TItem>& b) {return TItemTypes::compareByName(*a, *b); });
 };
 
 bool TDataCatalog::loadRawCatalog(std::vector<std::filesystem::path>& outMods) {
@@ -374,4 +394,5 @@ bool TDataCatalog::loadRawCatalog(std::filesystem::path& catalog, std::vector<st
 
     return true;
 };
+
 
