@@ -10,7 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <numeric>
-
+#include "TConfig.h"
 /*
 Singleton
 This class will manage the catalog of items and their properties
@@ -25,7 +25,8 @@ class TDataCatalog {
 
 public:
 
-    TDataCatalog() : 
+    TDataCatalog(TConfig::TConfig* config) : 
+        m_configptr(config),
         m_dimensionalTrees(std::unordered_map<std::pair<int,int>, TDataTypes::TVpTree, Hash::pair_hash>()),
         m_items(std::vector<std::unique_ptr<TItemTypes::TItem>>())
                     
@@ -108,4 +109,6 @@ private:
 
     std::filesystem::path m_catalogPath;
 
+
+    TConfig::TConfig* m_configptr;
 };

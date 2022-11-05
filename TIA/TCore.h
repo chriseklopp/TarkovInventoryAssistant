@@ -3,7 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include "TImageReader.h"
 #include "TDataCatalog.h"
-
+#include "TConfig.h"
 //#include "TScreenCapture.h" // TODO: figure out how to stop this breaking wxWidgets..
 
 /* Acts as an interface between backend and gui.
@@ -47,6 +47,14 @@ public:
     void saveDetectionsToCSV(std::string fname);
 
 
+    void setDATA_DIR(std::string dir) { m_configEditor.setDATA_DIR(dir); };
+
+    void setACTIVECATALOG(std::string dir) { m_configEditor.setACTIVECATALOG(dir); };
+
+    void setRAW_CATALOGS_DIR(std::string dir) { m_configEditor.setRAW_CATALOGS_DIR(dir); };
+
+    void setCATALOGS_DIR(std::string dir) { m_configEditor.setCATALOGS_DIR(dir); };
+
 private:
 
     // Detect content and compare to catalog to make detection results.
@@ -65,8 +73,10 @@ private:
 
     TDataCatalog m_dataCatalog;
     TImageReader m_imageReader;
-    
 
+
+    TConfig::TConfigEditor m_configEditor;
+    TConfig::TConfig m_config;
 
 
 };
