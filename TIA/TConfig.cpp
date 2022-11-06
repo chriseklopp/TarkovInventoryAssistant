@@ -121,7 +121,7 @@ namespace TConfig {
         if (!file.is_open())
             return false;
 
-        // Write file
+        // Write config file
         file << "[Settings]\n";
         file << "Data=\"\"\n";
         file << "Catalog=\"\"\n";

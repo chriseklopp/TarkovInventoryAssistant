@@ -12,7 +12,6 @@
 #include <iostream>
 #include "TItemTypes.h"
 
-#include "TGlobal.h"
 #include "TCore.h"
 #include <filesystem>
 

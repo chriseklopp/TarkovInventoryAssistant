@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <map>
 #include <filesystem>
-#include "TGlobal.h"
 #include <iostream>
 #include <fstream>
 #include <numeric>
