@@ -2,15 +2,22 @@
 
 
 
-
 TCore::TCore():
-    m_config(TConfig::TConfig()),
-    m_configEditor(TConfig::TConfigEditor(&m_config)),
+    m_config(),
+    m_configEditor(&m_config),
     m_dataCatalog(&m_config),
     m_imageReader(&m_config)
 {
+    if (!m_config.isValid()) {
+        std::cout << "ERROR: Config file invalid";
+        throw std::exception("Config invalid");
+    }
+    //TConfig::TConfigEditor m_configEditor(&m_config);
+    //m_dataCatalog = TDataCatalog(&m_config);
+    //m_imageReader = TImageReader(&m_config);
 
-    m_detectionResults = std::vector<TItemSupport::DetectionResult>();
+    //m_detectionResults = std::vector<TItemSupport::DetectionResult>();
+
 };
 
 void TCore::addAndParseImage(std::unique_ptr<cv::Mat> image) {

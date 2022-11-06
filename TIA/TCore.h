@@ -61,6 +61,11 @@ private:
     void detectImageContent(cv::Mat* image);
 
 
+    // Config handlers.
+    TConfig::TConfig m_config;
+    TConfig::TConfigEditor m_configEditor;
+
+
     // Contains currently loaded images.
     std::vector<std::unique_ptr<cv::Mat>> m_loadedImages;
 
@@ -70,13 +75,8 @@ private:
     std::vector<TItemSupport::DetectionResult> m_detectionResults; // Almost everything in this is a pointer.
 
 
-
     TDataCatalog m_dataCatalog;
     TImageReader m_imageReader;
-
-
-    TConfig::TConfigEditor m_configEditor;
-    TConfig::TConfig m_config;
 
 
 };

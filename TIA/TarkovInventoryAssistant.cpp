@@ -23,7 +23,6 @@ TIAFrame::TIAFrame()
     : wxFrame(nullptr, wxID_ANY, "Tarkov Inventory Assistant")
 {
 
-    m_core = TCore();
 
     wxBoxSizer* rootSizer = new wxBoxSizer(wxVERTICAL);
     this->SetBackgroundColour(wxColor(255, 255, 255));
