@@ -52,6 +52,9 @@ namespace TItemTypes {
             m_imageHash(hash)
         {};
 
+
+        virtual ~TItem() {};
+
         // Construct a NEW placeholder item from an image and populate its dims using cellsize.
         // Will have isPlaceHolder flag = true to signify it is not fully populated.
         // A placeholder is intended to be populated by another fully formed TItem (or derived) object.
@@ -88,6 +91,8 @@ namespace TItemTypes {
         bool isPlaceHolder;
 
     private:
+
+
 
         TItem(cv::Mat& image, std::pair<int,int> dim ): 
             m_name("None"),
