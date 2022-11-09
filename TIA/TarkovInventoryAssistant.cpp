@@ -116,6 +116,7 @@ void TIAFrame::OnHello(wxCommandEvent& event)
 
 void TIAFrame::OnSettings(wxCommandEvent& event)
 {
-    auto test = wxPopupWindow(this, wxPU_CONTAINS_CONTROLS);
+    m_settingsDialog = new TUI::SettingsDialog(&m_core,this);
+    m_settingsDialog->ShowModal();
 }
 

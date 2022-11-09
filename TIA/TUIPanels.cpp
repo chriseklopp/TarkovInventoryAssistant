@@ -266,28 +266,23 @@ namespace TUI {
     };
 
 
-    SettingsPanel::SettingsPanel(TCore* core, wxWindow* parent,
-        wxWindowID 	id,
+    SettingsDialog::SettingsDialog(TCore* core, wxWindow* parent,
+        wxWindowID id,
+        const wxString& titl,
         const wxPoint& pos,
         const wxSize& size,
-        long 	style,
-        const wxString& name
+        long style)
 
-    ) : m_coreptr(core), wxPanel(parent,
+     : m_coreptr(core), wxDialog(parent,
         id,
+        titl,
         pos,
         size,
-        style,
-        name) {
-
+        style) {
 
 
         wxBoxSizer* bSizer1;
         bSizer1 = new wxBoxSizer(wxVERTICAL);
-
-        m_headerText = new wxStaticText(this, wxID_ANY, wxT("Settings"), wxDefaultPosition, wxDefaultSize, 0);
-        m_headerText->Wrap(-1);
-        bSizer1->Add(m_headerText, 0, wxALL, 5);
 
         m_headerline = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
         bSizer1->Add(m_headerline, 0, wxEXPAND | wxALL, 5);
@@ -297,14 +292,18 @@ namespace TUI {
         bSizer1->Add(m_dataDirText, 0, 0, 5);
 
         m_dataDirSelect = new wxDirPickerCtrl(this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE);
-        bSizer1->Add(m_dataDirSelect, 0, wxALL, 5);
+        m_dataDirSelect->SetInitialDirectory(m_coreptr->getConfigPtr()->getROOT_DIR().string());
+        m_dataDirSelect->SetPath(m_coreptr->getConfigPtr()->getDATA_DIR().string());
+        bSizer1->Add(m_dataDirSelect, 0, wxEXPAND | wxALL, 5);
 
         m_compiledCatalogText = new wxStaticText(this, wxID_ANY, wxT("Compiled Catalog"), wxDefaultPosition, wxDefaultSize, 0);
         m_compiledCatalogText->Wrap(-1);
         bSizer1->Add(m_compiledCatalogText, 0, wxALL, 5);
 
         m_catalogSelect = new wxDirPickerCtrl(this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE);
-        bSizer1->Add(m_catalogSelect, 0, wxALL, 5);
+        m_catalogSelect->SetInitialDirectory(m_coreptr->getConfigPtr()->getCATALOGS_DIR().string());
+        m_catalogSelect->SetPath(m_coreptr->getConfigPtr()->getACTIVE_CATALOG().string());
+        bSizer1->Add(m_catalogSelect, 0, wxEXPAND | wxALL, 5);
 
 
         bSizer1->Add(0, 0, 1, wxEXPAND, 5);
@@ -315,10 +314,10 @@ namespace TUI {
 
         bSizer4->Add(0, 0, 1, wxEXPAND, 5);
 
-        m_cancelButton = new wxButton(this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0);
+        m_cancelButton = new wxButton(this, wxID_CANCEL, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0);
         bSizer4->Add(m_cancelButton, 0, wxALL, 5);
 
-        m_saveButton = new wxButton(this, wxID_ANY, wxT("Save"), wxDefaultPosition, wxDefaultSize, 0);
+        m_saveButton = new wxButton(this, wxID_OK, wxT("Save"), wxDefaultPosition, wxDefaultSize, 0);
         bSizer4->Add(m_saveButton, 0, wxALL, 5);
 
 
@@ -328,11 +327,22 @@ namespace TUI {
         this->SetSizer(bSizer1);
         this->Layout();
 
-
+        
+        Bind(wxEVT_BUTTON, &SettingsDialog::OnSave, this, wxID_OK);
+        //Bind(wxEVT_BUTTON, &SettingsDialog::OnCancel, this, wxID_CANCEL);
     }
 
 
+    void SettingsDialog::OnSave(wxCommandEvent& evt) {
+        // Set our selections through the core.
+        m_coreptr->setDATA_DIR(m_dataDirSelect->GetTextCtrlValue().ToStdString());
+        m_coreptr->setACTIVECATALOG(m_catalogSelect->GetTextCtrlValue().ToStdString());
+        m_coreptr->saveConfig();
+        Close();
+    };
+    void SettingsDialog::OnCancel(wxCommandEvent& evt) {
 
+    };
 
     cv::Mat formatItemImage(const TItemTypes::TItem* item, int maxRows, int maxCols) {
 
