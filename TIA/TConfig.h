@@ -10,14 +10,13 @@
 
 /* Container for environment paths and directories necessary for program execution
 * This attempts to populate on init using Settings.ini
-* 
+* This container can only be created and destroyed by a TConfigManager object.
 */
 namespace TConfig {
 
     class TConfig {
 
     public:
-        TConfig();
 
         const std::filesystem::path getDATA_DIR();
 
@@ -27,15 +26,25 @@ namespace TConfig {
 
         const std::filesystem::path getCATALOGS_DIR();
 
+        const std::filesystem::path getROOT_DIR();
+
         bool isValid() { return m_isValid; };
 
     private:
 
-        // Load Settings.ini config file.
-        void loadConfig(std::filesystem::path path);
+        
+        TConfig();
+     
+        ~TConfig() {};
 
-        // create new config file and return its path
-        std::filesystem::path makeNewConfig(std::filesystem::path& path);
+        // Load Settings.ini config file.
+        void loadConfig(std::filesystem::path path="");
+
+        // Writes current loaded config to Settings.ini
+        void saveConfig();
+
+        // create config file and return its path
+        std::filesystem::path writeConfig(std::filesystem::path& path);
 
         //Creates the data directory and the required structures within at the given path.
         void makeDataDirectories(std::filesystem::path& rootPath);
@@ -57,7 +66,10 @@ namespace TConfig {
         // Root directory of the program.
         std::filesystem::path ROOT_DIR;
 
-        friend class TConfigEditor;
+        // Ini path
+        std::filesystem::path m_iniPath;
+
+        friend class TConfigManager;
         bool m_isValid;
     };
 
@@ -67,12 +79,11 @@ namespace TConfig {
     * from the config but we dont want them changing any data- only the TCore should have those permissions
     * This will be able to call the setters on TConfig
     */
-    class TConfigEditor{
+    class TConfigManager{
 
     public:
-        TConfigEditor(TConfig* config): m_config(config) {};
+        TConfigManager(): m_config() {};
 
-        TConfigEditor() {};
         void setDATA_DIR(std::filesystem::path dir);
 
         void setACTIVECATALOG(std::filesystem::path dir);
@@ -81,8 +92,12 @@ namespace TConfig {
 
         void setCATALOGS_DIR(std::filesystem::path dir);
 
+        void saveConfig() { m_config.saveConfig(); };
+
+        TConfig* getConfigPtr() { return &m_config; };
+
     private:
-        TConfig* m_config;
+        TConfig m_config;
 
     };
 

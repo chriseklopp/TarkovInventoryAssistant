@@ -8,15 +8,15 @@ namespace TConfig {
     TConfig::TConfig() : m_isValid(false){
 
         ROOT_DIR = resolveRootPath();
-        std::filesystem::path settingsPath = "Settings.ini";
+        std::filesystem::path iniPath = "Settings.ini";
 
         // check if config exists 
-        if (!std::filesystem::exists(settingsPath)) {
-            settingsPath = makeNewConfig(settingsPath);
+        if (!std::filesystem::exists(iniPath)) {
+            writeConfig(iniPath);
         }
 
-        loadConfig(settingsPath);
-}
+        loadConfig(iniPath);
+    }
 
     const std::filesystem::path TConfig::getDATA_DIR() {
         return DATA_PATH;
@@ -34,10 +34,15 @@ namespace TConfig {
         return CATALOGS_PATH;
     };
 
+    const std::filesystem::path TConfig::getROOT_DIR() {
+        return ROOT_DIR;
+    }
+
     void TConfig::loadConfig(std::filesystem::path path) {
         if (!std::filesystem::exists(path)) {
             return;
         }
+
 
         std::ifstream in;
         in.open(path);
@@ -58,7 +63,7 @@ namespace TConfig {
             split.clear();
             
             TDataTypes::splitString(line, '=', split);
-            if(split.size() > 1)
+            if(split.size() >= 2)
                 handleValueMap.insert({ split.at(0), split.at(1) });
         }
 
@@ -99,9 +104,15 @@ namespace TConfig {
         CATALOGS_PATH = DATA_PATH / "CompiledCatalogs";
         RAW_CATALOGS_PATH = DATA_PATH / "RawCatalogs";
 
+        m_iniPath = path;
         in.close();
         m_isValid = true;
     };
+
+    void TConfig::saveConfig() {
+        writeConfig(m_iniPath);
+    };
+
     void TConfig::makeDataDirectories(std::filesystem::path& rootPath) {
         std::filesystem::path dataDir = rootPath / "Data";
         std::filesystem::path compCatDir = dataDir / "CompiledCatalogs";
@@ -113,7 +124,7 @@ namespace TConfig {
     };
 
 
-    std::filesystem::path TConfig::makeNewConfig(std::filesystem::path& path) {
+    std::filesystem::path TConfig::writeConfig(std::filesystem::path& path) {
 
         std::ofstream file;
         file.open(path, std::ios::out);
@@ -123,8 +134,10 @@ namespace TConfig {
 
         // Write config file
         file << "[Settings]\n";
-        file << "Data=\"\"\n";
-        file << "Catalog=\"\"\n";
+
+        file << "Data=" + DATA_PATH.string()+ "\n";
+
+        file << "Catalog=" + ACTIVE_CATALOG_PATH.string() + "\n";
 
         return path;
     };
@@ -132,7 +145,7 @@ namespace TConfig {
     std::filesystem::path TConfig::resolveRootPath() {
         std::filesystem::path cwd = std::filesystem::current_path();
         if (cwd.filename() == "build") {
-            return cwd += "\\..";
+            return cwd = cwd.parent_path();
         }
         else {
             // TODO: Alternate path handling.
@@ -140,22 +153,20 @@ namespace TConfig {
         }
     }
 
-    void TConfigEditor::setDATA_DIR(std::filesystem::path dir) {
-        m_config->DATA_PATH = dir;
+    void TConfigManager::setDATA_DIR(std::filesystem::path dir) {
+        m_config.DATA_PATH = dir;
     }
 
-    void TConfigEditor::setACTIVECATALOG(std::filesystem::path dir) {
-        m_config->ACTIVE_CATALOG_PATH = dir;
+    void TConfigManager::setACTIVECATALOG(std::filesystem::path dir) {
+        m_config.ACTIVE_CATALOG_PATH = dir;
     };
 
-    void TConfigEditor::setRAW_CATALOGS_DIR(std::filesystem::path dir) {
-        m_config->RAW_CATALOGS_PATH = dir;
+    void TConfigManager::setRAW_CATALOGS_DIR(std::filesystem::path dir) {
+        m_config.RAW_CATALOGS_PATH = dir;
     };
 
-    void TConfigEditor::setCATALOGS_DIR(std::filesystem::path dir) {
-        m_config->CATALOGS_PATH = dir;
+    void TConfigManager::setCATALOGS_DIR(std::filesystem::path dir) {
+        m_config.CATALOGS_PATH = dir;
     };
-
-
 
 }

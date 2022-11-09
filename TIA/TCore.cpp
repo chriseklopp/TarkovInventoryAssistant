@@ -3,20 +3,19 @@
 
 
 TCore::TCore():
-    m_config(),
-    m_configEditor(&m_config),
-    m_dataCatalog(&m_config),
-    m_imageReader(&m_config)
+    m_configManager(),
+    m_config(m_configManager.getConfigPtr()),
+    m_dataCatalog(m_config),
+    m_imageReader(m_config)
 {
-    if (!m_config.isValid()) {
+    if (!m_config->isValid()) {
         std::cout << "ERROR: Config file invalid";
         throw std::exception("Config invalid");
     }
-    //TConfig::TConfigEditor m_configEditor(&m_config);
+    //TConfig::TConfigManager m_configManager(&m_config);
     //m_dataCatalog = TDataCatalog(&m_config);
     //m_imageReader = TImageReader(&m_config);
 
-    //m_detectionResults = std::vector<TItemSupport::DetectionResult>();
 
 };
 
@@ -63,3 +62,17 @@ void TCore::detectImageContent(cv::Mat* image) {
     }
 }
 
+
+void TCore::setDATA_DIR(std::string dir) { m_configManager.setDATA_DIR(dir); };
+
+void TCore::setACTIVECATALOG(std::string dir) {
+    m_configManager.setACTIVECATALOG(dir);
+    m_dataCatalog.loadCatalog(m_config->getACTIVE_CATALOG());
+};
+
+void TCore::setRAW_CATALOGS_DIR(std::string dir){ m_configManager.setRAW_CATALOGS_DIR(dir); };
+
+void TCore::setCATALOGS_DIR(std::string dir) { m_configManager.setCATALOGS_DIR(dir); };
+
+
+void TCore::saveConfig() { m_configManager.saveConfig(); };

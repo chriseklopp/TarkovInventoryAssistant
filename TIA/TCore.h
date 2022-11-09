@@ -29,7 +29,8 @@ public:
     // Return reference to our item catalog.
     const std::vector<std::unique_ptr<TItemTypes::TItem>>& getCatalogItemList() { return m_dataCatalog.getItemList(); };
 
-
+    // Returns a pointer to the config. This is safe because the config is read only.
+    TConfig::TConfig* getConfigPtr() { return m_config; };
 
     // Delete all detections.
     void clearDetections();
@@ -46,14 +47,17 @@ public:
     // Save detections to csv file.
     void saveDetectionsToCSV(std::string fname);
 
+    void setDATA_DIR(std::string dir);
 
-    void setDATA_DIR(std::string dir) { m_configEditor.setDATA_DIR(dir); };
+    void setACTIVECATALOG(std::string dir);
 
-    void setACTIVECATALOG(std::string dir) { m_configEditor.setACTIVECATALOG(dir); };
+    void setRAW_CATALOGS_DIR(std::string dir);
 
-    void setRAW_CATALOGS_DIR(std::string dir) { m_configEditor.setRAW_CATALOGS_DIR(dir); };
+    void setCATALOGS_DIR(std::string dir);
 
-    void setCATALOGS_DIR(std::string dir) { m_configEditor.setCATALOGS_DIR(dir); };
+    // Save config settings to file.
+    void saveConfig();
+
 
 private:
 
@@ -62,9 +66,8 @@ private:
 
 
     // Config handlers.
-    TConfig::TConfig m_config;
-    TConfig::TConfigEditor m_configEditor;
-
+    TConfig::TConfigManager m_configManager;
+    TConfig::TConfig* m_config;
 
     // Contains currently loaded images.
     std::vector<std::unique_ptr<cv::Mat>> m_loadedImages;
