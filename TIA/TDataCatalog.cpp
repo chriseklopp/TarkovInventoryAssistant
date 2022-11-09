@@ -285,7 +285,7 @@ bool TDataCatalog::loadCatalog() {
 };
 
 
-bool TDataCatalog::loadCatalog(std::filesystem::path& catalog) {
+bool TDataCatalog::loadCatalog(const std::filesystem::path& catalog) {
     std::filesystem::path dataFile = catalog / "catalog.csv";
 
     if (!std::filesystem::exists(dataFile))
@@ -343,6 +343,9 @@ void TDataCatalog::makeVPTrees() {
 void TDataCatalog::clearCatalog() {
     m_items.clear();
     m_catalogPath.clear();
+    m_dimensionalTrees.clear();
+    m_dimItemsMap.clear();
+
 };
 
 void TDataCatalog::searchVPTree(TItemTypes::TItem& inItem, TDataTypes::TVpTree& tree) {

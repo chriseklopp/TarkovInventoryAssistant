@@ -59,7 +59,7 @@ public:
 
     // Load a compiled catalog from Data/CompiledCatalog.
     bool loadCatalog();
-    bool loadCatalog(std::filesystem::path& catalog);
+    bool loadCatalog(const std::filesystem::path& catalog);
 
 
 
