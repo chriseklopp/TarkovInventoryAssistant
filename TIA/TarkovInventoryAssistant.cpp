@@ -23,7 +23,6 @@ TIAFrame::TIAFrame()
     : wxFrame(nullptr, wxID_ANY, "Tarkov Inventory Assistant")
 {
 
-    m_core = TCore();
 
     wxBoxSizer* rootSizer = new wxBoxSizer(wxVERTICAL);
     this->SetBackgroundColour(wxColor(255, 255, 255));
@@ -117,6 +116,7 @@ void TIAFrame::OnHello(wxCommandEvent& event)
 
 void TIAFrame::OnSettings(wxCommandEvent& event)
 {
-    auto test = wxPopupWindow(this, wxPU_CONTAINS_CONTROLS);
+    m_settingsDialog = new TUI::SettingsDialog(&m_core,this);
+    m_settingsDialog->ShowModal();
 }
 

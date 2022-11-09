@@ -14,6 +14,8 @@ namespace TDataTypes
         while (getline(stream, word, del)) {
             out.push_back(word);
         }
+        if (s.back() == del)
+            out.push_back("");
     }
 
     // Split on character delimiter.

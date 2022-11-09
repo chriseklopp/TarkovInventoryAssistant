@@ -6,11 +6,10 @@
 #include <unordered_map>
 #include <map>
 #include <filesystem>
-#include "TGlobal.h"
 #include <iostream>
 #include <fstream>
 #include <numeric>
-
+#include "TConfig.h"
 /*
 Singleton
 This class will manage the catalog of items and their properties
@@ -25,7 +24,8 @@ class TDataCatalog {
 
 public:
 
-    TDataCatalog() : 
+    TDataCatalog(TConfig::TConfig* config) : 
+        m_configptr(config),
         m_dimensionalTrees(std::unordered_map<std::pair<int,int>, TDataTypes::TVpTree, Hash::pair_hash>()),
         m_items(std::vector<std::unique_ptr<TItemTypes::TItem>>())
                     
@@ -59,7 +59,7 @@ public:
 
     // Load a compiled catalog from Data/CompiledCatalog.
     bool loadCatalog();
-    bool loadCatalog(std::filesystem::path& catalog);
+    bool loadCatalog(const std::filesystem::path& catalog);
 
 
 
@@ -108,4 +108,6 @@ private:
 
     std::filesystem::path m_catalogPath;
 
+
+    TConfig::TConfig* m_configptr;
 };

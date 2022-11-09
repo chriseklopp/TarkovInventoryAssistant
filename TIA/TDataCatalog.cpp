@@ -6,7 +6,7 @@ TItemTypes::TItem* TDataCatalog::getItem(std::string& name) {
     // Search by item name. Switch to std::lower_bound??
     auto res = std::find_if(m_items.begin(), m_items.end(),
         [&](std::unique_ptr<TItemTypes::TItem>& e) { return e->m_name == name; });
-    if (res != m_items.end()){
+    if (res != m_items.end()) {
         return (*res).get();
     }
     return nullptr;
@@ -14,7 +14,8 @@ TItemTypes::TItem* TDataCatalog::getItem(std::string& name) {
 
 
 bool TDataCatalog::compileCatalogFromRaw(std::string rawpath, bool makeRotatedItems) {
-
+    if (!m_configptr)
+        return false;
     // Compiled Catalog will contain a CSV and folder of all images.
     bool success;
     std::vector<std::filesystem::path> modules;
@@ -27,10 +28,10 @@ bool TDataCatalog::compileCatalogFromRaw(std::string rawpath, bool makeRotatedIt
 
     // Create Directory for new compiled catalog.
     time_t t = std::time(nullptr);
-    std::filesystem::path catPath = TGlobal::COMPCATS_PATH / ("ItemCatalog_" + std::to_string(t));
-    std::filesystem::path imPath = catPath  / "images";
+    std::filesystem::path catPath = m_configptr->getCATALOGS_DIR() / ("ItemCatalog_" + std::to_string(t));
+    std::filesystem::path imPath = catPath / "images";
     std::filesystem::create_directories(imPath);
-    
+
     std::ofstream file;
     file.open(catPath / "catalog.csv", std::ios::out);
 
@@ -58,8 +59,8 @@ bool TDataCatalog::compileCatalogFromRaw(std::string rawpath, bool makeRotatedIt
 
 
 void TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
-                                              std::ofstream& out,
-                                              bool makeRotations) {
+    std::ofstream& out,
+    bool makeRotations) {
 
     // The defined ordering of read and write to compiled catalog string shall be:
     // Name, path, dims, containerDims, rotation, hash
@@ -85,7 +86,7 @@ void TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
         cv::Mat image(cv::imread(imagesPath));
         if (image.empty()) {
             std::cout << "Attempted to load invalid image: skipping it \n";
-                continue;
+            continue;
         }
 
         // Make rotated items.
@@ -148,7 +149,7 @@ std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
         name = fields.at(0);
 
         // Image
-        imagePath = m_catalogPath / "images"/ fields.at(1);
+        imagePath = m_catalogPath / "images" / fields.at(1);
 
         // Dims
         TDataTypes::splitString(fields.at(2), '-', temp);
@@ -188,22 +189,22 @@ std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
     }
 
     // This is a container item.
-    if(contDims.first != 0 && contDims.second != 0)
+    if (contDims.first != 0 && contDims.second != 0)
         return std::make_unique<TItemTypes::TItem>(TItemTypes::TContainerItem(
-                                                    name,
-                                                    imagePath,
-                                                    dims,
-                                                    contDims,
-                                                    rotation,
-                                                    hashVals));
+            name,
+            imagePath,
+            dims,
+            contDims,
+            rotation,
+            hashVals));
 
     // This is a regular TItem.
     return std::make_unique<TItemTypes::TItem>(TItemTypes::TItem(
-                                                name,
-                                                imagePath,
-                                                dims,
-                                                rotation,
-                                                hashVals));
+        name,
+        imagePath,
+        dims,
+        rotation,
+        hashVals));
 };
 
 
@@ -224,10 +225,10 @@ TItemTypes::TItem* TDataCatalog::getBestMatch(TItemTypes::TItem& in) {
 
     TItemTypes::TItem* bestIt;
     double best = 10;
-    
+
     for (auto it : items) {
         auto res = Hash::templateMatch(in.getImage(), it->getImage());
-        if (res.at<float>(cv::Point(0,0)) < best) {
+        if (res.at<float>(cv::Point(0, 0)) < best) {
             best = res.at<float>(cv::Point(0, 0));
             bestIt = it;
         }
@@ -246,9 +247,9 @@ TItemTypes::TItem* TDataCatalog::getBestMatch(TItemTypes::TItem& in) {
 
 
 void TDataCatalog::getNNearestMatches(TItemTypes::TItem& in,
-                                   std::vector<TItemTypes::TItem*>& out,
-                                   std::vector<double>& retDistances,
-                                   int N) {
+    std::vector<TItemTypes::TItem*>& out,
+    std::vector<double>& retDistances,
+    int N) {
 
     if (m_dimItemsMap.find(in.m_dim) != m_dimItemsMap.end())
         m_dimensionalTrees.at(in.m_dim).search(&in, N, &out, &retDistances);
@@ -256,18 +257,20 @@ void TDataCatalog::getNNearestMatches(TItemTypes::TItem& in,
 }
 
 bool TDataCatalog::loadCatalog() {
+    if (!m_configptr)
+        return false;
     // No path specifed. Find most recently created catalog.
     std::filesystem::path newestCat;
     std::filesystem::file_time_type currtime;
 
-    std::filesystem::directory_iterator itr = std::filesystem::directory_iterator(TGlobal::COMPCATS_PATH);
+    std::filesystem::directory_iterator itr = std::filesystem::directory_iterator(m_configptr->getCATALOGS_DIR());
 
     if (itr != std::filesystem::end(itr)) {
         newestCat = *itr;
         currtime = itr->last_write_time();
     }
     else {
-        std::cout << "LoadRawCatalog: No catalogs found at: " << TGlobal::COMPCATS_PATH.string() << std::endl;
+        std::cout << "LoadRawCatalog: No catalogs found at: " << m_configptr->getCATALOGS_DIR().string() << std::endl;
         return false;
     }
 
@@ -282,7 +285,7 @@ bool TDataCatalog::loadCatalog() {
 };
 
 
-bool TDataCatalog::loadCatalog(std::filesystem::path& catalog) {
+bool TDataCatalog::loadCatalog(const std::filesystem::path& catalog) {
     std::filesystem::path dataFile = catalog / "catalog.csv";
 
     if (!std::filesystem::exists(dataFile))
@@ -303,13 +306,13 @@ bool TDataCatalog::loadCatalog(std::filesystem::path& catalog) {
     // Skip header. (For now; maybe I'll utilize this in future to make it more robust).
     std::getline(in, line);
     while (std::getline(in, line)) {
-      std::unique_ptr<TItemTypes::TItem> item(makeTItemFromCompiledString(line));
-      if (!item)
-          continue;
+        std::unique_ptr<TItemTypes::TItem> item(makeTItemFromCompiledString(line));
+        if (!item)
+            continue;
 
 
-      addItemToDimMap(item.get());
-      m_items.push_back(std::move(item));
+        addItemToDimMap(item.get());
+        m_items.push_back(std::move(item));
 
     }
 
@@ -337,39 +340,43 @@ void TDataCatalog::makeVPTrees() {
     }
 };
 
-void TDataCatalog::clearCatalog(){
+void TDataCatalog::clearCatalog() {
     m_items.clear();
     m_catalogPath.clear();
+    m_dimensionalTrees.clear();
+    m_dimItemsMap.clear();
+
 };
 
 void TDataCatalog::searchVPTree(TItemTypes::TItem& inItem, TDataTypes::TVpTree& tree) {
-    
+
 };
 
 void TDataCatalog::sortItems() {
-    std::sort(m_items.begin(), m_items.end(), 
+    std::sort(m_items.begin(), m_items.end(),
         [](std::unique_ptr<TItemTypes::TItem>& a,
-        std::unique_ptr<TItemTypes::TItem>& b) {return TItemTypes::compareByName(*a, *b); });
+            std::unique_ptr<TItemTypes::TItem>& b) {return TItemTypes::compareByName(*a, *b); });
 };
 
 bool TDataCatalog::loadRawCatalog(std::vector<std::filesystem::path>& outMods) {
-
+    if (!m_configptr)
+        return false;
     // No path specifed. Find most recently created catalog.
-    std::filesystem::path newestCat; 
+    std::filesystem::path newestCat;
     std::filesystem::file_time_type currtime;
 
-    std::filesystem::directory_iterator itr = std::filesystem::directory_iterator(TGlobal::CATALOG_PATH);
+    std::filesystem::directory_iterator itr = std::filesystem::directory_iterator(m_configptr->getRAW_CATALOGS_DIR());
 
     if (itr != std::filesystem::end(itr)) {
         newestCat = *itr;
         currtime = itr->last_write_time();
     }
     else {
-        std::cout << "LoadRawCatalog: No catalogs found at: " << TGlobal::CATALOG_PATH.string() << std::endl;
+        std::cout << "LoadRawCatalog: No catalogs found at: " << m_configptr->getRAW_CATALOGS_DIR().string() << std::endl;
         return false;
     }
 
-    for (itr; itr != std::filesystem::end(itr); ++itr){
+    for (itr; itr != std::filesystem::end(itr); ++itr) {
         if (currtime < itr->last_write_time()) {
             currtime = itr->last_write_time();
             newestCat = *itr;

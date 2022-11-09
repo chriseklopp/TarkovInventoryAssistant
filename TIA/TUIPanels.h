@@ -155,21 +155,22 @@ namespace TUI {
     };
 
 
-    class SettingsPanel : public wxPanel
+    class SettingsDialog : public wxDialog
     {
 
     public:
-
-        SettingsPanel(TCore* core, wxWindow* parent,
-            wxWindowID 	id = wxID_ANY,
+        SettingsDialog(TCore* core, wxWindow* parent,
+            wxWindowID id = wxID_ANY,
+            const wxString& title = wxT("Settings"),
             const wxPoint& pos = wxDefaultPosition,
-            const wxSize& size = wxDefaultSize,
-            long 	style = wxTAB_TRAVERSAL,
-            const wxString& name = wxPanelNameStr
+            const wxSize& size = wxSize(552, 240),
+            long style = wxDEFAULT_DIALOG_STYLE);
 
-        );
 
     private:
+
+        void OnSave(wxCommandEvent& evt);
+        void OnCancel(wxCommandEvent& evt);
 
         wxStaticText* m_headerText;
         wxStaticLine* m_headerline;

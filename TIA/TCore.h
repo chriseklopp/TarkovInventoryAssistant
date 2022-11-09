@@ -3,7 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include "TImageReader.h"
 #include "TDataCatalog.h"
-
+#include "TConfig.h"
 //#include "TScreenCapture.h" // TODO: figure out how to stop this breaking wxWidgets..
 
 /* Acts as an interface between backend and gui.
@@ -29,7 +29,8 @@ public:
     // Return reference to our item catalog.
     const std::vector<std::unique_ptr<TItemTypes::TItem>>& getCatalogItemList() { return m_dataCatalog.getItemList(); };
 
-
+    // Returns a pointer to the config. This is safe because the config is read only.
+    TConfig::TConfig* getConfigPtr() { return m_config; };
 
     // Delete all detections.
     void clearDetections();
@@ -46,12 +47,27 @@ public:
     // Save detections to csv file.
     void saveDetectionsToCSV(std::string fname);
 
+    void setDATA_DIR(std::string dir);
+
+    void setACTIVECATALOG(std::string dir);
+
+    void setRAW_CATALOGS_DIR(std::string dir);
+
+    void setCATALOGS_DIR(std::string dir);
+
+    // Save config settings to file.
+    void saveConfig();
+
 
 private:
 
     // Detect content and compare to catalog to make detection results.
     void detectImageContent(cv::Mat* image);
 
+
+    // Config handlers.
+    TConfig::TConfigManager m_configManager;
+    TConfig::TConfig* m_config;
 
     // Contains currently loaded images.
     std::vector<std::unique_ptr<cv::Mat>> m_loadedImages;
@@ -62,11 +78,8 @@ private:
     std::vector<TItemSupport::DetectionResult> m_detectionResults; // Almost everything in this is a pointer.
 
 
-
     TDataCatalog m_dataCatalog;
     TImageReader m_imageReader;
-    
-
 
 
 };

@@ -4,6 +4,7 @@
 #include <vector>
 #include "TItemTypes.h"
 #include "TDataTypes.h"
+#include "TConfig.h"
 /*
 * 
 Processes the screenshot(s) into detected TItems.
@@ -12,7 +13,8 @@ Will determine if screenshot is of stash or of a container object.
 */
 class TImageReader {
 public:
-    TImageReader() : 
+    TImageReader(TConfig::TConfig* config) : 
+        m_configptr(config),
         m_cellsize(63),
         needsInit(true)
     {}
@@ -52,4 +54,7 @@ private:
     int m_cellsize;
     // std::vector<TEMP> m_containerList;
     bool needsInit;
+
+
+    TConfig::TConfig* m_configptr;
 };
