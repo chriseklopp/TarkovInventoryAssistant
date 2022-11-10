@@ -4,6 +4,7 @@
 #include "TImageReader.h"
 #include "TDataCatalog.h"
 #include "TConfig.h"
+#include "TEvents.h"
 //#include "TScreenCapture.h" // TODO: figure out how to stop this breaking wxWidgets..
 
 /* Acts as an interface between backend and gui.
@@ -14,7 +15,7 @@
 typedef int imageID;
 
 
-class TCore {
+class TCore : public TEvent::TSubject {
 public:
     TCore();
 
@@ -51,9 +52,15 @@ public:
 
     // Adds this image to our collection and parse any items on it into detection results.
     // returns the unique imageID associated with the image.
+    // ** Notifies observers with TEventEnum::ImageAdded **
     int addImage(std::unique_ptr<cv::Mat> image);
 
+    // Deletes image with the given id.
+    // ** Notifies observers with TEventEnum::ImageDeleted **
+    void deleteImage(imageID id);
+
     // Clear all loaded images.
+    // ** Notifies observers with TEventEnum::ImageDeleted **
     void clearImages();
 
     // Save detections to csv file.
@@ -61,15 +68,28 @@ public:
 
     void setDATA_DIR(std::string dir);
 
+    // ** Notifies observers with TEventEnum::CatalogChanged **
     void setACTIVECATALOG(std::string dir);
 
     void setRAW_CATALOGS_DIR(std::string dir);
 
     void setCATALOGS_DIR(std::string dir);
 
+    // Loads the config specified by the config.
+    void loadCatalog();
+
+
     // Save config settings to file.
     void saveConfig();
 
+
+    // Implement TSubject overrides
+
+    //virtual void registerTObserver(TEvent::TObserver* obs) override {};
+
+    //virtual void removeTObserver(TEvent::TObserver* obs) override {};
+
+    //virtual void notifyObservers(TEvent::TEventEnum e) override {};
 
 private:
 

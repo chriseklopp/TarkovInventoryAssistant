@@ -17,7 +17,6 @@ TCore::TCore():
     //m_dataCatalog = TDataCatalog(&m_config);
     //m_imageReader = TImageReader(&m_config);
 
-
 };
 
 
@@ -27,17 +26,33 @@ imageID TCore::addImage(std::unique_ptr<cv::Mat> image) {
     imageID id = createNewImageID();
     m_idImageMap.insert({ id,std::move(image) });
     detectImageContent(id);
+    notifyTObservers(TEvent::TEventEnum::ImageAdded);
 
     return id;
 };
+
+void TCore::deleteImage(imageID id) {
+    // Remove from m_idImageMap
+    if (m_idImageMap.find(id) != m_idImageMap.end())
+        m_idImageMap.erase(id);
+
+    // Remove from m_detectionResults
+    if (m_detectionResults.find(id) != m_detectionResults.end())
+        m_detectionResults.erase(id);
+
+    notifyTObservers(TEvent::TEventEnum::ImageDeleted);
+}
+
+
 void TCore::clearImages() {
     m_idImageMap.clear();
     m_detectionResults.clear();
+    notifyTObservers(TEvent::TEventEnum::ImageDeleted);
 };
 
-const std::vector<TItemSupport::DetectionResult>& TCore::getDetectionResults(imageID imageID) {
-    if (m_detectionResults.find(imageID) != m_detectionResults.end())
-        return m_detectionResults.at(imageID);
+const std::vector<TItemSupport::DetectionResult>& TCore::getDetectionResults(imageID id) {
+    if (m_detectionResults.find(id) != m_detectionResults.end())
+        return m_detectionResults.at(id);
     return std::vector<TItemSupport::DetectionResult>();
 }
 
@@ -82,7 +97,7 @@ void TCore::detectImageContent(imageID id) {
             continue;
 
         detResults.push_back(TItemSupport::DetectionResult(catalogMatch, std::move(res[i]),
-            image, resLocs[i], false));
+            id, resLocs[i], false));
     }
     m_detectionResults.insert({ id,std::move(detResults) });
 
@@ -102,11 +117,16 @@ void TCore::setDATA_DIR(std::string dir) { m_configManager.setDATA_DIR(dir); };
 void TCore::setACTIVECATALOG(std::string dir) {
     m_configManager.setACTIVECATALOG(dir);
     m_dataCatalog.loadCatalog(m_config->getACTIVE_CATALOG());
+    notifyTObservers(TEvent::TEventEnum::CatalogChanged);
 };
 
 void TCore::setRAW_CATALOGS_DIR(std::string dir){ m_configManager.setRAW_CATALOGS_DIR(dir); };
 
 void TCore::setCATALOGS_DIR(std::string dir) { m_configManager.setCATALOGS_DIR(dir); };
 
+void TCore::loadCatalog() {
+    m_dataCatalog.loadCatalog(m_config->getACTIVE_CATALOG());
+    notifyTObservers(TEvent::TEventEnum::CatalogChanged);
+}
 
 void TCore::saveConfig() { m_configManager.saveConfig(); };
