@@ -57,23 +57,30 @@ namespace TUI {
         }
         else{
             // Populate uncollapsed list.
-            for (auto& det : m_coreptr->getDetectionResults()) {
-                addItemToOutputList(&det, 1);
+            for (int id : m_coreptr->getLoadedImageIDs()) {
+                for (auto& det : m_coreptr->getDetectionResults(id)) {
+                    addItemToOutputList(&det, 1);
+                }
             }
         }
 
     };
     void OutputPanel::populateCountMap() {
-        for (auto& det : m_coreptr->getDetectionResults()) {
 
+        // TODO: Should be dependent on where we want all images or not.
+        for (int id : m_coreptr->getLoadedImageIDs()) {
 
-            if (m_itemNameCountmap.find(&det) != m_itemNameCountmap.end()) {
-                m_itemNameCountmap.at(&det)++;
-            }
-            else {
-                m_itemNameCountmap.insert({&det ,1});
+            for (auto& det : m_coreptr->getDetectionResults(id)) {
+
+                if (m_itemNameCountmap.find(&det) != m_itemNameCountmap.end()) {
+                    m_itemNameCountmap.at(&det)++;
+                }
+                else {
+                    m_itemNameCountmap.insert({&det ,1});
+                }
             }
         }
+
     };
 
     void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int count=1) {
@@ -343,6 +350,68 @@ namespace TUI {
     void SettingsDialog::OnCancel(wxCommandEvent& evt) {
 
     };
+
+
+
+    void ImagePanel::paintEvent(wxPaintEvent& evt)
+    {
+        // depending on your system you may need to look at double-buffered dcs
+        wxPaintDC dc(this);
+        render(dc);
+    }
+
+
+    void ImagePanel::paintNow()
+    {
+        // depending on your system you may need to look at double-buffered dcs
+        wxClientDC dc(this);
+        render(dc);
+    }
+
+    void ImagePanel::render(wxDC& dc)
+    {
+        int neww, newh;
+        dc.GetSize(&neww, &newh);
+
+        wxImage* image = m_drawDetections ? &m_sourceImageWithdetections : &m_sourceImage;
+
+        if (neww != m_imWidth || newh != m_imHeight)
+        {
+            m_imageResized = wxBitmap(image->Scale(neww, newh /*, wxIMAGE_QUALITY_HIGH*/));
+            m_imWidth = neww;
+            m_imHeight = newh;
+            dc.DrawBitmap(m_imageResized, 0, 0, false);
+        }
+        else {
+            dc.DrawBitmap(m_imageResized, 0, 0, false);
+        }
+    }
+
+    void ImagePanel::OnSize(wxSizeEvent& event) {
+        Refresh();
+        //skip the event.
+        event.Skip();
+    }
+
+
+    void ImagePanel::setActiveImage(imageID id) {
+        auto image = m_coreptr->getImage(id);
+        m_sourceImage = wxImage(image->cols, image->rows, image->data, true);
+        makeImageWithDetections(id);
+    }
+
+    void ImagePanel::showDetections(bool draw) {
+        m_drawDetections = draw;
+    }
+
+    void ImagePanel::makeImageWithDetections(imageID id) {
+
+        const std::vector<TItemSupport::DetectionResult>& res = m_coreptr->getDetectionResults(id);
+        for (auto& loc : res) {
+            loc.imageLoc;
+        }
+
+    }
 
     cv::Mat formatItemImage(const TItemTypes::TItem* item, int maxRows, int maxCols) {
 

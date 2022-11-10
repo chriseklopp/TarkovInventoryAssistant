@@ -91,7 +91,7 @@ TIAFrame::TIAFrame()
     // TODO: DEBUG REMOVE
     std::unique_ptr<cv::Mat> matty = 
         std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\raw2\\tucker2.png"));
-    m_core.addAndParseImage(std::move(matty));
+    m_core.addImage(std::move(matty));
     m_outputPanel->populateOutputList();
 }
 

@@ -18,9 +18,11 @@
 #include "TDataTypes.h"
 #include "TCore.h"
 
+
+
 /*
-Code for the 4 main panels in the TIA GUI.
-Each inherits wxPanel
+Contains definitions for UI panels and dialogs.
+
 */
 
 namespace TUI {
@@ -60,8 +62,6 @@ namespace TUI {
         // When true, detections with identical parents will be collapsed into one row with a count >=1.
         bool m_collapseSimilarItems;
 
-        // TODO: This needs to be DetResult* : count.
-        //std::map<std::string, TItemSupport::DetectionResult*> m_itemNameCountmap;
         std::map<const TItemSupport::DetectionResult*, int> m_itemNameCountmap;
         // Pointer to the core object.
         TCore* m_coreptr;
@@ -98,6 +98,10 @@ namespace TUI {
 
         // Pointer to the core object.
         TCore* m_coreptr;
+
+        // List that displays loaded images as a sidebar.
+        wxGrid* m_imageList;
+
     };
     class CatalogPanel : public wxPanel {
 
@@ -188,7 +192,55 @@ namespace TUI {
 
 
 
+    /* Image panel displays a selected image or a stream output.
+    * Can be toggled to draw any associated detections on itself.
+    */
+    class ImagePanel : public wxPanel
+    {
 
+    public:
+
+
+        ImagePanel(TCore* core, wxFrame* parent) :
+            m_coreptr(core),
+            wxPanel(parent) {};
+
+
+        void paintEvent(wxPaintEvent& evt);
+        void paintNow();
+        void OnSize(wxSizeEvent& event);
+        void render(wxDC& dc);
+
+
+        void setActiveImage(imageID id);
+
+        // Toggles image to display/hide detected items.
+        void showDetections(bool draw);
+
+
+
+
+    private:
+
+        void makeImageWithDetections(imageID id);
+
+        wxBitmap m_imageResized;
+
+        int m_imWidth;
+        int m_imHeight;
+
+        TCore* m_coreptr;
+
+        bool m_drawDetections;
+
+
+        wxImage m_sourceImage;
+
+        // This image is identical to the source image but has detections drawn on it.
+        // This will be rendered instead of the source image if m_drawDetections is true.
+        wxImage m_sourceImageWithdetections;
+
+    };
 
     class ImageGridCellRenderer : public wxGridCellStringRenderer
     {
