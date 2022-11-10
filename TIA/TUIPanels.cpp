@@ -40,7 +40,6 @@ namespace TUI {
         sizer->Add(m_outputList, 1, wxALL | wxEXPAND, 0);
         this->SetSizerAndFit(sizer);
 
-
     };
 
     void OutputPanel::populateOutputList() {
@@ -65,6 +64,9 @@ namespace TUI {
         }
 
     };
+
+
+
     void OutputPanel::populateCountMap() {
 
         // TODO: Should be dependent on where we want all images or not.
@@ -106,6 +108,16 @@ namespace TUI {
             new ImageGridCellRenderer(wxImage(fmtCatImage.cols, fmtCatImage.rows, fmtCatImage.data, true)));
 
     };
+    void OutputPanel::TEventReceived(TEvent::TEventEnum e) {
+        switch (e) {
+
+        case TEvent::TEventEnum::ImageDeleted:
+        case TEvent::TEventEnum::ImageAdded:
+            populateOutputList();
+            break;
+        }
+    };
+
 
 
 
@@ -117,7 +129,6 @@ namespace TUI {
        {"SourceImage", 4}
 
     };
-
 
     DisplayPanel::DisplayPanel(TCore* core, wxWindow* parent,
         wxWindowID 	id,
@@ -134,9 +145,55 @@ namespace TUI {
 
 
         this->SetBackgroundColour(wxColor(0, 0, 200));
+        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 
+        m_imageScrollList = new wxGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0);
+        m_imageScrollList->HideRowLabels();
+        m_imageScrollList->CreateGrid(0, 1);
+        m_imageScrollList->EnableEditing(false);
+
+
+
+        sizer->Add(m_imageScrollList, 1, wxALL | wxEXPAND, 0);
+
+        m_imagePanel = new ImagePanel(core, this);
+
+        sizer->Add(m_imagePanel, 1, wxALL | wxEXPAND, 0);
+        this->SetSizerAndFit(sizer);
 
     };
+
+    void DisplayPanel::populateImageScrollList() {
+        clearImageScrollList();
+
+        std::vector<int> idVect = m_coreptr->getLoadedImageIDs();
+        for (int id : idVect) {
+            cv::Mat const* image = m_coreptr->getImage(id);
+
+            m_imageScrollList->AppendRows(1);
+            int row = m_imageScrollList->GetNumberRows() - 1;
+            m_imageScrollList->SetCellRenderer(row, 0,
+                new ImageGridCellRenderer(wxImage(image->cols, image->rows, image->data, true)));
+        }
+
+    }
+
+    void DisplayPanel::clearImageScrollList() {
+        if (m_imageScrollList->GetNumberRows())
+            m_imageScrollList->DeleteRows(0, m_imageScrollList->GetNumberRows());
+    }
+
+
+    void DisplayPanel::TEventReceived(TEvent::TEventEnum e) {
+        switch (e) {
+
+        case TEvent::TEventEnum::ImageDeleted:
+        case TEvent::TEventEnum::ImageAdded:
+            populateImageScrollList();
+            break;
+        }
+    }
+
 
     ConsolePanel::ConsolePanel(TCore* core, wxWindow* parent,
         wxWindowID 	id,
@@ -157,6 +214,11 @@ namespace TUI {
 
 
     };
+
+    void ConsolePanel::TEventReceived(TEvent::TEventEnum e) {
+
+    }
+
 
     CatalogPanel::CatalogPanel(TCore* core, wxWindow* parent,
         wxWindowID 	id,
@@ -202,9 +264,6 @@ namespace TUI {
 
 
         this->SetSizerAndFit(sizer);
-
-        populateCatalogDisplay();
-
     };
 
 
@@ -242,8 +301,6 @@ namespace TUI {
     };
 
 
-
-
     void CatalogPanel::applyFilters() {
         for (int i = 0; i < m_catalogDisplay->GetNumberRows(); i++) {
 
@@ -271,6 +328,16 @@ namespace TUI {
         if (m_catalogDisplay->GetNumberRows())
             m_catalogDisplay->DeleteRows(0, m_catalogDisplay->GetNumberRows());
     };
+
+
+    void CatalogPanel::TEventReceived(TEvent::TEventEnum e) {
+        switch (e) {
+
+        case TEvent::TEventEnum::CatalogChanged:
+            populateCatalogDisplay();
+            break;
+        }
+    }
 
 
     SettingsDialog::SettingsDialog(TCore* core, wxWindow* parent,
@@ -396,6 +463,8 @@ namespace TUI {
 
     void ImagePanel::setActiveImage(imageID id) {
         auto image = m_coreptr->getImage(id);
+        if (!image)
+            return;
         m_sourceImage = wxImage(image->cols, image->rows, image->data, true);
         makeImageWithDetections(id);
     }
@@ -406,12 +475,19 @@ namespace TUI {
 
     void ImagePanel::makeImageWithDetections(imageID id) {
 
-        const std::vector<TItemSupport::DetectionResult>& res = m_coreptr->getDetectionResults(id);
-        for (auto& loc : res) {
-            loc.imageLoc;
-        }
+        const std::vector<TItemSupport::DetectionResult>& detRes = m_coreptr->getDetectionResults(id);
+        wxBitmap bm = wxBitmap(m_sourceImage);
+        wxMemoryDC dc = wxMemoryDC(bm);
 
+        for (auto& det : detRes) {
+            std::pair<cv::Point,cv::Point> locs = det.imageLoc;
+            dc.SetPen(wxPen(wxColour('red'), 5, wxSOLID));
+            dc.SetBrush(wxBrush(wxColour('red'), wxTRANSPARENT));
+            dc.DrawRectangle(locs.first.x, locs.first.y, locs.second.x, locs.second.y);
+        }
+        m_sourceImageWithdetections = bm.ConvertToImage();
     }
+
 
     cv::Mat formatItemImage(const TItemTypes::TItem* item, int maxRows, int maxCols) {
 

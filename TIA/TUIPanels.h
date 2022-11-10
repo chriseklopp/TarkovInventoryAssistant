@@ -27,7 +27,55 @@ Contains definitions for UI panels and dialogs.
 
 namespace TUI {
 
-    class OutputPanel : public wxPanel {
+    /* Image panel displays a selected image or a stream output.
+    * Can be toggled to draw any associated detections on itself.
+    */
+    class ImagePanel : public wxPanel
+    {
+
+    public:
+
+
+        ImagePanel(TCore* core, wxWindow* parent) :
+            m_coreptr(core),
+            wxPanel(parent) {};
+
+
+        void paintEvent(wxPaintEvent& evt);
+        void paintNow();
+        void OnSize(wxSizeEvent& event);
+        void render(wxDC& dc);
+
+
+        void setActiveImage(imageID id);
+
+        // Toggles image to display/hide detected items.
+        void showDetections(bool draw);
+
+
+    private:
+
+        void makeImageWithDetections(imageID id);
+
+        wxBitmap m_imageResized;
+
+        int m_imWidth;
+        int m_imHeight;
+
+        TCore* m_coreptr;
+
+        bool m_drawDetections;
+
+
+        wxImage m_sourceImage;
+
+        // This image is identical to the source image but has detections drawn on it.
+        // This will be rendered instead of the source image if m_drawDetections is true.
+        wxImage m_sourceImageWithdetections;
+
+    };
+
+    class OutputPanel : public wxPanel, public TEvent::TObserver {
 
     public:
         OutputPanel(TCore* core, wxWindow* parent,
@@ -41,10 +89,10 @@ namespace TUI {
 
         void populateOutputList();
 
+
         void addItemToOutputList(const TItemSupport::DetectionResult* item, int count);
 
-
-
+        virtual void TEventReceived(TEvent::TEventEnum e) override;
 
     private:
 
@@ -69,7 +117,7 @@ namespace TUI {
     };
 
 
-    class DisplayPanel : public wxPanel {
+    class DisplayPanel : public wxPanel, public TEvent::TObserver {
 
     public:
         DisplayPanel(TCore* core, wxWindow* parent,
@@ -81,10 +129,27 @@ namespace TUI {
 
         );
 
+        void populateImageScrollList();
+
+
+
+        void clearImageScrollList();
+
+        void tempSelected() { m_imagePanel->setActiveImage(0); };
+
+        virtual void TEventReceived(TEvent::TEventEnum e) override;
+
+    private:
+
+
+
         // Pointer to the core object.
         TCore* m_coreptr;
+        wxGrid* m_imageScrollList;
+
+        ImagePanel* m_imagePanel;
     };
-    class ConsolePanel : public wxPanel {
+    class ConsolePanel : public wxPanel, public TEvent::TObserver {
 
     public:
         ConsolePanel(TCore* core, wxWindow* parent,
@@ -96,6 +161,9 @@ namespace TUI {
 
         );
 
+
+        virtual void TEventReceived(TEvent::TEventEnum e) override;
+
         // Pointer to the core object.
         TCore* m_coreptr;
 
@@ -103,7 +171,7 @@ namespace TUI {
         wxGrid* m_imageList;
 
     };
-    class CatalogPanel : public wxPanel {
+    class CatalogPanel : public wxPanel, public TEvent::TObserver {
 
     public:
         CatalogPanel(TCore* core, wxWindow* parent,
@@ -115,10 +183,9 @@ namespace TUI {
 
         );
 
-        // Filter the catalog display by name.
-        void setNameFilter(std::string filter);
-
         //void filterType(std::string filter);
+
+        virtual void TEventReceived(TEvent::TEventEnum e) override;
 
     private:
 
@@ -192,55 +259,6 @@ namespace TUI {
 
 
 
-    /* Image panel displays a selected image or a stream output.
-    * Can be toggled to draw any associated detections on itself.
-    */
-    class ImagePanel : public wxPanel
-    {
-
-    public:
-
-
-        ImagePanel(TCore* core, wxFrame* parent) :
-            m_coreptr(core),
-            wxPanel(parent) {};
-
-
-        void paintEvent(wxPaintEvent& evt);
-        void paintNow();
-        void OnSize(wxSizeEvent& event);
-        void render(wxDC& dc);
-
-
-        void setActiveImage(imageID id);
-
-        // Toggles image to display/hide detected items.
-        void showDetections(bool draw);
-
-
-
-
-    private:
-
-        void makeImageWithDetections(imageID id);
-
-        wxBitmap m_imageResized;
-
-        int m_imWidth;
-        int m_imHeight;
-
-        TCore* m_coreptr;
-
-        bool m_drawDetections;
-
-
-        wxImage m_sourceImage;
-
-        // This image is identical to the source image but has detections drawn on it.
-        // This will be rendered instead of the source image if m_drawDetections is true.
-        wxImage m_sourceImageWithdetections;
-
-    };
 
     class ImageGridCellRenderer : public wxGridCellStringRenderer
     {
