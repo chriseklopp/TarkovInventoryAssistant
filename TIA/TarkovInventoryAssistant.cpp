@@ -88,11 +88,22 @@ TIAFrame::TIAFrame()
     Bind(wxEVT_MENU, &TIAFrame::OnSettings, this, ID_Settings);
 
 
+    // Register observer panels with TCore
+    m_core.registerTObserver(m_displayPanel);
+    m_core.registerTObserver(m_outputPanel);
+    m_core.registerTObserver(m_consolePanel);
+    m_core.registerTObserver(m_catalogPanel);
+
+
+    // Load initial catalog defined in the config.
+    m_core.loadCatalog();
+
     // TODO: DEBUG REMOVE
-    std::unique_ptr<cv::Mat> matty = 
+    std::unique_ptr<cv::Mat> matty =
         std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\raw2\\tucker2.png"));
     m_core.addImage(std::move(matty));
-    m_outputPanel->populateOutputList();
+
+
 }
 
 
