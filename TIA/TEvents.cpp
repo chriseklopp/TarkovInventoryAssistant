@@ -15,7 +15,7 @@ namespace TEvent {
             m_TObservers.erase(itr);
     }
 
-    void TSubject::notifyTObservers(TEventEnum e){
+    void TSubject::notifyTObservers(TEvent e){
         for (TObserver* obs : m_TObservers) {
             obs->TEventReceived(e);
         }
