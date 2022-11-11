@@ -47,6 +47,8 @@ void TCore::deleteImage(imageID id) {
 
 
 void TCore::activateImage(imageID id){
+    if (m_activeImages.find(id) != m_activeImages.end())
+        return;
     m_activeImages.insert(id);
     notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageActivated, std::to_string(id)));
 }
