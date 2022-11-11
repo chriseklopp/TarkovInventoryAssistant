@@ -217,6 +217,7 @@ namespace TUI {
 
         m_toggleDetections->Bind(wxEVT_CHECKBOX, &DisplayPanel::OnToggleDetections, this);
         m_modeSelect->Bind(wxEVT_CHOICE, &DisplayPanel::OnModeSelect, this);
+
         sizer->Add(m_toolbar, 0, wxEXPAND, 5);
 
 
@@ -235,7 +236,9 @@ namespace TUI {
         m_imageScrollList->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
         m_imageScrollList->SetDefaultCellBackgroundColour(wxColor(20, 19, 19));
         m_imageScrollList->SetMargins(0, 2);
+
         m_imageScrollList->Bind(wxEVT_GRID_CELL_LEFT_CLICK, &DisplayPanel::OnImageSelect, this);
+        m_imageScrollList->Bind(wxEVT_GRID_CELL_RIGHT_CLICK, &DisplayPanel::OnImageRightClick, this);
 
 
 
@@ -244,8 +247,13 @@ namespace TUI {
 
         m_imagePanel = new ImagePanel(core, this);
         m_imagePanel->showDetections(m_toggleDetections->IsChecked());
+
         contentSizer->Add(m_imagePanel, 1, wxALL | wxEXPAND, 0);
 
+        m_imageScrollListRCMenu = new TUI::DisplayPanel::RightClickMenu();
+        wxMenuItem* removeImageItm = new wxMenuItem(m_imageScrollListRCMenu, wxID_REMOVE_IMAGE, wxString(wxT("Remove Image")), wxEmptyString, wxITEM_NORMAL);
+        m_imageScrollListRCMenu->Append(removeImageItm);
+        m_imageScrollListRCMenu->Bind(wxEVT_MENU, &DisplayPanel::OnRightClickMenuClicked, this);
 
         sizer->Add(contentSizer, 1, wxALL | wxEXPAND, 0);
         this->SetSizerAndFit(sizer);
@@ -289,16 +297,26 @@ namespace TUI {
         evt.Skip();
     }
 
+    void DisplayPanel::OnImageRightClick(wxGridEvent& evt) {
+        wxString imID = m_imageScrollList->GetCellValue(wxGridCellCoords(evt.GetRow(), evt.GetCol()));
+        m_imageScrollListRCMenu->setImageId(wxAtoi(imID));
+        PopupMenu(m_imageScrollListRCMenu);
+    }
 
     void DisplayPanel::OnToggleDetections(wxCommandEvent& evt) {
-
         m_imagePanel->showDetections(evt.GetInt()==1);
-
     }
 
 
     void DisplayPanel::OnModeSelect(wxCommandEvent& evt) {
         //NYI: Implement handlign of this when feed mode is actually implemented.
+    }
+
+    void DisplayPanel::OnRightClickMenuClicked(wxCommandEvent& evt) {
+        switch (evt.GetId()) {
+        case TUI::wxIDS::wxID_REMOVE_IMAGE:
+            m_coreptr->deleteImage(m_imageScrollListRCMenu->getImageId());
+        }
     }
 
 
@@ -307,6 +325,8 @@ namespace TUI {
 
         case TEvent::TEventEnum::ImagesCleared:
         case TEvent::TEventEnum::ImageDeleted:
+            if (std::stoi(e.getData()) == m_imagePanel->getActiveImage())
+                m_imagePanel->clearDisplay();
         case TEvent::TEventEnum::ImageAdded:
             populateImageScrollList();
             break;
@@ -582,6 +602,15 @@ namespace TUI {
             dc.DrawBitmap(m_imageResized, 0, 0, false);
         }
     }
+
+    void ImagePanel::clearDisplay() {
+        m_imageID = -1;
+        m_sourceImage = wxImage();
+        m_sourceImageWithdetections = wxImage();
+        Refresh();
+    }
+
+
 
     void ImagePanel::OnSize(wxSizeEvent& event) {
         Refresh();

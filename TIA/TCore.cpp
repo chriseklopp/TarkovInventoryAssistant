@@ -41,7 +41,8 @@ void TCore::deleteImage(imageID id) {
     if (m_detectionResults.find(id) != m_detectionResults.end())
         m_detectionResults.erase(id);
 
-    
+    // Remove from activated Images (but silently to not trigger sending two events)
+    m_activeImages.erase(id);
     notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageDeleted, std::to_string(id)));
 }
 

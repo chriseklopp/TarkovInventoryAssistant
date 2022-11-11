@@ -26,6 +26,10 @@ Contains definitions for UI panels and dialogs.
 
 namespace TUI {
 
+    enum wxIDS {
+        wxID_REMOVE_IMAGE = wxID_LAST +1
+    };
+
     /* Image panel displays a selected image or a stream output.
     * Can be toggled to draw any associated detections on itself.
     */
@@ -59,6 +63,11 @@ namespace TUI {
 
         void setActiveImage(imageID id);
 
+        imageID getActiveImage() { return m_imageID; }
+
+
+        void clearDisplay();
+
         // Toggles image to display/hide detected items.
         void showDetections(bool draw);
 
@@ -86,6 +95,11 @@ namespace TUI {
 
     };
 
+
+
+
+    /* OutputPanel display results of detections from active images.
+    */
     class OutputPanel : public wxPanel, public TEvent::TObserver {
 
     public:
@@ -139,7 +153,8 @@ namespace TUI {
 
     };
 
-
+    /* DisplayPanel displays and allows management of loaded images.
+    */
     class DisplayPanel : public wxPanel, public TEvent::TObserver {
 
     public:
@@ -162,14 +177,28 @@ namespace TUI {
 
         void OnImageSelect(wxGridEvent& evt);
 
+        void OnImageRightClick(wxGridEvent& evt);
+
         void OnToggleDetections(wxCommandEvent& evt);
 
         void OnModeSelect(wxCommandEvent& evt);
 
+        void OnRightClickMenuClicked(wxCommandEvent& evt);
+
         virtual void TEventReceived(TEvent::TEvent e) override;
 
 
-        void OnSizeTest();
+
+        class RightClickMenu : public wxMenu {
+        public:
+            RightClickMenu() : m_imageID(-1) {};
+            void setImageId(imageID id) { m_imageID = id; };
+            imageID getImageId() { return m_imageID; };
+
+        private:
+
+            imageID m_imageID;
+        };
 
     private:
 
@@ -190,11 +219,17 @@ namespace TUI {
         wxGrid* m_imageScrollList;
         ImagePanel* m_imagePanel;
 
+
+        RightClickMenu* m_imageScrollListRCMenu;
         // TODO: feed mode widgets if any.
 
         imageID m_selectedImageID;
 
     };
+
+
+    /* ConsolePanel acts as a text console that outputs events as they happen.
+    */
     class ConsolePanel : public wxPanel, public TEvent::TObserver {
 
     public:
@@ -217,6 +252,9 @@ namespace TUI {
         wxGrid* m_imageList;
 
     };
+
+    /* CatalogPanel displays the contents of the currently loaded catalog.
+    */
     class CatalogPanel : public wxPanel, public TEvent::TObserver {
 
     public:
