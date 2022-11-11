@@ -70,13 +70,6 @@ namespace TUI {
     void OutputPanel::removeOutputListInfo(imageID id) {
 
         clearOutputList();
-        //depopulateCountMap(id);
-        //for (int i = 0; i < m_outputList->GetNumberRows()-1; i++) {
-        //    if (id == wxAtoi(m_outputList->GetCellValue(i, m_columnIndexMap.at("ParentID"))))
-        //        m_outputList->DeleteRows(i);
-        //        i--;
-        //}
-
     }
 
     void OutputPanel::refreshOutputList() {
@@ -87,6 +80,8 @@ namespace TUI {
 
     }
     void OutputPanel::clearOutputList() {
+        if (!m_outputList->GetNumberRows())
+            return;
         m_outputList->DeleteRows(0, m_outputList->GetNumberRows());
         m_itemNameCountmap.clear();
     }
@@ -156,11 +151,11 @@ namespace TUI {
         switch (e.getType()) {
 
 
-
-
         case TEvent::TEventEnum::ImageActivated:
             populateOutputList(std::stoi(e.getData()));
             break;
+
+        case TEvent::TEventEnum::ImageDeleted:
         case TEvent::TEventEnum::ImageDeactivated:
             refreshOutputList();
             break;
