@@ -26,7 +26,8 @@ imageID TCore::addImage(std::unique_ptr<cv::Mat> image) {
     imageID id = createNewImageID();
     m_idImageMap.insert({ id,std::move(image) });
     detectImageContent(id);
-    notifyTObservers(TEvent::TEventEnum::ImageAdded);
+    
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageAdded, std::to_string(id)));
 
     return id;
 };
@@ -40,20 +41,41 @@ void TCore::deleteImage(imageID id) {
     if (m_detectionResults.find(id) != m_detectionResults.end())
         m_detectionResults.erase(id);
 
-    notifyTObservers(TEvent::TEventEnum::ImageDeleted);
+    
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageDeleted, std::to_string(id)));
+}
+
+
+void TCore::activateImage(imageID id){
+    m_activeImages.insert(id);
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageActivated, std::to_string(id)));
+}
+
+// Deactivate image.
+void TCore::deactivateImage(imageID id) {
+    if (m_activeImages.find(id) == m_activeImages.end())
+        return;
+    m_activeImages.erase(id);
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageDeactivated, std::to_string(id)));
+}
+
+void TCore::deactivateAllImages() {
+    m_activeImages.clear();
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::AllImagesDeactivated, ""));
 }
 
 
 void TCore::clearImages() {
     m_idImageMap.clear();
     m_detectionResults.clear();
-    notifyTObservers(TEvent::TEventEnum::ImageDeleted);
+    
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImagesCleared, ""));
 };
 
-const std::vector<TItemSupport::DetectionResult>& TCore::getDetectionResults(imageID id) {
+const std::vector<TItemSupport::DetectionResult>* TCore::getDetectionResults(imageID id) {
     if (m_detectionResults.find(id) != m_detectionResults.end())
-        return m_detectionResults.at(id);
-    return std::vector<TItemSupport::DetectionResult>();
+        return &m_detectionResults.at(id);
+    return nullptr;
 }
 
 void TCore::deleteDetection(TItemSupport::DetectionResult& det) {
@@ -117,7 +139,8 @@ void TCore::setDATA_DIR(std::string dir) { m_configManager.setDATA_DIR(dir); };
 void TCore::setACTIVECATALOG(std::string dir) {
     m_configManager.setACTIVECATALOG(dir);
     m_dataCatalog.loadCatalog(m_config->getACTIVE_CATALOG());
-    notifyTObservers(TEvent::TEventEnum::CatalogChanged);
+    
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::CatalogChanged, dir));
 };
 
 void TCore::setRAW_CATALOGS_DIR(std::string dir){ m_configManager.setRAW_CATALOGS_DIR(dir); };
@@ -126,7 +149,17 @@ void TCore::setCATALOGS_DIR(std::string dir) { m_configManager.setCATALOGS_DIR(d
 
 void TCore::loadCatalog() {
     m_dataCatalog.loadCatalog(m_config->getACTIVE_CATALOG());
-    notifyTObservers(TEvent::TEventEnum::CatalogChanged);
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::CatalogChanged, m_config->getACTIVE_CATALOG().string()));
 }
+
+// Return vector of activated image IDs.
+const std::vector<imageID> TCore::getActivatedIDs() {
+    std::vector<imageID> ret;
+    for (int id : m_activeImages) {
+        ret.push_back(id);
+    }
+    return ret;
+}
+
 
 void TCore::saveConfig() { m_configManager.saveConfig(); };

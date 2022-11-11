@@ -27,11 +27,7 @@ public:
     */
 
     //Returns a reference to detection results for given ID.
-    const std::vector<TItemSupport::DetectionResult>& getDetectionResults(imageID imageID);
-
-    // Returns a vector of all detection results associated with a given image.
-    //const std::vector<TItemSupport::DetectionResult*> getDetectionResults(std::unique_ptr<cv::Mat>& im);
-    //const std::vector<TItemSupport::DetectionResult*> getDetectionResults(const cv::Mat* im);
+    const std::vector<TItemSupport::DetectionResult>* getDetectionResults(imageID imageID);
 
     // Returns pointer to image associated with the given id.
     // ** If no image is associated with the ID this will return null ptr **
@@ -43,8 +39,13 @@ public:
     // Return reference to our item catalog.
     const std::vector<std::unique_ptr<TItemTypes::TItem>>& getCatalogItemList() { return m_dataCatalog.getItemList(); };
 
+    // Return vector of activated image IDs.
+    const std::vector<imageID> getActivatedIDs();
+
     // Returns a pointer to the config. This is safe because the config is read only.
     TConfig::TConfig* getConfigPtr() { return m_config; };
+
+
 
 
     // Delete a detection.
@@ -58,6 +59,16 @@ public:
     // Deletes image with the given id.
     // ** Notifies observers with TEventEnum::ImageDeleted **
     void deleteImage(imageID id);
+
+    // Set image to active
+    void activateImage(imageID id);
+
+    // Deactivate image.
+    void deactivateImage(imageID id);
+
+    // Deactivates ALL active images.
+    void deactivateAllImages();
+
 
     // Clear all loaded images.
     // ** Notifies observers with TEventEnum::ImageDeleted **
@@ -82,15 +93,6 @@ public:
     // Save config settings to file.
     void saveConfig();
 
-
-    // Implement TSubject overrides
-
-    //virtual void registerTObserver(TEvent::TObserver* obs) override {};
-
-    //virtual void removeTObserver(TEvent::TObserver* obs) override {};
-
-    //virtual void notifyObservers(TEvent::TEventEnum e) override {};
-
 private:
 
 
@@ -105,8 +107,8 @@ private:
     TConfig::TConfigManager m_configManager;
     TConfig::TConfig* m_config;
 
-    // Contains currently loaded images.
-    //std::vector<std::unique_ptr<cv::Mat>> m_loadedImages;
+    // Signifies which images should be treated as "active".
+    std::set<imageID> m_activeImages;
 
 
     std::map<imageID, std::unique_ptr<cv::Mat>> m_idImageMap;

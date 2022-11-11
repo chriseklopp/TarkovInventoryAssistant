@@ -38,7 +38,7 @@ TIAFrame::TIAFrame()
     // Make upper windows and their left / right splitter.
     wxSplitterWindow* upperSplitter = new wxSplitterWindow(upperLowerSplitter, wxID_ANY);
     upperSplitter->SetMinimumPaneSize(10);
-    upperSplitter->SetSashGravity(.5);
+    upperSplitter->SetSashGravity(1);
 
     m_displayPanel = new TUI::DisplayPanel(&m_core, upperSplitter,wxID_ANY, wxDefaultPosition,wxSize(200,100));
     m_outputPanel = new TUI::OutputPanel(&m_core, upperSplitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
@@ -102,6 +102,18 @@ TIAFrame::TIAFrame()
     std::unique_ptr<cv::Mat> matty =
         std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\raw2\\tucker2.png"));
     m_core.addImage(std::move(matty));
+
+    std::unique_ptr<cv::Mat> matty1 =
+        std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\testimage4.png"));
+    m_core.addImage(std::move(matty1));
+
+    std::unique_ptr<cv::Mat> matty2 =
+        std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\raw2\\tucker2.png"));
+    m_core.addImage(std::move(matty2));
+
+    std::unique_ptr<cv::Mat> matty3 =
+        std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\testimage4.png"));
+    m_core.addImage(std::move(matty3));
 
 
 }
