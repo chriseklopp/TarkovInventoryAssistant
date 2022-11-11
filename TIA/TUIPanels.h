@@ -19,7 +19,6 @@
 #include "TCore.h"
 
 
-
 /*
 Contains definitions for UI panels and dialogs.
 
@@ -38,13 +37,24 @@ namespace TUI {
 
         ImagePanel(TCore* core, wxWindow* parent) :
             m_coreptr(core),
-            wxPanel(parent) {};
+            m_imageID(-1),
+            m_drawDetections(true),
+            wxPanel(parent) {
+        
+            this->Bind(wxEVT_PAINT, &ImagePanel::paintEvent, this);
+            this->Bind(wxEVT_SIZE, &ImagePanel::OnSize, this);
+            paintNow();
+        };
 
 
         void paintEvent(wxPaintEvent& evt);
         void paintNow();
         void OnSize(wxSizeEvent& event);
-        void render(wxDC& dc);
+
+        // Render the image on the screen.
+        // Force render forces the image to render regardless of the 
+        // circumstances.
+        void render(wxDC& dc, bool forceRender=false);
 
 
         void setActiveImage(imageID id);
@@ -66,6 +76,7 @@ namespace TUI {
 
         bool m_drawDetections;
 
+        int m_imageID;
 
         wxImage m_sourceImage;
 
@@ -87,17 +98,29 @@ namespace TUI {
 
         );
 
-        void populateOutputList();
 
+        // Populate Output list with information from imageID;
+        void populateOutputList(imageID id);
 
-        void addItemToOutputList(const TItemSupport::DetectionResult* item, int count);
+        // Removes items from an image from the output list.
+        void removeOutputListInfo(imageID id);
 
-        virtual void TEventReceived(TEvent::TEventEnum e) override;
+        // Resets output list and repopulates it with detections from all activated images.
+        void refreshOutputList();
+
+        // Clear everything from output list
+        void clearOutputList();
+
+        virtual void TEventReceived(TEvent::TEvent e) override;
 
     private:
 
-        void populateCountMap();
+        void addItemToOutputList(const TItemSupport::DetectionResult* item, int count);
 
+
+        void populateCountMap(imageID id);
+
+        void depopulateCountMap(imageID id);
 
         // Maps column name to column index in the outputList.
         static const std::map<std::string, int> m_columnIndexMap;
@@ -132,16 +155,27 @@ namespace TUI {
         void populateImageScrollList();
 
 
-
         void clearImageScrollList();
 
         void tempSelected() { m_imagePanel->setActiveImage(0); };
 
-        virtual void TEventReceived(TEvent::TEventEnum e) override;
+
+        void OnImageSelect(wxGridEvent& evt);
+
+        virtual void TEventReceived(TEvent::TEvent e) override;
+
+
+        void OnSizeTest();
 
     private:
 
 
+
+
+        static const int m_scrollListMaxRows = 120;
+        static const int m_scrollListMaxCols = 260;
+
+        imageID m_selectedImageID;
 
         // Pointer to the core object.
         TCore* m_coreptr;
@@ -162,7 +196,7 @@ namespace TUI {
         );
 
 
-        virtual void TEventReceived(TEvent::TEventEnum e) override;
+        virtual void TEventReceived(TEvent::TEvent e) override;
 
         // Pointer to the core object.
         TCore* m_coreptr;
@@ -185,7 +219,7 @@ namespace TUI {
 
         //void filterType(std::string filter);
 
-        virtual void TEventReceived(TEvent::TEventEnum e) override;
+        virtual void TEventReceived(TEvent::TEvent e) override;
 
     private:
 
@@ -283,9 +317,12 @@ namespace TUI {
     };
 
     // Formats an item image so it looks proper in the display.
-    cv::Mat formatItemImage(const TItemTypes::TItem* item, int maxRows, int maxCols);
+    // Preserving aspect ratio.
+    cv::Mat formatImage(const cv::Mat image, int maxRows, int maxCols);
 
-
+    // Resize Image preserving aspect ratio.
+    // Will return an empty image if max values given are impossibly small
+    wxImage resizeImage(wxImage& im, int maxRows, int maxCols);
 
 
 

@@ -1,6 +1,7 @@
 #include "TUIPanels.h"
 
 
+
 namespace TUI {
     OutputPanel::OutputPanel(TCore* core, wxWindow* parent,
         wxWindowID 	id,
@@ -13,9 +14,6 @@ namespace TUI {
             size,
             style,
             name) {
-
-
-
 
         this->SetBackgroundColour(wxColor(100, 200, 200));
 
@@ -33,6 +31,7 @@ namespace TUI {
         m_outputList->SetColSize(m_columnIndexMap.at("SourceImage"), m_imageMaxCols);
 
         m_outputList->SetColSize(m_columnIndexMap.at("Name"), 240);
+        m_outputList->SetColSize(m_columnIndexMap.at("ParentID"), 0);
         m_outputList->EnableEditing(false);
 
 
@@ -42,48 +41,88 @@ namespace TUI {
 
     };
 
-    void OutputPanel::populateOutputList() {
-        // Populates outputList based on the newest info from the core.
-        m_itemNameCountmap.clear();
 
+    void OutputPanel::populateOutputList(imageID id) {
+
+
+        populateCountMap(id);
 
         if (m_collapseSimilarItems) {
             // Populate collapsed list.
-            populateCountMap();
             for (auto p : m_itemNameCountmap) {
                 addItemToOutputList(p.first, p.second);
             }
         }
-        else{
+        else {
             // Populate uncollapsed list.
-            for (int id : m_coreptr->getLoadedImageIDs()) {
-                for (auto& det : m_coreptr->getDetectionResults(id)) {
-                    addItemToOutputList(&det, 1);
-                }
+            auto res = m_coreptr->getDetectionResults(id);
+            if (!res)
+                return;
+
+            for (auto& det : *res) {
+                addItemToOutputList(&det, 1);
+            }
+
+        }
+
+    }
+
+    void OutputPanel::removeOutputListInfo(imageID id) {
+
+        clearOutputList();
+        //depopulateCountMap(id);
+        //for (int i = 0; i < m_outputList->GetNumberRows()-1; i++) {
+        //    if (id == wxAtoi(m_outputList->GetCellValue(i, m_columnIndexMap.at("ParentID"))))
+        //        m_outputList->DeleteRows(i);
+        //        i--;
+        //}
+
+    }
+
+    void OutputPanel::refreshOutputList() {
+        clearOutputList();
+        for (int id : m_coreptr->getActivatedIDs()) {
+            populateOutputList(id);
+        }
+
+    }
+    void OutputPanel::clearOutputList() {
+        m_outputList->DeleteRows(0, m_outputList->GetNumberRows());
+        m_itemNameCountmap.clear();
+    }
+
+    void OutputPanel::populateCountMap(imageID id) {
+
+        auto res = m_coreptr->getDetectionResults(id);
+        if (!res)
+            return;
+
+        for (auto& det : *res) {
+
+            if (m_itemNameCountmap.find(&det) != m_itemNameCountmap.end()) {
+                m_itemNameCountmap.at(&det)++;
+            }
+            else {
+                m_itemNameCountmap.insert({&det ,1});
             }
         }
 
+
     };
 
+    void OutputPanel::depopulateCountMap(imageID id) {
+        auto res = m_coreptr->getDetectionResults(id);
+        if (!res)
+            return;
 
-
-    void OutputPanel::populateCountMap() {
-
-        // TODO: Should be dependent on where we want all images or not.
-        for (int id : m_coreptr->getLoadedImageIDs()) {
-
-            for (auto& det : m_coreptr->getDetectionResults(id)) {
-
-                if (m_itemNameCountmap.find(&det) != m_itemNameCountmap.end()) {
-                    m_itemNameCountmap.at(&det)++;
-                }
-                else {
-                    m_itemNameCountmap.insert({&det ,1});
-                }
+        for (auto& det : *res) {
+            if (m_itemNameCountmap.find(&det) != m_itemNameCountmap.end()) {
+                m_itemNameCountmap.at(&det)--;
             }
         }
 
-    };
+    }
+
 
     void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int count=1) {
         if (!det)
@@ -97,23 +136,36 @@ namespace TUI {
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), det->catalogItem->getDimAsString());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), countString);
 
+
+        wxString parentId = wxString::Format(wxT("%i"), det->parentImageID);
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("ParentID"), parentId);
+
         // Add source image
-        cv::Mat fmtSourceImage = formatItemImage(item.get(), m_imageMaxRows, m_imageMaxCols);
+        cv::Mat fmtSourceImage = formatImage(item->getImage(), m_imageMaxRows, m_imageMaxCols);
         m_outputList->SetCellRenderer(row, m_columnIndexMap.at("SourceImage"),
             new ImageGridCellRenderer(wxImage(fmtSourceImage.cols, fmtSourceImage.rows, fmtSourceImage.data, true)));
 
         // Add catalog image
-        cv::Mat fmtCatImage = formatItemImage(det->catalogItem, m_imageMaxRows, m_imageMaxCols);
+        cv::Mat fmtCatImage = formatImage(det->catalogItem->getImage(), m_imageMaxRows, m_imageMaxCols);
         m_outputList->SetCellRenderer(row, m_columnIndexMap.at("CatalogImage"),
             new ImageGridCellRenderer(wxImage(fmtCatImage.cols, fmtCatImage.rows, fmtCatImage.data, true)));
 
     };
-    void OutputPanel::TEventReceived(TEvent::TEventEnum e) {
-        switch (e) {
+    void OutputPanel::TEventReceived(TEvent::TEvent e) {
 
-        case TEvent::TEventEnum::ImageDeleted:
-        case TEvent::TEventEnum::ImageAdded:
-            populateOutputList();
+        switch (e.getType()) {
+
+
+
+
+        case TEvent::TEventEnum::ImageActivated:
+            populateOutputList(std::stoi(e.getData()));
+            break;
+        case TEvent::TEventEnum::ImageDeactivated:
+            clearOutputList();
+            break;
+        case TEvent::TEventEnum::AllImagesDeactivated:
+            clearOutputList();
             break;
         }
     };
@@ -126,7 +178,8 @@ namespace TUI {
        {"Count", 1},
        {"Name",   2},
        {"Dim", 3},
-       {"SourceImage", 4}
+       {"SourceImage", 4},
+        {"ParentID", 5}
 
     };
 
@@ -144,17 +197,27 @@ namespace TUI {
 
 
 
-        this->SetBackgroundColour(wxColor(0, 0, 200));
+        this->SetBackgroundColour(wxColor(59, 57, 57));
         wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 
-        m_imageScrollList = new wxGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0);
+        m_imageScrollList = new wxGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
         m_imageScrollList->HideRowLabels();
-        m_imageScrollList->CreateGrid(0, 1);
+        m_imageScrollList->HideColLabels();
+        m_imageScrollList->CreateGrid(0, 1, wxGrid::wxGridSelectionModes::wxGridSelectRows);
         m_imageScrollList->EnableEditing(false);
+        m_imageScrollList->SetDefaultRowSize(m_scrollListMaxRows);
+        m_imageScrollList->SetColSize(0, m_scrollListMaxCols);
+        m_imageScrollList->DisableColResize(0);
+        m_imageScrollList->DisableDragRowSize();
+        m_imageScrollList->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
+        m_imageScrollList->SetDefaultCellBackgroundColour(wxColor(20, 19, 19));
+        m_imageScrollList->SetMargins(0, 2);
+
+        m_imageScrollList->Bind(wxEVT_GRID_CELL_LEFT_CLICK, &DisplayPanel::OnImageSelect, this);
 
 
 
-        sizer->Add(m_imageScrollList, 1, wxALL | wxEXPAND, 0);
+        sizer->Add(m_imageScrollList, 0, wxEXPAND | wxALIGN_LEFT | wxLEFT, 5);
 
         m_imagePanel = new ImagePanel(core, this);
 
@@ -172,8 +235,11 @@ namespace TUI {
 
             m_imageScrollList->AppendRows(1);
             int row = m_imageScrollList->GetNumberRows() - 1;
+            wxString cellVal = wxString::Format(wxT("%i"), id);
+            m_imageScrollList->SetCellValue(row, 0, cellVal);
+            cv::Mat fmtImage = formatImage(*image, m_scrollListMaxRows, m_scrollListMaxCols);
             m_imageScrollList->SetCellRenderer(row, 0,
-                new ImageGridCellRenderer(wxImage(image->cols, image->rows, image->data, true)));
+                new ImageGridCellRenderer(wxImage(fmtImage.cols, fmtImage.rows, fmtImage.data, true)));
         }
 
     }
@@ -184,9 +250,22 @@ namespace TUI {
     }
 
 
-    void DisplayPanel::TEventReceived(TEvent::TEventEnum e) {
-        switch (e) {
+    void DisplayPanel::OnImageSelect(wxGridEvent& evt) {
+        wxString imID = m_imageScrollList->GetCellValue(wxGridCellCoords(evt.GetRow(), evt.GetCol()));
+        m_imagePanel->setActiveImage(wxAtoi(imID));
 
+        m_coreptr->deactivateImage(m_selectedImageID);
+        m_selectedImageID = wxAtoi(imID);
+        m_imagePanel->paintNow();
+        m_coreptr->activateImage(wxAtoi(imID));
+        evt.Skip();
+    }
+
+
+    void DisplayPanel::TEventReceived(TEvent::TEvent e) {
+        switch (e.getType()) {
+
+        case TEvent::TEventEnum::ImagesCleared:
         case TEvent::TEventEnum::ImageDeleted:
         case TEvent::TEventEnum::ImageAdded:
             populateImageScrollList();
@@ -215,7 +294,7 @@ namespace TUI {
 
     };
 
-    void ConsolePanel::TEventReceived(TEvent::TEventEnum e) {
+    void ConsolePanel::TEventReceived(TEvent::TEvent e) {
 
     }
 
@@ -295,7 +374,7 @@ namespace TUI {
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Name"), item->getName());
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Dim"), item->getDimAsString());
 
-        cv::Mat fmtImage = formatItemImage(item,m_imageMaxRows,m_imageMaxCols);
+        cv::Mat fmtImage = formatImage(item->getImage(),m_imageMaxRows,m_imageMaxCols);
         m_catalogDisplay->SetCellRenderer(row, m_columnIndexMap.at("Image"),
             new ImageGridCellRenderer(wxImage(fmtImage.cols, fmtImage.rows, fmtImage.data, true)));
     };
@@ -330,9 +409,8 @@ namespace TUI {
     };
 
 
-    void CatalogPanel::TEventReceived(TEvent::TEventEnum e) {
-        switch (e) {
-
+    void CatalogPanel::TEventReceived(TEvent::TEvent e) {
+        switch (e.getType()) {
         case TEvent::TEventEnum::CatalogChanged:
             populateCatalogDisplay();
             break;
@@ -422,6 +500,7 @@ namespace TUI {
 
     void ImagePanel::paintEvent(wxPaintEvent& evt)
     {
+
         // depending on your system you may need to look at double-buffered dcs
         wxPaintDC dc(this);
         render(dc);
@@ -430,21 +509,31 @@ namespace TUI {
 
     void ImagePanel::paintNow()
     {
+
         // depending on your system you may need to look at double-buffered dcs
         wxClientDC dc(this);
-        render(dc);
+        render(dc,true);
     }
 
-    void ImagePanel::render(wxDC& dc)
+    void ImagePanel::render(wxDC& dc, bool forceRender)
     {
         int neww, newh;
         dc.GetSize(&neww, &newh);
+        if (neww <=0 || newh <= 0)
+            return;
 
         wxImage* image = m_drawDetections ? &m_sourceImageWithdetections : &m_sourceImage;
+        if (!image->IsOk())
+            return;
 
-        if (neww != m_imWidth || newh != m_imHeight)
+        if (forceRender || (neww != m_imWidth || newh != m_imHeight))
         {
-            m_imageResized = wxBitmap(image->Scale(neww, newh /*, wxIMAGE_QUALITY_HIGH*/));
+            wxImage resizedIm = resizeImage(*image, newh, neww);
+            if (!resizedIm.IsOk())
+                return;
+
+            m_imageResized = resizedIm;
+
             m_imWidth = neww;
             m_imHeight = newh;
             dc.DrawBitmap(m_imageResized, 0, 0, false);
@@ -462,10 +551,17 @@ namespace TUI {
 
 
     void ImagePanel::setActiveImage(imageID id) {
+        if (id == m_imageID)
+            return;
         auto image = m_coreptr->getImage(id);
         if (!image)
             return;
-        m_sourceImage = wxImage(image->cols, image->rows, image->data, true);
+        m_imageID = id;
+
+        cv::Mat fmtImage;
+        cv::cvtColor(*image, fmtImage, cv::COLOR_BGR2RGB);
+
+        m_sourceImage = wxImage(fmtImage.cols, fmtImage.rows, fmtImage.data, true).Copy();
         makeImageWithDetections(id);
     }
 
@@ -475,24 +571,28 @@ namespace TUI {
 
     void ImagePanel::makeImageWithDetections(imageID id) {
 
-        const std::vector<TItemSupport::DetectionResult>& detRes = m_coreptr->getDetectionResults(id);
+        auto res = m_coreptr->getDetectionResults(id);
+        if (!res)
+            return;
+
         wxBitmap bm = wxBitmap(m_sourceImage);
         wxMemoryDC dc = wxMemoryDC(bm);
 
-        for (auto& det : detRes) {
+        for (auto& det : *res) {
             std::pair<cv::Point,cv::Point> locs = det.imageLoc;
-            dc.SetPen(wxPen(wxColour('red'), 5, wxSOLID));
-            dc.SetBrush(wxBrush(wxColour('red'), wxTRANSPARENT));
-            dc.DrawRectangle(locs.first.x, locs.first.y, locs.second.x, locs.second.y);
+            dc.SetPen(wxPen(wxColour(245,24,24), 2, wxSOLID));
+            dc.SetBrush(wxBrush(wxColour(245, 24, 24), wxTRANSPARENT));
+            dc.DrawRectangle(locs.first.x, locs.first.y, locs.second.x- locs.first.x,locs.second.y- locs.first.y);
         }
         m_sourceImageWithdetections = bm.ConvertToImage();
     }
 
 
-    cv::Mat formatItemImage(const TItemTypes::TItem* item, int maxRows, int maxCols) {
 
+
+    cv::Mat formatImage(const cv::Mat image, int maxRows, int maxCols) {
         cv::Mat im;
-        cv::cvtColor(item->getImage(), im, cv::COLOR_BGR2RGB);
+        cv::cvtColor(image, im, cv::COLOR_BGR2RGB);
 
 
         // Scale down the image, preserving aspect ratio.
@@ -510,5 +610,28 @@ namespace TUI {
         cv::Mat imresized;
         cv::resize(im, imresized, cv::Size(numCols, numRows), (0, 0), (0, 0), cv::INTER_AREA);
         return imresized;
-    };
+    }
+
+
+    wxImage resizeImage(wxImage& im, int maxRows, int maxCols) {
+        
+        // Scale down the image, preserving aspect ratio.
+        int numRows = maxRows;
+        double scale_percent = numRows * 100 / im.GetHeight();
+        int numCols = im.GetWidth() * scale_percent / 100;
+
+        // If the item is too long, base off max cols instead.
+        if (numCols > maxCols) {
+            numCols = maxCols;
+            scale_percent = numCols * 100 / im.GetWidth();
+            numRows = im.GetHeight() * scale_percent / 100;
+        }
+
+
+        if (numCols == 0 || numRows == 0)
+            return wxImage();
+        return wxImage(im.Scale(numCols, numRows /*, wxIMAGE_QUALITY_HIGH*/));
+    }
+
+
 }
