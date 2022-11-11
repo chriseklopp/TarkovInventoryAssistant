@@ -38,7 +38,7 @@ namespace TUI {
         ImagePanel(TCore* core, wxWindow* parent) :
             m_coreptr(core),
             m_imageID(-1),
-            m_drawDetections(true),
+            m_drawDetections(false),
             wxPanel(parent) {
         
             this->Bind(wxEVT_PAINT, &ImagePanel::paintEvent, this);
@@ -162,6 +162,10 @@ namespace TUI {
 
         void OnImageSelect(wxGridEvent& evt);
 
+        void OnToggleDetections(wxCommandEvent& evt);
+
+        void OnModeSelect(wxCommandEvent& evt);
+
         virtual void TEventReceived(TEvent::TEvent e) override;
 
 
@@ -169,19 +173,27 @@ namespace TUI {
 
     private:
 
-
-
+        // Pointer to the core object.
+        TCore* m_coreptr;
 
         static const int m_scrollListMaxRows = 120;
         static const int m_scrollListMaxCols = 260;
 
+
+        // Tool bar widgets.
+        wxToolBar* m_toolbar;
+        wxChoice* m_modeSelect;
+        wxStaticLine* m_staticLine;
+        wxCheckBox* m_toggleDetections;
+
+        //Main UI widgets
+        wxGrid* m_imageScrollList;
+        ImagePanel* m_imagePanel;
+
+        // TODO: feed mode widgets if any.
+
         imageID m_selectedImageID;
 
-        // Pointer to the core object.
-        TCore* m_coreptr;
-        wxGrid* m_imageScrollList;
-
-        ImagePanel* m_imagePanel;
     };
     class ConsolePanel : public wxPanel, public TEvent::TObserver {
 

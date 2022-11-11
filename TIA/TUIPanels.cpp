@@ -162,7 +162,7 @@ namespace TUI {
             populateOutputList(std::stoi(e.getData()));
             break;
         case TEvent::TEventEnum::ImageDeactivated:
-            clearOutputList();
+            refreshOutputList();
             break;
         case TEvent::TEventEnum::AllImagesDeactivated:
             clearOutputList();
@@ -198,7 +198,30 @@ namespace TUI {
 
 
         this->SetBackgroundColour(wxColor(59, 57, 57));
-        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+        // Tool bar widgets.
+        m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL);
+        wxString m_modeSelectChoices[] = { wxT("Screenshot mode"), wxT("Feed Mode (NYI)") };
+        int m_modeSelectNChoices = sizeof(m_modeSelectChoices) / sizeof(wxString);
+        m_modeSelect = new wxChoice(m_toolbar, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_modeSelectNChoices, m_modeSelectChoices, 0);
+        m_modeSelect->SetSelection(0);
+        m_toolbar->AddControl(m_modeSelect);
+
+        m_staticLine = new wxStaticLine(m_toolbar, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL);
+        m_toolbar->AddControl(m_staticLine);
+        m_toggleDetections = new wxCheckBox(m_toolbar, wxID_ANY, wxT("Show detections"), wxDefaultPosition, wxDefaultSize, 0);
+        m_toolbar->AddControl(m_toggleDetections);
+        m_toolbar->Realize();
+
+        m_toggleDetections->Bind(wxEVT_CHECKBOX, &DisplayPanel::OnToggleDetections, this);
+        m_modeSelect->Bind(wxEVT_CHOICE, &DisplayPanel::OnModeSelect, this);
+        sizer->Add(m_toolbar, 0, wxEXPAND, 5);
+
+
+        // Main panel widgets.
+        wxBoxSizer* contentSizer = new wxBoxSizer(wxHORIZONTAL);
 
         m_imageScrollList = new wxGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
         m_imageScrollList->HideRowLabels();
@@ -212,16 +235,19 @@ namespace TUI {
         m_imageScrollList->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
         m_imageScrollList->SetDefaultCellBackgroundColour(wxColor(20, 19, 19));
         m_imageScrollList->SetMargins(0, 2);
-
         m_imageScrollList->Bind(wxEVT_GRID_CELL_LEFT_CLICK, &DisplayPanel::OnImageSelect, this);
 
 
 
-        sizer->Add(m_imageScrollList, 0, wxEXPAND | wxALIGN_LEFT | wxLEFT, 5);
+        contentSizer->Add(m_imageScrollList, 0, wxEXPAND | wxALIGN_LEFT | wxLEFT, 5);
+
 
         m_imagePanel = new ImagePanel(core, this);
+        m_imagePanel->showDetections(m_toggleDetections->IsChecked());
+        contentSizer->Add(m_imagePanel, 1, wxALL | wxEXPAND, 0);
 
-        sizer->Add(m_imagePanel, 1, wxALL | wxEXPAND, 0);
+
+        sizer->Add(contentSizer, 1, wxALL | wxEXPAND, 0);
         this->SetSizerAndFit(sizer);
 
     };
@@ -252,6 +278,8 @@ namespace TUI {
 
     void DisplayPanel::OnImageSelect(wxGridEvent& evt) {
         wxString imID = m_imageScrollList->GetCellValue(wxGridCellCoords(evt.GetRow(), evt.GetCol()));
+        if (wxAtoi(imID) == m_selectedImageID)
+            return;
         m_imagePanel->setActiveImage(wxAtoi(imID));
 
         m_coreptr->deactivateImage(m_selectedImageID);
@@ -259,6 +287,18 @@ namespace TUI {
         m_imagePanel->paintNow();
         m_coreptr->activateImage(wxAtoi(imID));
         evt.Skip();
+    }
+
+
+    void DisplayPanel::OnToggleDetections(wxCommandEvent& evt) {
+
+        m_imagePanel->showDetections(evt.GetInt()==1);
+
+    }
+
+
+    void DisplayPanel::OnModeSelect(wxCommandEvent& evt) {
+        //NYI: Implement handlign of this when feed mode is actually implemented.
     }
 
 
@@ -567,6 +607,7 @@ namespace TUI {
 
     void ImagePanel::showDetections(bool draw) {
         m_drawDetections = draw;
+        paintNow();
     }
 
     void ImagePanel::makeImageWithDetections(imageID id) {
