@@ -199,7 +199,7 @@ namespace TItemSupport {
 
 
 
-        TItemTypes::TItem* catalogItem;
+        const TItemTypes::TItem* catalogItem;
         std::unique_ptr<TItemTypes::TItem> inputItem;
 
         int parentImageID; // ImageID from where the item was detected.

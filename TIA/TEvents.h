@@ -34,7 +34,7 @@ namespace TEvent {
 
     public:
         virtual void TEventReceived(TEvent e) = 0;
-
+        virtual ~TObserver() {};
     };
 
     class TSubject {
