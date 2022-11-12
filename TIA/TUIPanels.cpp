@@ -17,6 +17,31 @@ namespace TUI {
 
         this->SetBackgroundColour(wxColor(100, 200, 200));
 
+
+        auto sizer = new wxBoxSizer(wxVERTICAL);
+
+
+        // Add header toolbar
+        m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL);
+
+        m_toggleCollapse = new wxCheckBox(m_toolbar, wxID_ANY, wxT("Collapse Similar"),
+                                          wxDefaultPosition, wxDefaultSize, 0);
+        m_toggleActiveOnly = new wxCheckBox(m_toolbar, wxID_ANY, wxT("Show Active Only"),
+                                            wxDefaultPosition, wxDefaultSize, 0);
+
+        m_toolbar->AddControl(m_toggleCollapse);
+        m_toolbar->AddControl(m_toggleActiveOnly);
+
+        m_toggleCollapse->Bind(wxEVT_CHECKBOX, &OutputPanel::OnToggleCollapse, this);
+        m_toggleActiveOnly->Bind(wxEVT_CHECKBOX, &OutputPanel::OnToggleActiveOnly, this);
+        m_toolbar->Realize();
+
+        sizer->Add(m_toolbar, 0, wxEXPAND, 5);
+
+
+
+
+
         // Add output list
         m_outputList = new wxGrid(this, wxUSE_ANY);
         m_outputList->CreateGrid(0, m_columnIndexMap.size());
@@ -31,11 +56,9 @@ namespace TUI {
         m_outputList->SetColSize(m_columnIndexMap.at("SourceImage"), m_imageMaxCols);
 
         m_outputList->SetColSize(m_columnIndexMap.at("Name"), 240);
-        m_outputList->SetColSize(m_columnIndexMap.at("ParentID"), 0);
+        //m_outputList->SetColSize(m_columnIndexMap.at("ParentID"), 0);
         m_outputList->EnableEditing(false);
 
-
-        auto sizer = new wxBoxSizer(wxVERTICAL);
         sizer->Add(m_outputList, 1, wxALL | wxEXPAND, 0);
         this->SetSizerAndFit(sizer);
 
@@ -74,10 +97,17 @@ namespace TUI {
 
     void OutputPanel::refreshOutputList() {
         clearOutputList();
-        for (int id : m_coreptr->getActivatedIDs()) {
-            populateOutputList(id);
-        }
 
+        if (m_showActiveOnly) {
+            for (int id : m_coreptr->getActivatedIDs()) {
+                populateOutputList(id);
+            }
+        }
+        else {
+            for (int id : m_coreptr->getLoadedImageIDs()) {
+                populateOutputList(id);
+            }
+        }
     }
     void OutputPanel::clearOutputList() {
         if (!m_outputList->GetNumberRows())
@@ -86,19 +116,33 @@ namespace TUI {
         m_itemNameCountmap.clear();
     }
 
+    void OutputPanel::OnToggleCollapse(wxCommandEvent& evt) {
+        m_collapseSimilarItems = (evt.GetInt() == 1);
+        refreshOutputList();
+    }
+
+    void OutputPanel::OnToggleActiveOnly(wxCommandEvent& evt) {
+        m_showActiveOnly = (evt.GetInt() == 1);
+        refreshOutputList();
+    }
+
+
     void OutputPanel::populateCountMap(imageID id) {
 
         auto res = m_coreptr->getDetectionResults(id);
         if (!res)
             return;
 
-        for (auto& det : *res) {
 
-            if (m_itemNameCountmap.find(&det) != m_itemNameCountmap.end()) {
-                m_itemNameCountmap.at(&det)++;
+        for (auto& det : *res) {
+            if (m_itemNameCountmap.find(det.catalogItem) != m_itemNameCountmap.end()) {
+                m_itemNameCountmap.at(det.catalogItem)++;
             }
             else {
-                m_itemNameCountmap.insert({&det ,1});
+
+
+
+                m_itemNameCountmap.insert({det.catalogItem ,1});
             }
         }
 
@@ -111,15 +155,15 @@ namespace TUI {
             return;
 
         for (auto& det : *res) {
-            if (m_itemNameCountmap.find(&det) != m_itemNameCountmap.end()) {
-                m_itemNameCountmap.at(&det)--;
+            if (m_itemNameCountmap.find(det.catalogItem) != m_itemNameCountmap.end()) {
+                m_itemNameCountmap.at(det.catalogItem)--;
             }
         }
 
     }
 
 
-    void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int count=1) {
+    void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int count) {
         if (!det)
             return;
         m_outputList->AppendRows(1);
@@ -132,9 +176,6 @@ namespace TUI {
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), countString);
 
 
-        wxString parentId = wxString::Format(wxT("%i"), det->parentImageID);
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("ParentID"), parentId);
-
         // Add source image
         cv::Mat fmtSourceImage = formatImage(item->getImage(), m_imageMaxRows, m_imageMaxCols);
         m_outputList->SetCellRenderer(row, m_columnIndexMap.at("SourceImage"),
@@ -142,6 +183,25 @@ namespace TUI {
 
         // Add catalog image
         cv::Mat fmtCatImage = formatImage(det->catalogItem->getImage(), m_imageMaxRows, m_imageMaxCols);
+        m_outputList->SetCellRenderer(row, m_columnIndexMap.at("CatalogImage"),
+            new ImageGridCellRenderer(wxImage(fmtCatImage.cols, fmtCatImage.rows, fmtCatImage.data, true)));
+
+    };
+
+    void OutputPanel::addItemToOutputList(const TItemTypes::TItem* itm, int count) {
+        if (!itm)
+            return;
+        m_outputList->AppendRows(1);
+        std::string countString = std::to_string(count);
+        int row = m_outputList->GetNumberRows() - 1;
+
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), itm->getName());
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), itm->getDimAsString());
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), countString);
+
+
+        // Add catalog image
+        cv::Mat fmtCatImage = formatImage(itm->getImage(), m_imageMaxRows, m_imageMaxCols);
         m_outputList->SetCellRenderer(row, m_columnIndexMap.at("CatalogImage"),
             new ImageGridCellRenderer(wxImage(fmtCatImage.cols, fmtCatImage.rows, fmtCatImage.data, true)));
 

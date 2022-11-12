@@ -125,16 +125,26 @@ namespace TUI {
         // Clear everything from output list
         void clearOutputList();
 
+        void OnToggleCollapse(wxCommandEvent& evt);
+
+        void OnToggleActiveOnly(wxCommandEvent& evt);
+
         virtual void TEventReceived(TEvent::TEvent e) override;
 
     private:
 
-        void addItemToOutputList(const TItemSupport::DetectionResult* item, int count);
+        void addItemToOutputList(const TItemSupport::DetectionResult* item, int count=1);
 
+
+        void addItemToOutputList(const TItemTypes::TItem* itm, int count=1);
 
         void populateCountMap(imageID id);
 
         void depopulateCountMap(imageID id);
+
+        // Pointer to the core object.
+        TCore* m_coreptr;
+
 
         // Maps column name to column index in the outputList.
         static const std::map<std::string, int> m_columnIndexMap;
@@ -144,17 +154,26 @@ namespace TUI {
 
         wxGrid* m_outputList;
 
+
+        // Tool bar widgets.
+        wxToolBar* m_toolbar;
+        wxCheckBox* m_toggleCollapse;
+        wxCheckBox* m_toggleActiveOnly;
+
         // When true, detections with identical parents will be collapsed into one row with a count >=1.
         bool m_collapseSimilarItems;
 
-        std::map<const TItemSupport::DetectionResult*, int> m_itemNameCountmap;
-        // Pointer to the core object.
-        TCore* m_coreptr;
+        // When true, only active images will have their detections displayed.
+        bool m_showActiveOnly;
+
+
+
+        std::map<const TItemTypes::TItem*, int> m_itemNameCountmap;
+
 
     };
 
-    /* DisplayPanel displays and allows management of loaded images.
-    */
+    // DisplayPanel displays and allows management of loaded images.
     class DisplayPanel : public wxPanel, public TEvent::TObserver {
 
     public:
@@ -280,7 +299,6 @@ namespace TUI {
         );
 
         //void filterType(std::string filter);
-
         virtual void TEventReceived(TEvent::TEvent e) override;
 
     private:
