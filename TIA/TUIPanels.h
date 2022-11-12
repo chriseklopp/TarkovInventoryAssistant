@@ -185,8 +185,10 @@ namespace TUI {
 
         void OnRightClickMenuClicked(wxCommandEvent& evt);
 
-        virtual void TEventReceived(TEvent::TEvent e) override;
+        void OnAddDirBtn(wxCommandEvent& evt);
+        void OnAddImageBtn(wxCommandEvent& evt);
 
+        virtual void TEventReceived(TEvent::TEvent e) override;
 
 
         class RightClickMenu : public wxMenu {
@@ -209,6 +211,7 @@ namespace TUI {
         static const int m_scrollListMaxCols = 260;
 
 
+
         // Tool bar widgets.
         wxToolBar* m_toolbar;
         wxChoice* m_modeSelect;
@@ -220,10 +223,19 @@ namespace TUI {
         ImagePanel* m_imagePanel;
 
 
+        // Image list header widgets
+        wxButton* m_addDirBtn;
+        wxButton* m_addImageBtn;
+       // wxDirDialog* m_imageDirSelect;
+        //wxFileDialog* m_imageFileSelect;
+        
         RightClickMenu* m_imageScrollListRCMenu;
         // TODO: feed mode widgets if any.
 
         imageID m_selectedImageID;
+
+        std::filesystem::path m_previousDirSelect;
+        std::filesystem::path m_previousImageSelect;
 
     };
 

@@ -98,22 +98,6 @@ TIAFrame::TIAFrame()
     // Load initial catalog defined in the config.
     m_core.loadCatalog();
 
-    // TODO: DEBUG REMOVE
-    std::unique_ptr<cv::Mat> matty =
-        std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\raw2\\tucker2.png"));
-    m_core.addImage(std::move(matty));
-
-    std::unique_ptr<cv::Mat> matty1 =
-        std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\testimage4.png"));
-    m_core.addImage(std::move(matty1));
-
-    std::unique_ptr<cv::Mat> matty2 =
-        std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\raw2\\tucker2.png"));
-    m_core.addImage(std::move(matty2));
-
-    std::unique_ptr<cv::Mat> matty3 =
-        std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\testimage4.png"));
-    m_core.addImage(std::move(matty3));
 
 
 }

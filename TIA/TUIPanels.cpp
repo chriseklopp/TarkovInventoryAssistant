@@ -218,7 +218,6 @@ namespace TUI {
 
         // Main panel widgets.
         wxBoxSizer* contentSizer = new wxBoxSizer(wxHORIZONTAL);
-
         m_imageScrollList = new wxGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
         m_imageScrollList->HideRowLabels();
         m_imageScrollList->HideColLabels();
@@ -236,17 +235,40 @@ namespace TUI {
         m_imageScrollList->Bind(wxEVT_GRID_CELL_RIGHT_CLICK, &DisplayPanel::OnImageRightClick, this);
 
 
+        // Image list header widgets
+        wxBoxSizer* imageListSizer = new wxBoxSizer(wxVERTICAL);
+        wxBoxSizer* imageListHeader = new wxBoxSizer(wxHORIZONTAL);
+        
+        m_addDirBtn = new wxButton(this, wxID_ANY, wxT("Add Dir"), wxDefaultPosition, wxDefaultSize, 0);
+        imageListHeader->Add(m_addDirBtn, 1, wxEXPAND, 5);
+        m_addDirBtn->Bind(wxEVT_BUTTON, &DisplayPanel::OnAddDirBtn, this);
 
-        contentSizer->Add(m_imageScrollList, 0, wxEXPAND | wxALIGN_LEFT | wxLEFT, 5);
+
+        m_addImageBtn = new wxButton(this, wxID_ANY, wxT("Add Image"), wxDefaultPosition, wxDefaultSize, 0);
+        imageListHeader->Add(m_addImageBtn, 1, wxEXPAND, 5);
+        m_addImageBtn->Bind(wxEVT_BUTTON, &DisplayPanel::OnAddImageBtn, this);
 
 
+
+       // m_imageDirSelect->SetInitialDirectory(m_coreptr->getConfigPtr()->getDATA_DIR().string());
+        //m_imageDirSelect->SetPath(m_coreptr->getConfigPtr()->getDATA_DIR().string());
+
+
+        imageListSizer->Add(imageListHeader, 0, wxUP | wxEXPAND, 2);
+        imageListSizer->Add(m_imageScrollList, 1, wxEXPAND, 5);
+
+
+        contentSizer->Add(imageListSizer, 0, wxEXPAND | wxALIGN_LEFT, 5);
+
+        // Add main image display panel
         m_imagePanel = new ImagePanel(core, this);
         m_imagePanel->showDetections(m_toggleDetections->IsChecked());
 
         contentSizer->Add(m_imagePanel, 1, wxALL | wxEXPAND, 0);
 
         m_imageScrollListRCMenu = new TUI::DisplayPanel::RightClickMenu();
-        wxMenuItem* removeImageItm = new wxMenuItem(m_imageScrollListRCMenu, wxID_REMOVE_IMAGE, wxString(wxT("Remove Image")), wxEmptyString, wxITEM_NORMAL);
+        wxMenuItem* removeImageItm = new wxMenuItem(m_imageScrollListRCMenu, wxID_REMOVE_IMAGE,
+            wxString(wxT("Remove Image")),wxEmptyString, wxITEM_NORMAL);
         m_imageScrollListRCMenu->Append(removeImageItm);
         m_imageScrollListRCMenu->Bind(wxEVT_MENU, &DisplayPanel::OnRightClickMenuClicked, this);
 
@@ -313,6 +335,38 @@ namespace TUI {
             m_coreptr->deleteImage(m_imageScrollListRCMenu->getImageId());
         }
     }
+
+    void DisplayPanel::OnAddDirBtn(wxCommandEvent& evt){
+        if (m_previousDirSelect.empty())
+            m_previousDirSelect = m_coreptr->getConfigPtr()->getDATA_DIR();
+
+        wxDirDialog dirSelect = new wxDirDialog(this, wxT("Select a folder"));
+        dirSelect.SetPath(m_previousDirSelect.string());
+
+        if (dirSelect.ShowModal() == wxID_CANCEL)
+            return;
+
+        std::filesystem::path selectedPath = std::filesystem::path(dirSelect.GetPath().ToStdString());
+        m_previousDirSelect = selectedPath.parent_path();
+        m_coreptr->loadImagesInDir(selectedPath);
+    }
+
+    void DisplayPanel::OnAddImageBtn(wxCommandEvent& evt){
+        if (m_previousImageSelect.empty())
+            m_previousImageSelect = m_coreptr->getConfigPtr()->getDATA_DIR();
+
+        wxFileDialog imageSelect = new wxFileDialog(this, wxT("Select an image"));
+        imageSelect.SetPath(m_previousImageSelect.string());
+
+        if (imageSelect.ShowModal() == wxID_CANCEL)
+            return;
+
+        std::filesystem::path selectedPath = std::filesystem::path(imageSelect.GetPath().ToStdString());
+        m_previousImageSelect = selectedPath;
+        m_coreptr->loadImage(selectedPath);
+    }
+
+
 
 
     void DisplayPanel::TEventReceived(TEvent::TEvent e) {
@@ -443,9 +497,11 @@ namespace TUI {
             std::string name = m_catalogDisplay->GetCellValue(i, m_columnIndexMap.at("Name"));
             std::transform(name.begin(), name.end(), name.begin(), ::tolower); // lower for case insensitive compare
 
-            if (!(name.find(m_nameFilter) != std::string::npos)) {
-                m_catalogDisplay->HideRow(i);
-                continue;
+            if (!m_nameFilter.empty()) {
+                if (!(name.find(m_nameFilter) != std::string::npos)) {
+                    m_catalogDisplay->HideRow(i);
+                    continue;
+                }
             }
             m_catalogDisplay->ShowRow(i);
             // Apply other filters...
