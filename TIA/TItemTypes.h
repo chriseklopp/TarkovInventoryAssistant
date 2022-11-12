@@ -183,12 +183,12 @@ namespace TItemSupport {
 
         DetectionResult(TItemTypes::TItem* catItem,
                         std::unique_ptr<TItemTypes::TItem> inItem,
-                        cv::Mat* parentImage,
-                        cv::Point itemLoc=cv::Point(-1, -1),
+                        int parentImageID,
+                        std::pair<cv::Point, cv::Point> itemLoc= std::make_pair(cv::Point(-1, -1), cv::Point(-1, -1)),
                         bool isDetectionError=false) :
 
             catalogItem(catItem),
-            parentImage(parentImage),
+            parentImageID(parentImageID),
             imageLoc(itemLoc),
             detectionError(isDetectionError)
 
@@ -202,8 +202,8 @@ namespace TItemSupport {
         TItemTypes::TItem* catalogItem;
         std::unique_ptr<TItemTypes::TItem> inputItem;
 
-        cv::Mat* parentImage; // Image from where the item was detected. ** Always check this pointer when accessing **
-        cv::Point imageLoc; // Point location in the parent iamge where item was detected. (top left corner).
+        int parentImageID; // ImageID from where the item was detected.
+        std::pair<cv::Point, cv::Point> imageLoc; // Point locations in the parent image where item was detected. (top left corner, bottom right corner).
 
         bool detectionError = false; // Mostly for testing and debug uses, signify that this detection was wrong.
     };

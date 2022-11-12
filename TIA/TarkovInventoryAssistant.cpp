@@ -38,7 +38,7 @@ TIAFrame::TIAFrame()
     // Make upper windows and their left / right splitter.
     wxSplitterWindow* upperSplitter = new wxSplitterWindow(upperLowerSplitter, wxID_ANY);
     upperSplitter->SetMinimumPaneSize(10);
-    upperSplitter->SetSashGravity(.5);
+    upperSplitter->SetSashGravity(1);
 
     m_displayPanel = new TUI::DisplayPanel(&m_core, upperSplitter,wxID_ANY, wxDefaultPosition,wxSize(200,100));
     m_outputPanel = new TUI::OutputPanel(&m_core, upperSplitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
@@ -88,11 +88,18 @@ TIAFrame::TIAFrame()
     Bind(wxEVT_MENU, &TIAFrame::OnSettings, this, ID_Settings);
 
 
-    // TODO: DEBUG REMOVE
-    std::unique_ptr<cv::Mat> matty = 
-        std::make_unique<cv::Mat>(cv::imread("C:\\pyworkspace\\tarkovinventoryproject\\Data\\screenshots\\raw2\\tucker2.png"));
-    m_core.addAndParseImage(std::move(matty));
-    m_outputPanel->populateOutputList();
+    // Register observer panels with TCore
+    m_core.registerTObserver(m_displayPanel);
+    m_core.registerTObserver(m_outputPanel);
+    m_core.registerTObserver(m_consolePanel);
+    m_core.registerTObserver(m_catalogPanel);
+
+
+    // Load initial catalog defined in the config.
+    m_core.loadCatalog();
+
+
+
 }
 
 

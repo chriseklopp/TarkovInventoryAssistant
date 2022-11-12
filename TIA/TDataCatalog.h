@@ -29,9 +29,7 @@ public:
         m_dimensionalTrees(std::unordered_map<std::pair<int,int>, TDataTypes::TVpTree, Hash::pair_hash>()),
         m_items(std::vector<std::unique_ptr<TItemTypes::TItem>>())
                     
-    {
-        loadCatalog(); // This may be temporary??
-    };
+    {};
 
     // Search catalog for item by name. !! This will return nullptr if it fails !!
 

@@ -23,6 +23,7 @@ add_executable (TarkovInventoryAssistant WIN32
 "TUIPanels.h"
 "TCore.h"
 "TConfig.h"
+"TEvents.h"
 
 "TarkovInventoryAssistant.cpp"
 "TDataTypes.cpp"
@@ -34,6 +35,7 @@ add_executable (TarkovInventoryAssistant WIN32
 "TUIPanels.cpp"
 "TCore.cpp"
 "TConfig.cpp"
+"TEvents.cpp"
 )
 
 
