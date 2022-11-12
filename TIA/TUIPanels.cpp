@@ -8,7 +8,7 @@ namespace TUI {
         const wxPoint& pos,
         const wxSize& size,
         long 	style,
-        const wxString& name) : m_coreptr(core), m_collapseSimilarItems(false), wxPanel(parent,
+        const wxString& name) : m_coreptr(core), m_collapseSimilarItems(false),m_showActiveOnly(true), wxPanel(parent,
             id,
             pos,
             size,
