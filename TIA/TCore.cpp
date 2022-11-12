@@ -47,6 +47,33 @@ void TCore::deleteImage(imageID id) {
 }
 
 
+int TCore::loadImage(std::filesystem::path imPath){
+    if (!imPath.is_absolute() || !std::filesystem::exists(imPath))
+        return -1;
+
+    std::unique_ptr<cv::Mat> image = std::make_unique<cv::Mat>(cv::imread(imPath.string()));
+    if (image->empty())
+        std::cout << "wtf??";
+    bool x = image->data == 0;
+    bool y = image->dims == 0;
+    bool z = image->total() == 0;
+
+
+    return addImage(std::move(image));
+}
+
+bool TCore::loadImagesInDir(std::filesystem::path imDir){
+    if (!imDir.is_absolute() || !std::filesystem::exists(imDir))
+        return false;
+
+    std::filesystem::directory_iterator itr = std::filesystem::directory_iterator(imDir);
+    for (itr; itr != std::filesystem::end(itr); ++itr) {
+        loadImage(*itr);
+    }
+    return true;
+}
+
+
 void TCore::activateImage(imageID id){
     if (m_activeImages.find(id) != m_activeImages.end())
         return;

@@ -51,6 +51,14 @@ public:
     // Delete a detection.
     void deleteDetection(TItemSupport::DetectionResult& det);
 
+    // Attempt to load the image at the given *ASBOLUTE* path.
+    // Returns the image's ID if successful.
+    int loadImage(std::filesystem::path imPath);
+
+    // Attempt to load all images in the given *ASBOLUTE* path.
+    // Returns the image's ID if successful.
+    bool loadImagesInDir(std::filesystem::path imDir);
+
     // Adds this image to our collection and parse any items on it into detection results.
     // returns the unique imageID associated with the image.
     // ** Notifies observers with TEventEnum::ImageAdded **
