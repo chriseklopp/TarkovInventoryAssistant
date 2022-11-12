@@ -123,6 +123,8 @@ void TImageReader::resolveContainerImage(const cv::Mat& image,
             std::vector<cv::Point> approx;
             cv::approxPolyDP(*cont, approx, .2 * peri, true);
 
+            if (approx.size() < 2)
+                continue;
             cv::Point lowerP = approx.at(0);
             cv::Point upperP = approx.at(1);
 
@@ -141,14 +143,16 @@ void TImageReader::resolveContainerImage(const cv::Mat& image,
 
 
             cv::Mat itemImage = image(cv::Range(lowerP.y, upperP.y), cv::Range(lowerP.x, upperP.x));
-            //cv::imshow("a", itemImage);
-            //cv::waitKey(0);
+            if (itemImage.empty())
+                continue;
+
             // We create a placeholder TItem with our image and its dimensions.
             retItems.push_back(TItemTypes::TItem::makePlaceHolder(itemImage, m_cellsize));
-            retLocs.push_back(std::make_pair(lowerP,upperP));
+            retLocs.push_back(std::make_pair(lowerP, upperP));
         }
 
     }
+
 
 }
 
