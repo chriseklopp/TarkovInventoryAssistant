@@ -168,18 +168,25 @@ void TCore::setDATA_DIR(std::string dir) { m_configManager.setDATA_DIR(dir); };
 
 void TCore::setACTIVECATALOG(std::string dir) {
     m_configManager.setACTIVECATALOG(dir);
-    m_dataCatalog.loadCatalog(m_config->getACTIVE_CATALOG());
-    
-    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::CatalogChanged, dir));
+    loadCatalog(dir);
 };
 
 void TCore::setRAW_CATALOGS_DIR(std::string dir){ m_configManager.setRAW_CATALOGS_DIR(dir); };
 
 void TCore::setCATALOGS_DIR(std::string dir) { m_configManager.setCATALOGS_DIR(dir); };
 
-void TCore::loadCatalog() {
-    m_dataCatalog.loadCatalog(m_config->getACTIVE_CATALOG());
-    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::CatalogChanged, m_config->getACTIVE_CATALOG().string()));
+void TCore::loadCatalog(std::string dir) {
+    if (dir.empty())
+        dir = m_config->getACTIVE_CATALOG().string();
+    bool success = m_dataCatalog.loadCatalog(m_config->getACTIVE_CATALOG());
+    if (success) {
+        // We need to remake all detections using the new catalog.
+        m_detectionResults.clear();
+        for (auto& itr : m_idImageMap) {
+            detectImageContent(itr.first);
+        }
+    }
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::CatalogChanged, dir, success));
 }
 
 // Return vector of activated image IDs.

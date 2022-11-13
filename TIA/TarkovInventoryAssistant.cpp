@@ -80,7 +80,7 @@ TIAFrame::TIAFrame()
     SetMenuBar(menuBar);
 
     CreateStatusBar();
-    SetStatusText("Welcome to wxWidgets!");
+    SetStatusText("Welcome to Tarkov Inventory Assistant!");
 
     Bind(wxEVT_MENU, &TIAFrame::OnHello, this, ID_Hello);
     Bind(wxEVT_MENU, &TIAFrame::OnAbout, this, wxID_ABOUT);
@@ -111,8 +111,8 @@ void TIAFrame::OnExit(wxCommandEvent& event)
 
 void TIAFrame::OnAbout(wxCommandEvent& event)
 {
-    wxMessageBox("This is a wxWidgets Hello World example",
-        "About Hello World", wxOK | wxICON_INFORMATION);
+    wxMessageBox("Documentation Coming Soon (TM)",
+        "Tarkov Inventory Assistant", wxOK | wxICON_INFORMATION);
 }
 
 void TIAFrame::OnHello(wxCommandEvent& event)

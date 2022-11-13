@@ -279,8 +279,7 @@ namespace TUI {
         // Pointer to the core object.
         TCore* m_coreptr;
 
-        // List that displays loaded images as a sidebar.
-        wxGrid* m_imageList;
+        wxTextCtrl* m_consoleOutput;
 
     };
 
