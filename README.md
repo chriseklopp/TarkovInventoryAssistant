@@ -1,6 +1,11 @@
 # TarkovInventoryAssistant
 Escape from Tarkov Inventory Assistant.
 
+
+
+
+![Alt text](/../../../chriseklopp/blob/main/TIA_screenshot2.PNG?raw=true "Title")
+
 Motivation:
 ------------------------------------------------------------------------------------------------------------------------
 Escape from Tarkov doesn't have a method of itemizing your hideout Stash (item storage). The only useful information the
