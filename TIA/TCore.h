@@ -94,8 +94,9 @@ public:
 
     void setCATALOGS_DIR(std::string dir);
 
-    // Loads the config specified by the config.
-    void loadCatalog();
+    // Loads the config specified.
+    // If empty, will attempt to load catalog specified by the config.
+    void loadCatalog(std::string dir="");
 
 
     // Save config settings to file.

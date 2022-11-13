@@ -28,6 +28,8 @@ namespace TUI {
                                           wxDefaultPosition, wxDefaultSize, 0);
         m_toggleActiveOnly = new wxCheckBox(m_toolbar, wxID_ANY, wxT("Show Active Only"),
                                             wxDefaultPosition, wxDefaultSize, 0);
+        m_toggleCollapse->SetValue(m_collapseSimilarItems);
+        m_toggleActiveOnly->SetValue(m_showActiveOnly);
 
         m_toolbar->AddControl(m_toggleCollapse);
         m_toolbar->AddControl(m_toggleActiveOnly);
@@ -56,7 +58,11 @@ namespace TUI {
         m_outputList->SetColSize(m_columnIndexMap.at("SourceImage"), m_imageMaxCols);
 
         m_outputList->SetColSize(m_columnIndexMap.at("Name"), 240);
-        //m_outputList->SetColSize(m_columnIndexMap.at("ParentID"), 0);
+        m_outputList->SetDefaultCellBackgroundColour(wxColor(20, 20, 20));
+        m_outputList->SetDefaultCellTextColour(wxColor(255, 255, 255));
+        m_outputList->SetDefaultCellFont(wxFont(10, wxFONTFAMILY_DEFAULT,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL));
+        m_outputList->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
+        m_outputList->SetGridLineColour(wxColour(73, 81, 84));
         m_outputList->EnableEditing(false);
 
         sizer->Add(m_outputList, 1, wxALL | wxEXPAND, 0);
@@ -234,7 +240,7 @@ namespace TUI {
        {"Name",   2},
        {"Dim", 3},
        {"SourceImage", 4},
-        {"ParentID", 5}
+        //{"ParentID", 5}
 
     };
 
@@ -288,7 +294,7 @@ namespace TUI {
         m_imageScrollList->DisableColResize(0);
         m_imageScrollList->DisableDragRowSize();
         m_imageScrollList->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
-        m_imageScrollList->SetDefaultCellBackgroundColour(wxColor(20, 19, 19));
+        m_imageScrollList->SetDefaultCellBackgroundColour(wxColor(20, 20, 20));
         m_imageScrollList->SetMargins(0, 2);
 
         m_imageScrollList->Bind(wxEVT_GRID_CELL_LEFT_CLICK, &DisplayPanel::OnImageSelect, this);
@@ -459,11 +465,49 @@ namespace TUI {
 
         this->SetBackgroundColour(wxColor(50, 50, 0));
 
+        auto sizer = new wxBoxSizer(wxVERTICAL);
+        m_consoleOutput = new wxTextCtrl(this, wxUSE_ANY,wxEmptyString,wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_MULTILINE);
 
+        m_consoleOutput->SetBackgroundColour(wxColour(20,20,20));
+        m_consoleOutput->SetForegroundColour(wxColour(255, 255, 255));
+        m_consoleOutput->SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+
+        sizer->Add(m_consoleOutput, 1, wxEXPAND);
+        m_consoleOutput->AppendText("------Tarkov Inventory Assistant-----\n");
+        this->SetSizerAndFit(sizer);
 
     };
 
     void ConsolePanel::TEventReceived(TEvent::TEvent e) {
+
+        switch (e.getType()) {
+
+            case TEvent::TEventEnum::ImageAdded:
+                m_consoleOutput->AppendText("Image Added: ID=" + e.getData() +
+                    " Detections=" + std::to_string(m_coreptr->getDetectionResults(std::stoi(e.getData()))->size()) + "\n");
+                break;
+
+            case TEvent::TEventEnum::ImageDeleted:
+                m_consoleOutput->AppendText("Image Deleted: ID=" + e.getData() + "\n");
+                break;
+            case TEvent::TEventEnum::ImageActivated:
+                break;
+            case TEvent::TEventEnum::ImageDeactivated:
+                break;
+            case TEvent::TEventEnum::AllImagesDeactivated:
+                break;
+
+            case TEvent::TEventEnum::ImagesCleared:
+                m_consoleOutput->AppendText("Cleared all Images \n");
+                break;
+            case TEvent::TEventEnum::CatalogChanged:
+                if (e.getStatus() == 1)
+                    m_consoleOutput->AppendText("Successfully Loaded Catalog: " + e.getData() + "\n");
+                else
+                    m_consoleOutput->AppendText("Failed to load catalog: " + e.getData() + "\n");
+                break;
+                
+        }
 
     }
 
@@ -495,7 +539,7 @@ namespace TUI {
 
         m_catalogDisplay = new wxGrid(this, wxUSE_ANY);
         m_catalogDisplay->CreateGrid(0, m_columnIndexMap.size());
-        // TODO: Use the column info struct (when i make it)
+
         m_catalogDisplay->HideRowLabels();
         m_catalogDisplay->SetColLabelValue(m_columnIndexMap.at("Name"), "Name");
         m_catalogDisplay->SetColLabelValue(m_columnIndexMap.at("Image"), "Image");
@@ -505,10 +549,16 @@ namespace TUI {
         m_catalogDisplay->SetColSize(m_columnIndexMap.at("Image"), m_imageMaxCols);
         m_catalogDisplay->SetColSize(m_columnIndexMap.at("Name"), 240);
         m_catalogDisplay->EnableEditing(false);
-        //m_catalogDisplay->AutoSize();
-        //m_catalogDisplay->SetColMinimalWidth(m_columnIndexMap.at("Name"), 160);
+
+
+        m_catalogDisplay->SetDefaultCellBackgroundColour(wxColor(20, 20, 20));
+        m_catalogDisplay->SetDefaultCellTextColour(wxColor(255, 255, 255));
+        m_catalogDisplay->SetDefaultCellFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+        m_catalogDisplay->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
+        m_catalogDisplay->SetGridLineColour(wxColour(73, 81, 84));
+
         sizer->Add(m_catalogDisplay, 1, wxALL | wxEXPAND, 0);
-        //sizer->Add(m_catalogDisplay, 4, wxALL | wxEXPAND, 0);
+
 
 
         this->SetSizerAndFit(sizer);

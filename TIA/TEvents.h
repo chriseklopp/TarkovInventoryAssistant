@@ -17,15 +17,20 @@ namespace TEvent {
 
     public:
 
-        TEvent(TEventEnum evtType, std::string data) : eventType(evtType), m_data(data) {};
+        TEvent(TEventEnum evtType, std::string data, int status=1) : 
+            eventType(evtType),
+            m_data(data),
+            m_status(status){};
 
 
         TEventEnum getType() {return eventType;}
         std::string getData() { return m_data; }
+        int getStatus() { return m_status; }
     private:
 
         TEventEnum eventType;
         std::string m_data;
+        int m_status;
     };
 
 
