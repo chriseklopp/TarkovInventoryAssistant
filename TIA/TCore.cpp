@@ -53,7 +53,7 @@ int TCore::loadImage(std::filesystem::path imPath){
 
     std::unique_ptr<cv::Mat> image = std::make_unique<cv::Mat>(cv::imread(imPath.string()));
     if (image->empty())
-        std::cout << "wtf??";
+        return -1;
     bool x = image->data == 0;
     bool y = image->dims == 0;
     bool z = image->total() == 0;
