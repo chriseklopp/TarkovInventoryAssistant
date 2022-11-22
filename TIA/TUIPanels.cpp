@@ -422,6 +422,7 @@ namespace TUI {
             m_previousImageSelect = m_coreptr->getConfigPtr()->getDATA_DIR();
 
         wxFileDialog imageSelect = new wxFileDialog(this, wxT("Select an image"));
+        imageSelect.SetWildcard("(*.bmp; *.png;*.jpg)");
         imageSelect.SetPath(m_previousImageSelect.string());
 
         if (imageSelect.ShowModal() == wxID_CANCEL)
