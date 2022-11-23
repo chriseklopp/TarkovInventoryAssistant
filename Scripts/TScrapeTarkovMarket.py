@@ -113,11 +113,11 @@ class MarketScraper:
     @staticmethod
     def extractPriceInfo(cellTag, outList):
 
-        price = cellTag.find("span", class_="price-main").text.replace('"', "")
+        price = cellTag.find("span", class_="price-main").text.replace('"', "").replace(",", "'")
         pps = ""
         pricePerSlot = cellTag.find("span", class_="price-sec")
         if pricePerSlot:
-            pps = pricePerSlot.text.replace("\n", "").replace(" ", "").replace('"', "")
+            pps = pricePerSlot.text.replace("\n", "").replace(" ", "").replace('"', "").replace(",", "'")
 
         outList.append(price)
         outList.append(pps)
@@ -125,11 +125,11 @@ class MarketScraper:
     @staticmethod
     def extractSellToTraderInfo(cellTag, outList):
         cells = cellTag.findChild("div").findChildren("div")
-        outList.append(cells[0].text.replace('"', ""))
+        outList.append(cells[0].text.replace('"', "").replace(",", "'"))
         if len(cells) == 1:
             return
 
-        outList.append(cells[1].text.replace('"', ""))
+        outList.append(cells[1].text.replace('"', "").replace(",", "'"))
         return
 
 
