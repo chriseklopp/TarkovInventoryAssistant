@@ -17,37 +17,37 @@ import os
 import shutil
 import time
 from PIL import Image
-
+from TScrapeTarkovMarket import MarketScraper
 
 class TWebScraper:
-    def __init__(self, item=True, price=True):
-        if item and price:
-            # self.supplemental_item_information_gatherer("https://escapefromtarkov.fandom.com/wiki/Folder_with_intelligence")
-            tarkov_wiki_urls = ["https://escapefromtarkov.fandom.com/wiki/Weapon_mods",
-                                "https://escapefromtarkov.fandom.com/wiki/Chest_rigs",
-                                "https://escapefromtarkov.fandom.com/wiki/Provisions",
-                                "https://escapefromtarkov.fandom.com/wiki/Loot",
-                                "https://escapefromtarkov.fandom.com/wiki/Weapons",
-                                "https://escapefromtarkov.fandom.com/wiki/Keys_%26_Intel",
-                                "https://escapefromtarkov.fandom.com/wiki/Containers",
-                                "https://escapefromtarkov.fandom.com/wiki/Armor_vests",
-                                "https://escapefromtarkov.fandom.com/wiki/Backpacks",
-                                "https://escapefromtarkov.fandom.com/wiki/Headwear",
-                                "https://escapefromtarkov.fandom.com/wiki/Eyewear",
-                                "https://escapefromtarkov.fandom.com/wiki/Gear_components",
-                                "https://escapefromtarkov.fandom.com/wiki/Armbands",
-                                "https://escapefromtarkov.fandom.com/wiki/Face_cover",
-                                "https://escapefromtarkov.fandom.com/wiki/Medical"
-                                #"https://escapefromtarkov.fandom.com/wiki/Ammunition" TODO: need spec handling for this
-                                ]
+    def __init__(self, prices):
+        # self.supplemental_item_information_gatherer("https://escapefromtarkov.fandom.com/wiki/Folder_with_intelligence")
+        tarkov_wiki_urls = ["https://escapefromtarkov.fandom.com/wiki/Weapon_mods",
+                            "https://escapefromtarkov.fandom.com/wiki/Chest_rigs",
+                            "https://escapefromtarkov.fandom.com/wiki/Provisions",
+                            "https://escapefromtarkov.fandom.com/wiki/Loot",
+                            "https://escapefromtarkov.fandom.com/wiki/Weapons",
+                            "https://escapefromtarkov.fandom.com/wiki/Keys_%26_Intel",
+                            "https://escapefromtarkov.fandom.com/wiki/Containers",
+                            "https://escapefromtarkov.fandom.com/wiki/Armor_vests",
+                            "https://escapefromtarkov.fandom.com/wiki/Backpacks",
+                            "https://escapefromtarkov.fandom.com/wiki/Headwear",
+                            "https://escapefromtarkov.fandom.com/wiki/Eyewear",
+                            "https://escapefromtarkov.fandom.com/wiki/Gear_components",
+                            "https://escapefromtarkov.fandom.com/wiki/Armbands",
+                            "https://escapefromtarkov.fandom.com/wiki/Face_cover",
+                            "https://escapefromtarkov.fandom.com/wiki/Medical"
+                            #"https://escapefromtarkov.fandom.com/wiki/Ammunition" TODO: need spec handling for this
+                            ]
 
-            self.directory_builder(tarkov_wiki_urls)
-            start = time.time()  # debug
-            for url in tarkov_wiki_urls:
-                self.catalog_builder(url)
-            end = time.time()  # debug
-            print("All Downloads Complete")
-            print(f"Total Time:{end-start}")  # debug
+        self.priceTable = prices
+        self.directory_builder(tarkov_wiki_urls)
+        start = time.time()  # debug
+        for url in tarkov_wiki_urls:
+            self.catalog_builder(url)
+        end = time.time()  # debug
+        print("All Downloads Complete")
+        print(f"Total Time:{end-start}")  # debug
 
     def catalog_builder(self, url: str):
         """
@@ -84,6 +84,13 @@ class TWebScraper:
             if error:
                 continue
             table_df = table_df[desired]
+
+            # Merge table with price table
+            table_df = pd.merge(table_df, self.priceTable, "left", "Name")
+            print()
+
+
+
 
             table_df.to_csv(f"{page_name}{table_num}.csv", index=False)
         os.chdir(ogwd)  # return working directory to original.
@@ -466,4 +473,6 @@ class TWebScraper:
 
 
 if __name__ == "__main__":  # run this to update the catalog from the wiki.
-    TWebScraper()
+    ms = MarketScraper()
+    priceTable = ms.run() # get price data
+    TWebScraper(priceTable)
