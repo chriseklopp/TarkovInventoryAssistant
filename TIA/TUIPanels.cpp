@@ -3,6 +3,28 @@
 
 
 namespace TUI {
+
+
+    // Catalog display column ordering
+    const std::map<std::string, int> CatalogPanel::m_columnIndexMap = {
+   {"Image",  0},
+   {"Name", 1},
+   {"Dim",   2},
+   {"FleaPrice", 3},
+   {"TraderPrice", 4}
+    };
+
+    // Output display column ordering
+    const std::map<std::string, int> OutputPanel::m_columnIndexMap = {
+   {"CatalogImage",  0},
+   {"Count", 1},
+   {"Name",   2},
+   {"Dim", 3},
+   {"SourceImage", 4},
+   {"FleaPrice", 5},
+   {"TraderPrice", 6}
+    };
+
     OutputPanel::OutputPanel(TCore* core, wxWindow* parent,
         wxWindowID 	id,
         const wxPoint& pos,
@@ -182,6 +204,19 @@ namespace TUI {
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), countString);
 
 
+        // Add price info
+        wxString fleaString = wxString::FromUTF8(det->catalogItem->getPrice());
+        if (!det->catalogItem->getPricePerSlot().empty())
+            fleaString += "\n" + wxString::FromUTF8(det->catalogItem->getPricePerSlot());
+
+        wxString traderString = wxString::FromUTF8(det->catalogItem->getTraderSellPrice()) + "\n" + det->catalogItem->getTrader();
+
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
+
+
+
+
         // Add source image
         cv::Mat fmtSourceImage = formatImage(item->getImage(), m_imageMaxRows, m_imageMaxCols);
         m_outputList->SetCellRenderer(row, m_columnIndexMap.at("SourceImage"),
@@ -204,6 +239,17 @@ namespace TUI {
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), itm->getName());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), itm->getDimAsString());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), countString);
+
+
+        // Add price info
+        wxString fleaString = wxString::FromUTF8(itm->getPrice());
+        if (!itm->getPricePerSlot().empty())
+            fleaString += "\n" + wxString::FromUTF8(itm->getPricePerSlot());
+
+        wxString traderString = wxString::FromUTF8(itm->getTraderSellPrice()) + "\n" + itm->getTrader();
+
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
 
 
         // Add catalog image
@@ -234,15 +280,7 @@ namespace TUI {
 
 
 
-    const std::map<std::string, int> OutputPanel::m_columnIndexMap = {
-       {"CatalogImage",  0},
-       {"Count", 1},
-       {"Name",   2},
-       {"Dim", 3},
-       {"SourceImage", 4},
-        //{"ParentID", 5}
 
-    };
 
     DisplayPanel::DisplayPanel(TCore* core, wxWindow* parent,
         wxWindowID 	id,
@@ -542,9 +580,12 @@ namespace TUI {
         m_catalogDisplay->CreateGrid(0, m_columnIndexMap.size());
 
         m_catalogDisplay->HideRowLabels();
-        m_catalogDisplay->SetColLabelValue(m_columnIndexMap.at("Name"), "Name");
-        m_catalogDisplay->SetColLabelValue(m_columnIndexMap.at("Image"), "Image");
-        m_catalogDisplay->SetColLabelValue(m_columnIndexMap.at("Dim"), "Dim");
+
+
+        for (auto& c : m_columnIndexMap) {
+            m_catalogDisplay->SetColLabelValue(c.second, c.first);
+        }
+
         m_catalogDisplay->SetColLabelSize(20);
         m_catalogDisplay->SetDefaultRowSize(m_imageMaxRows);
         m_catalogDisplay->SetColSize(m_columnIndexMap.at("Image"), m_imageMaxCols);
@@ -581,11 +622,6 @@ namespace TUI {
 
     };
 
-    const std::map<std::string, int> CatalogPanel::m_columnIndexMap = {
-       {"Image",  0},
-       {"Name", 1},
-       {"Dim",   2},
-    };
 
 
     void CatalogPanel::addItemToCatalogDisplay(TItemTypes::TItem* item, int row) {
@@ -593,6 +629,17 @@ namespace TUI {
             return;
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Name"), item->getName());
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Dim"), item->getDimAsString());
+
+
+        wxString fleaString = wxString::FromUTF8(item->getPrice());
+        if (!item->getPricePerSlot().empty())
+            fleaString += "\n" + wxString::FromUTF8(item->getPricePerSlot());
+
+        wxString traderString = wxString::FromUTF8(item->getTraderSellPrice()) + "\n" + item->getTrader();
+
+        m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
+        m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
+
 
         cv::Mat fmtImage = formatImage(item->getImage(),m_imageMaxRows,m_imageMaxCols);
         m_catalogDisplay->SetCellRenderer(row, m_columnIndexMap.at("Image"),
