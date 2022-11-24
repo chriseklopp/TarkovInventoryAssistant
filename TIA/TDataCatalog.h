@@ -40,11 +40,11 @@ public:
     const std::vector<std::unique_ptr<TItemTypes::TItem>>& getItemList() { return m_items; };
 
 
-    /* This function will compile the raw information from Data/catalog and build the neccessary tree structures
+    /* This function will compile the raw information from Data/catalog
      * This information will be saved to Data/CompiledCatalog
      * This should ONLY be used when a compiled catalog isnt present or when the raw catalog has been updated.
      */
-    bool compileCatalogFromRaw(std::string rawpath ="", bool makeRotatedItems=false);
+    bool compileCatalogFromRaw(std::filesystem::path rawpath ="", bool makeRotatedItems=false);
 
 
     // This function compares an item to the catalog and populates a reference to the item that best matches it.
@@ -61,12 +61,6 @@ public:
 
 
 
-    // Todo: Move to private.
-    // Load raw catalog from Data/catalog. Raw catalog data used to make compiled catalog.
-    // Only use when using a new catalog.
-    bool loadRawCatalog(std::vector<std::filesystem::path>& outMods);
-
-    bool loadRawCatalog(std::filesystem::path& catalog, std::vector<std::filesystem::path>& outMods);
 
     // Clears all catalog data from this object.
     void clearCatalog();
@@ -89,6 +83,14 @@ private:
     void writeFileToCompiledCatalog(const std::filesystem::path& file, std::ofstream& out, bool makeRotations);
 
     void addItemToDimMap(TItemTypes::TItem* item);
+
+
+    // Load raw catalog from Data/catalog. Raw catalog data used to make compiled catalog.
+    // Only use when using a new catalog.
+    bool loadRawCatalog(std::vector<std::filesystem::path>& outMods);
+
+    bool loadRawCatalog(std::filesystem::path& catalog, std::vector<std::filesystem::path>& outMods);
+
 
 
     // Map of L-W dimensions to respective VPTrees.
