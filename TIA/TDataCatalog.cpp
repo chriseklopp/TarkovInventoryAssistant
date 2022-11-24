@@ -1,5 +1,5 @@
 #include "TDataCatalog.h"
-
+#include <locale>
 
 TItemTypes::TItem* TDataCatalog::getItem(std::string& name) {
 
@@ -13,7 +13,7 @@ TItemTypes::TItem* TDataCatalog::getItem(std::string& name) {
 };
 
 
-bool TDataCatalog::compileCatalogFromRaw(std::string rawpath, bool makeRotatedItems) {
+bool TDataCatalog::compileCatalogFromRaw(std::filesystem::path rawpath, bool makeRotatedItems) {
     if (!m_configptr)
         return false;
     // Compiled Catalog will contain a CSV and folder of all images.
@@ -22,7 +22,7 @@ bool TDataCatalog::compileCatalogFromRaw(std::string rawpath, bool makeRotatedIt
     if (rawpath.empty())
         success = loadRawCatalog(modules);
     else
-        success = loadRawCatalog(std::filesystem::path(rawpath), modules);
+        success = loadRawCatalog(rawpath, modules);
     if (!success)
         return false;
 
@@ -63,9 +63,9 @@ void TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
     bool makeRotations) {
 
     // The defined ordering of read and write to compiled catalog string shall be:
-    // Name, path, dims, containerDims, rotation, hash
+    // Name, path, dims, containerDims, avgPrice, PPS, traderPrice, bestTrader, rotation, hash
     // The file format shall be CSV with - delimiting between array values.
-    // EX: Dog,Dog.img,4-5,2-2,0,23-43-677-234-893
+    // EX: Dog,Dog.img,4-5,2-2, $10, $5, $2, prapor, 0,23-43-677-234-893
     std::ifstream in;
     in.open(file);
 
@@ -128,9 +128,9 @@ void TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
 
 std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(const std::string& instring) {
     // The defined ordering of read and write to compiled catalog string shall be:
-    // Name, path, dims, containerDims, rotation, hash
+    // Name, path, dims, containerDims, avgPrice, PPS, traderPrice, bestTrader, rotation, hash
     // The file format shall be CSV with - delimiting between array values.
-    // EX: Dog,Dog.img,4-5,2-2,0,23-43-677-234-893
+    // EX: Dog,Dog.img,4-5,2-2, $10, $5, $2, prapor, 0,23-43-677-234-893
 
     std::vector<std::string> fields;
     TDataTypes::splitString(instring, ',', fields);
@@ -140,8 +140,14 @@ std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
     std::filesystem::path imagePath;
     std::pair<int, int> dims;
     std::pair<int, int> contDims;
+
+    TItemSupport::PriceInfo priceData;
+
+
+
     bool rotation;
     cv::Mat hashVals;
+
 
     try {
         std::vector<int> temp;
@@ -163,16 +169,32 @@ std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
         contDims.second = temp.at(1);
         temp.clear();
 
+        // Price info
+        std::string avgPrice = fields.at(4);
+        std::replace(avgPrice.begin(), avgPrice.end(), '\'', ','); // Replace apostrophes with commas in prices.
+
+        std::string pricePerSlot = fields.at(5);
+        std::replace(pricePerSlot.begin(), pricePerSlot.end(), '\'', ',');
+
+        std::string traderPrice = fields.at(6);
+        std::replace(traderPrice.begin(), traderPrice.end(), '\'', ',');
+
+        std::string bestTrader = fields.at(7);
+        std::replace(bestTrader.begin(), bestTrader.end(), '\'', ',');
+
+        priceData = TItemSupport::PriceInfo(avgPrice, pricePerSlot, traderPrice, bestTrader);
+
+
         //Rotation
-        if (fields.at(4) == "1")
+        if (fields.at(8) == "1")
             rotation = true;
-        else if (fields.at(4) == "0")
+        else if (fields.at(8) == "0")
             rotation = false;
         else
             throw std::invalid_argument("Invalid rotation");
 
         //Hash
-        TDataTypes::splitString(fields.at(5), '-', temp);
+        TDataTypes::splitString(fields.at(9), '-', temp);
         hashVals = cv::Mat(temp).t();
         hashVals.convertTo(hashVals, CV_8U);
 
@@ -195,6 +217,7 @@ std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
             imagePath,
             dims,
             contDims,
+            priceData,
             rotation,
             hashVals));
 
@@ -203,6 +226,7 @@ std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
         name,
         imagePath,
         dims,
+        priceData,
         rotation,
         hashVals));
 };
@@ -301,6 +325,7 @@ bool TDataCatalog::loadCatalog(const std::filesystem::path& catalog) {
     // At this point we are probably good to clear the previous catalog.
     clearCatalog();
     m_catalogPath = catalog;
+
 
     std::string line;
     // Skip header. (For now; maybe I'll utilize this in future to make it more robust).

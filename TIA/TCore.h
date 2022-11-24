@@ -46,8 +46,6 @@ public:
     TConfig::TConfig* getConfigPtr() { return m_config; };
 
 
-
-
     // Delete a detection.
     void deleteDetection(TItemSupport::DetectionResult& det);
 
@@ -98,6 +96,8 @@ public:
     // If empty, will attempt to load catalog specified by the config.
     void loadCatalog(std::string dir="");
 
+    // Create a compiled catalog from a raw catalog.
+    void compileRawCatalog(std::filesystem::path& path);
 
     // Save config settings to file.
     void saveConfig();

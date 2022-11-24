@@ -4,6 +4,53 @@
 
 namespace TItemTypes {
 
+
+
+
+    // Probably dont use this..
+    TItem::TItem() :
+        m_name("None"),
+        m_image(cv::Mat()),
+        m_dim(std::make_pair(0, 0)),
+        m_isRotated(false),
+        isPlaceHolder(true),
+        m_imageHash(Hash::PhashImage(cv::Mat()))
+    {};
+
+    // Construct a fully-fledged TItem. This should be the most common way to construct a TItem.
+    TItem::TItem(std::string& name, cv::Mat& image, std::pair<int, int>& dim, bool rotated, bool placeholder) :
+        m_name(name),
+        m_image(image),
+        m_dim(dim),
+        m_isRotated(rotated),
+        isPlaceHolder(placeholder),
+        m_imageHash(Hash::PhashImage(image))
+    {};
+
+    // Construct a fully-fledged TItem, using an image from a path.
+    TItem::TItem(std::string& name, std::filesystem::path& imagePath, std::pair<int, int>& dim, bool rotated, bool placeholder) :
+        m_name(name),
+        m_image(cv::imread(imagePath.string())),
+        m_dim(dim),
+        m_isRotated(rotated),
+        isPlaceHolder(placeholder),
+        m_imageHash(Hash::PhashImage(m_image))
+    {};
+
+    // Construct a fully-fledged TItem, using an image from a path and a premade hash. Mostly used for loading catalog items.
+    TItem::TItem(std::string& name, std::filesystem::path& imagePath, std::pair<int, int>& dim, TItemSupport::PriceInfo& priceInfo, bool rotated, cv::Mat& hash, bool placeholder) :
+        m_name(name),
+        m_image(cv::imread(imagePath.string())),
+        m_dim(dim),
+        m_priceInfo(priceInfo),
+        m_isRotated(rotated),
+        isPlaceHolder(placeholder),
+        m_imageHash(hash)
+    {};
+
+
+
+
     std::unique_ptr<TItem> TItem::makePlaceHolder(cv::Mat& image, double cellSize) {
         int width = round(image.cols / cellSize);
         int height = round(image.rows / cellSize);
@@ -16,6 +63,28 @@ namespace TItemTypes {
         to.isPlaceHolder = false;
         // TODO: Needs to cast "to" to derived class if "from" is a derived class type.
     };
+
+
+    const std::string TItem::getPrice() const {
+        return m_priceInfo.price;
+    }
+
+    //Returns average flea price per slot for item
+    const std::string TItem::getPricePerSlot() const {
+        return m_priceInfo.pricePerSlot;
+    }
+
+    // Get best trader sell price
+    const std::string TItem::getTraderSellPrice() const {
+        return m_priceInfo.traderPrice;
+    }
+
+    // Get name of best trader to sell to.
+    const std::string TItem::getTrader() const {
+        return m_priceInfo.trader;
+    }
+
+
 
 
     bool TContainerItem::insert(TItem item, cv::Point location)

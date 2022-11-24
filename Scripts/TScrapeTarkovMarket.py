@@ -108,7 +108,7 @@ class MarketScraper:
 
     @staticmethod
     def extractName(cellTag, outList):
-        outList.append(cellTag.find("span", class_="name").text.replace(" ", "_"))
+        outList.append(cellTag.find("span", class_="name").text.replace(" ", "_").replace('"', "").replace(",", ""))
 
     @staticmethod
     def extractPriceInfo(cellTag, outList):

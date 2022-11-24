@@ -4,6 +4,36 @@
 #include "TDataTypes.h"
 #include <opencv2/opencv.hpp>
 #include <filesystem>
+
+
+// Contains supporting objects for TItemTypes; using a separate namespace to preserve the
+// original meaning of the TItemTypes space
+namespace TItemSupport {
+    
+    struct PriceInfo {
+
+        PriceInfo() {};
+
+        PriceInfo(std::string price,
+            std::string pricePerSlot,
+            std::string traderPrice,
+            std::string trader
+        ) :
+
+            price(price),
+            pricePerSlot(pricePerSlot),
+            traderPrice(traderPrice),
+            trader(trader) {}
+
+
+        std::string price;
+        std::string pricePerSlot;
+        std::string traderPrice;
+        std::string trader;
+
+    };
+}
+
 namespace TItemTypes {
 
 
@@ -13,44 +43,16 @@ namespace TItemTypes {
     public:
 
         // Probably dont use this..
-        TItem() :
-            m_name("None"),
-            m_image(cv::Mat()),
-            m_dim(std::make_pair(0, 0)),
-            m_isRotated(false),
-            isPlaceHolder(true),
-            m_imageHash(Hash::PhashImage(cv::Mat()))
-        {};
+        TItem();
 
         // Construct a fully-fledged TItem. This should be the most common way to construct a TItem.
-        TItem(std::string& name, cv::Mat& image, std::pair<int, int>& dim, bool rotated, bool placeholder = false):
-            m_name(name),
-            m_image(image),
-            m_dim(dim),
-            m_isRotated(rotated),
-            isPlaceHolder(placeholder),
-            m_imageHash(Hash::PhashImage(image))
-        {};
+        TItem(std::string& name, cv::Mat& image, std::pair<int, int>& dim, bool rotated, bool placeholder = false);
 
         // Construct a fully-fledged TItem, using an image from a path.
-        TItem(std::string& name, std::filesystem::path& imagePath, std::pair<int, int>& dim, bool rotated, bool placeholder = false) :
-            m_name(name),
-            m_image(cv::imread(imagePath.string())),
-            m_dim(dim),
-            m_isRotated(rotated),
-            isPlaceHolder(placeholder),
-            m_imageHash(Hash::PhashImage(m_image))
-        {};
+        TItem(std::string& name, std::filesystem::path& imagePath, std::pair<int, int>& dim, bool rotated, bool placeholder = false);
 
-        // Construct a fully-fledged TItem, using an image from a path and a premade hash.
-        TItem(std::string& name, std::filesystem::path& imagePath, std::pair<int, int>& dim, bool rotated, cv::Mat& hash, bool placeholder = false) :
-            m_name(name),
-            m_image(cv::imread(imagePath.string())),
-            m_dim(dim),
-            m_isRotated(rotated),
-            isPlaceHolder(placeholder),
-            m_imageHash(hash)
-        {};
+        // Construct a fully-fledged TItem, using an image from a path and a premade hash. Mostly used for loading catalog items.
+        TItem(std::string& name, std::filesystem::path& imagePath, std::pair<int, int>& dim, TItemSupport::PriceInfo& priceInfo, bool rotated, cv::Mat& hash, bool placeholder = false);
 
 
         virtual ~TItem() {};
@@ -78,6 +80,20 @@ namespace TItemTypes {
         const std::pair<int, int> getDim() const { return m_dim; };
         const std::string getDimAsString(char dlm = 'x') const { return std::to_string(m_dim.first) + dlm + std::to_string(m_dim.second); };
 
+        // Price info
+        // Returns average flea price for item
+        const std::string getPrice() const;
+
+        //Returns average flea price per slot for item
+        const std::string getPricePerSlot() const;
+
+        // Get best trader sell price
+        const std::string getTraderSellPrice() const;
+
+        // Get name of best trader to sell to.
+        const std::string getTrader() const;
+
+
         cv::Mat m_imageHash; // TODO: change this to proper type.
         std::string m_name;
         std::pair<int, int> m_dim; // (Width, Height)
@@ -89,6 +105,7 @@ namespace TItemTypes {
         cv::Mat m_image;
         bool m_isRotated;
         bool isPlaceHolder;
+        TItemSupport::PriceInfo m_priceInfo;
 
     private:
 
@@ -127,11 +144,12 @@ namespace TItemTypes {
             std::filesystem::path& imagePath,
             std::pair<int, int>& dim,
             std::pair<int, int>& containerDim,
+            TItemSupport::PriceInfo& priceInfo,
             bool rotated,
             cv::Mat& hash,
             bool placeholder = false) :
 
-            TItem(name, imagePath, dim, rotated, hash),
+            TItem(name, imagePath, dim, priceInfo, rotated, hash),
             m_spaceFilled(0),
             m_capacity(containerDim.first* containerDim.second),
             m_containerDim(containerDim)
@@ -197,8 +215,6 @@ namespace TItemSupport {
         };
 
 
-
-
         const TItemTypes::TItem* catalogItem;
         std::unique_ptr<TItemTypes::TItem> inputItem;
 
@@ -207,6 +223,8 @@ namespace TItemSupport {
 
         bool detectionError = false; // Mostly for testing and debug uses, signify that this detection was wrong.
     };
+
+
 
 
 }

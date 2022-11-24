@@ -189,6 +189,12 @@ void TCore::loadCatalog(std::string dir) {
     notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::CatalogChanged, dir, success));
 }
 
+
+void TCore::compileRawCatalog(std::filesystem::path& path) {
+    m_dataCatalog.compileCatalogFromRaw(path, false);
+}
+
+
 // Return vector of activated image IDs.
 const std::vector<imageID> TCore::getActivatedIDs() {
     std::vector<imageID> ret;
