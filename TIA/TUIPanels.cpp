@@ -205,11 +205,11 @@ namespace TUI {
 
 
         // Add price info
-        wxString fleaString = wxString::FromUTF8(det->catalogItem->getPrice());
-        if (!det->catalogItem->getPricePerSlot().empty())
-            fleaString += "\n" + wxString::FromUTF8(det->catalogItem->getPricePerSlot());
+        wxString fleaString = wxString::FromUTF8(det->catalogItem->getPrice().getCurrencyString());
+        if (!det->catalogItem->getPricePerSlot().getCurrencyString().empty())
+            fleaString += "\n" + wxString::FromUTF8(det->catalogItem->getPricePerSlot().getCurrencyString());
 
-        wxString traderString = wxString::FromUTF8(det->catalogItem->getTraderSellPrice()) + "\n" + det->catalogItem->getTrader();
+        wxString traderString = wxString::FromUTF8(det->catalogItem->getTraderSellPrice().getCurrencyString()) + "\n" + det->catalogItem->getTrader();
 
         m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
         m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
@@ -242,11 +242,12 @@ namespace TUI {
 
 
         // Add price info
-        wxString fleaString = wxString::FromUTF8(itm->getPrice());
-        if (!itm->getPricePerSlot().empty())
-            fleaString += "\n" + wxString::FromUTF8(itm->getPricePerSlot());
+        wxString fleaString = wxString::FromUTF8(itm->getPrice().multiplyBy(count));
 
-        wxString traderString = wxString::FromUTF8(itm->getTraderSellPrice()) + "\n" + itm->getTrader();
+        if (!itm->getPricePerSlot().getCurrencyString().empty())
+            fleaString += "\n" + wxString::FromUTF8(itm->getPricePerSlot().multiplyBy(count));
+
+        wxString traderString = wxString::FromUTF8(itm->getTraderSellPrice().multiplyBy(count)) + "\n" + itm->getTrader();
 
         m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
         m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
@@ -630,12 +631,11 @@ namespace TUI {
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Name"), item->getName());
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Dim"), item->getDimAsString());
 
+        wxString fleaString = wxString::FromUTF8(item->getPrice().getCurrencyString());
+        if (!item->getPricePerSlot().getCurrencyString().empty())
+            fleaString += "\n" + wxString::FromUTF8(item->getPricePerSlot().getCurrencyString());
 
-        wxString fleaString = wxString::FromUTF8(item->getPrice());
-        if (!item->getPricePerSlot().empty())
-            fleaString += "\n" + wxString::FromUTF8(item->getPricePerSlot());
-
-        wxString traderString = wxString::FromUTF8(item->getTraderSellPrice()) + "\n" + item->getTrader();
+        wxString traderString = wxString::FromUTF8(item->getTraderSellPrice().getCurrencyString()) + "\n" + item->getTrader();
 
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
