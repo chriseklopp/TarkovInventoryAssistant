@@ -50,6 +50,31 @@ namespace TDataTypes
         return out;
     };
 
+    std::string prettifyToString(int val) {
+        std::string stringVal = std::to_string(val);
+        std::string ret(stringVal.size() + int(stringVal.size() / 3), ' ');
+
+        int count = 0;
+        int retItr = ret.size() - 1;
+        int i = stringVal.size() - 1;
+        while(i >= 0) {
+
+            if (count < 3) {
+                ret[retItr] = stringVal[i];
+                count++;
+                i--;
+            }
+
+            else{
+                ret[retItr] = ',';
+                count = 0;
+            }
+
+             retItr--;
+        }
+        return ret;
+    }
+
     TPixelCoordinate::TPixelCoordinate()
     {
         // Default constructor

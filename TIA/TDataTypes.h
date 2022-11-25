@@ -22,6 +22,9 @@ namespace TDataTypes
     // Join vector to std::string on character delimiter.
     std::string joinVector(std::vector<int>& in, char del);
 
+    // Converts integer to string and adds commas where necessary.
+    std::string prettifyToString(int val);
+
     /*
     * TPixelCoordinate
     *This class is intended to hold pixel coordinates for CV operations.
