@@ -10,6 +10,30 @@
 // original meaning of the TItemTypes space
 namespace TItemSupport {
     
+    class TCurrency {
+
+    public:
+        TCurrency() {};
+        TCurrency(const std::string& currString);
+        ~TCurrency() {};
+
+        int getValue() const;
+        std::string getCurrencyString() const;
+        std::string getUnit() const;
+        bool isPrependedUnit() const;
+
+        // Multiply value by the given int and return a string result.
+        // Prettify will format the number to add commas where appropriate
+        std::string multiplyBy(int num, bool prettify=true) const;
+
+    private:
+        uint m_value;
+        std::string m_unit;
+        std::string m_rawString; 
+        bool m_isPrependedUnit;
+    };
+
+
     struct PriceInfo {
 
         PriceInfo() {};
@@ -26,12 +50,15 @@ namespace TItemSupport {
             trader(trader) {}
 
 
-        std::string price;
-        std::string pricePerSlot;
-        std::string traderPrice;
+        TCurrency price;
+        TCurrency pricePerSlot;
+        TCurrency traderPrice;
         std::string trader;
 
+
     };
+
+
 }
 
 namespace TItemTypes {
@@ -82,13 +109,13 @@ namespace TItemTypes {
 
         // Price info
         // Returns average flea price for item
-        const std::string getPrice() const;
+        const TItemSupport::TCurrency getPrice() const;
 
         //Returns average flea price per slot for item
-        const std::string getPricePerSlot() const;
+        const TItemSupport::TCurrency getPricePerSlot() const;
 
         // Get best trader sell price
-        const std::string getTraderSellPrice() const;
+        const TItemSupport::TCurrency getTraderSellPrice() const;
 
         // Get name of best trader to sell to.
         const std::string getTrader() const;
