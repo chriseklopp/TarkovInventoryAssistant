@@ -32,7 +32,8 @@ namespace TDataCatalog {
         TDataCatalog(TConfig::TConfig* config) :
             m_configptr(config),
             m_dimensionalTrees(),
-            m_items()
+            m_items(),
+            m_idCounter(0)
 
         {};
 
