@@ -155,7 +155,8 @@ namespace TUI {
         void addToTotalCurrency(const TItemSupport::DetectionResult& det);
         void removeFromTotalCurrency(const TItemSupport::DetectionResult& det);
 
-
+        // Swap the values of two rows in the outputList
+        void swapListRows(int rowA, int rowB);
 
         void updateTotalValueDisplay();
 
@@ -264,8 +265,6 @@ namespace TUI {
         // Image list header widgets
         wxButton* m_addDirBtn;
         wxButton* m_addImageBtn;
-       // wxDirDialog* m_imageDirSelect;
-        //wxFileDialog* m_imageFileSelect;
         
         RightClickMenu* m_imageScrollListRCMenu;
         // TODO: feed mode widgets if any.

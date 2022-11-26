@@ -102,7 +102,8 @@ namespace TUI {
     void OutputPanel::addImageInfo(imageID id) {
 
         const std::vector<TItemSupport::DetectionResult>* res = m_coreptr->getDetectionResults(id);
-
+        if (!res)
+            return;
         if (m_collapseSimilarItems) {
             // Populate collapsed list.
             std::vector<TDataTypes::dcID> newItems;
@@ -130,17 +131,23 @@ namespace TUI {
     }
 
     void OutputPanel::removeImageInfo(imageID id) {
-        const std::vector<imageID> activeIds = m_coreptr->getActivatedIDs();
 
-        if (std::find(activeIds.begin(), activeIds.end(), id) == activeIds.end())
-            return;
 
-        if (activeIds.size() < 2) {
-            clearOutputList(); // More efficient to clear everything if theres only one image.
-            return;
+        if (m_showActiveOnly) {
+            const std::vector<imageID> activeIds = m_coreptr->getActivatedIDs();
+
+            if (std::find(activeIds.begin(), activeIds.end(), id) == activeIds.end())
+                return;
+
+            if (activeIds.size() < 2) {
+                clearOutputList(); // More efficient to clear everything if theres only one image.
+                return;
+            }
         }
 
         const std::vector<TItemSupport::DetectionResult>* res = m_coreptr->getDetectionResults(id);
+        if (!res)
+            return;
 
         if (m_collapseSimilarItems) {
             // Depopulate collapsed list.
@@ -330,15 +337,91 @@ namespace TUI {
     };
 
     void OutputPanel::removeItemsFromOutputList(const std::vector<TDataTypes::dcID>& ids){
-    
+        if (!ids.size())
+            return;
+
+        std::set<TDataTypes::dcID> idSet(ids.begin(), ids.end());
+
+        int endIdx = m_outputList->GetNumberRows() - 1;
+        int r = 0;
+        while (r < endIdx) {
+            TDataTypes::dcID rowCatID = wxAtoi(m_outputList->GetCellValue(r, m_columnIndexMap.at("CatalogItemId")));
+            if (idSet.find(rowCatID) != idSet.end()) { // This is a row that must be removed
+                swapListRows(r, endIdx); // Swap row to be removed to the back.
+                endIdx--;
+            }
+            else { // This row does not need to be removed
+                r++;
+            }
+        }
+
+        int idxOfRemoval = endIdx + 1; // DeleteRows is start index inclusive.
+
+        // Remove rows from the back
+        if (idxOfRemoval <= m_outputList->GetNumberRows() - 1)
+            m_outputList->DeleteRows(idxOfRemoval, m_outputList->GetNumberRows() - idxOfRemoval);
+
     }
 
     void OutputPanel::removeItemsFromOutputList(const std::vector<TItemSupport::DetectionResult>* dets){
-    
+        if (!dets || !dets->size())
+            return;
+
+        int idToRemove = dets->at(0).parentImageID; // All dets should have the same parentImageID.
+
+        int endIdx = m_outputList->GetNumberRows() - 1;
+        int r = 0;
+        while (r < endIdx) {
+            imageID parentID = wxAtoi(m_outputList->GetCellValue(r, m_columnIndexMap.at("ParentImageId")));
+            if (parentID == idToRemove) { // This is a row that must be removed
+                swapListRows(r, endIdx); // Swap row to be removed to the back.
+                endIdx--;
+            }
+            else { // This row does not need to be removed
+                r++;
+            }
+        }
+
+        int idxOfRemoval = endIdx + 1; // DeleteRows is start index inclusive.
+
+        // Remove rows from the back
+        if (idxOfRemoval <= m_outputList->GetNumberRows() - 1)
+            m_outputList->DeleteRows(idxOfRemoval, m_outputList->GetNumberRows() - idxOfRemoval);
     }
 
 
+    // Swap the values of two rows in the outputList
+    void OutputPanel::swapListRows(int rowA, int rowB) {
 
+        // Temp store values from rowA.
+        std::vector<std::pair<int, wxString>> temp; // store column idx, and value from that col.
+        for (auto& c : m_columnIndexMap) {
+            temp.push_back(std::make_pair(c.second, m_outputList->GetCellValue(rowA, c.second)));
+        }
+
+        // Store image renders.
+        wxGridCellRenderer* tempCatRender = m_outputList->GetCellRenderer(rowA, m_columnIndexMap.at("CatalogImage"));
+        wxGridCellRenderer* tempSourceRender = m_outputList->GetCellRenderer(rowA, m_columnIndexMap.at("SourceImage"));
+
+
+        // Copy values from rowB to rowA
+        for (auto& c : m_columnIndexMap) {
+            m_outputList->SetCellValue(rowA, c.second, m_outputList->GetCellValue(rowB, c.second));
+        }
+        // Copy image renderers.
+        m_outputList->SetCellRenderer(rowA, m_columnIndexMap.at("CatalogImage"), m_outputList->GetCellRenderer(rowB, m_columnIndexMap.at("CatalogImage")));
+        m_outputList->SetCellRenderer(rowA, m_columnIndexMap.at("SourceImage"), m_outputList->GetCellRenderer(rowB, m_columnIndexMap.at("SourceImage")));
+
+
+        // Copy temp values to rowB
+        for (auto& p : temp) {
+            m_outputList->SetCellValue(rowB, p.first, p.second);
+        }
+
+        m_outputList->SetCellRenderer(rowB, m_columnIndexMap.at("CatalogImage"), tempCatRender);
+        m_outputList->SetCellRenderer(rowB, m_columnIndexMap.at("SourceImage"), tempSourceRender);
+
+    }
 
 
     void OutputPanel::updateCounts(){
@@ -357,15 +440,35 @@ namespace TUI {
 
         switch (e.getType()) {
 
-
+        case TEvent::TEventEnum::ImageAdded:
+            if (m_showActiveOnly) {
+                break;
+            }
+            else {
+                addImageInfo(std::stoi(e.getData()));
+                break;
+            }
+            
         case TEvent::TEventEnum::ImageActivated:
-            addImageInfo(std::stoi(e.getData()));
-            break;
+            if (m_showActiveOnly) {
+                addImageInfo(std::stoi(e.getData()));
+                break;
+            }
+            else {
+                break;
+            }
+        
+        case TEvent::TEventEnum::ImageDeactivated:
+            if (m_showActiveOnly)
+                removeImageInfo(std::stoi(e.getData()));
+            else {
+                break;
+            }
 
         case TEvent::TEventEnum::ImageDeleted:
-        case TEvent::TEventEnum::ImageDeactivated:
             removeImageInfo(std::stoi(e.getData()));
             break;
+
         case TEvent::TEventEnum::AllImagesDeactivated:
             clearOutputList();
             break;
