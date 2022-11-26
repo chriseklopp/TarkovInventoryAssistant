@@ -33,9 +33,14 @@ imageID TCore::addImage(std::unique_ptr<cv::Mat> image) {
 };
 
 void TCore::deleteImage(imageID id) {
+
     // Remove from m_idImageMap
     if (m_idImageMap.find(id) != m_idImageMap.end())
         m_idImageMap.erase(id);
+
+    // Notify observers first, they may need the images detection results to clean up.
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageDeleted, std::to_string(id)));
+
 
     // Remove from m_detectionResults
     if (m_detectionResults.find(id) != m_detectionResults.end())
@@ -43,7 +48,7 @@ void TCore::deleteImage(imageID id) {
 
     // Remove from activated Images (but silently to not trigger sending two events)
     m_activeImages.erase(id);
-    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageDeleted, std::to_string(id)));
+
 }
 
 
@@ -85,8 +90,10 @@ void TCore::activateImage(imageID id){
 void TCore::deactivateImage(imageID id) {
     if (m_activeImages.find(id) == m_activeImages.end())
         return;
-    m_activeImages.erase(id);
+
     notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageDeactivated, std::to_string(id)));
+    m_activeImages.erase(id);
+
 }
 
 void TCore::deactivateAllImages() {
