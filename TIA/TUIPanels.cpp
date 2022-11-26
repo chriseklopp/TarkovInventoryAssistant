@@ -99,20 +99,20 @@ namespace TUI {
 
         if (m_collapseSimilarItems) {
             // Populate collapsed list.
-            std::vector<const TItemTypes::TItem*> newItems;
+            std::vector<TDataTypes::dcID> newItems;
             for (auto& det : *res) {
                 if (addToCountMap(det))
                     newItems.push_back(det.catalogItem);
                 addToTotalCurrency(det);
             }
             // Append any new items to the outputList
-            for (const TItemTypes::TItem* itm : newItems) {
-                addItemToOutputList(itm, 1);
+            for (TDataTypes::dcID& itm : newItems) {
+                addItemToOutputList(m_coreptr->getCatalogItem(itm), 1);
             }
 
             // Update counts of all existing items. TODO: change below code.
-            for (auto p : m_itemNameCountmap) {
-                addItemToOutputList(p.first, p.second);
+            for (auto p : m_itemIDCountMap) {
+                addItemToOutputList(m_coreptr->getCatalogItem(p.first), p.second);
             }
         }
 
@@ -148,7 +148,7 @@ namespace TUI {
         if (!m_outputList->GetNumberRows())
             return;
         m_outputList->DeleteRows(0, m_outputList->GetNumberRows());
-        m_itemNameCountmap.clear();
+        m_itemIDCountMap.clear();
     }
 
     void OutputPanel::OnToggleCollapse(wxCommandEvent& evt) {
@@ -162,20 +162,20 @@ namespace TUI {
     }
 
     bool OutputPanel::addToCountMap(const TItemSupport::DetectionResult& det) {
-        if (m_itemNameCountmap.find(det.catalogItem) != m_itemNameCountmap.end()) {
-            m_itemNameCountmap.at(det.catalogItem)++;
+        if (m_itemIDCountMap.find(det.catalogItem) != m_itemIDCountMap.end()) {
+            m_itemIDCountMap.at(det.catalogItem)++;
             return false;
         }
         else {
-            m_itemNameCountmap.insert({ det.catalogItem, 1 });
+            m_itemIDCountMap.insert({ det.catalogItem, 1 });
             return true;
         }
     }
 
     bool OutputPanel::removeFromCountMap(const TItemSupport::DetectionResult& det) {
-        if (m_itemNameCountmap.find(det.catalogItem) != m_itemNameCountmap.end()) {
-            m_itemNameCountmap.at(det.catalogItem)--;
-            if (m_itemNameCountmap.at(det.catalogItem) == 0)
+        if (m_itemIDCountMap.find(det.catalogItem) != m_itemIDCountMap.end()) {
+            m_itemIDCountMap.at(det.catalogItem)--;
+            if (m_itemIDCountMap.at(det.catalogItem) == 0)
                 return true;
         }
         return false;
@@ -184,24 +184,28 @@ namespace TUI {
 
     void OutputPanel::addToTotalCurrency(const TItemSupport::DetectionResult& det) {
 
-        std::string detUnit = det.catalogItem->getPrice().getUnit();
+        const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det.catalogItem);
+
+        std::string detUnit = catItem->getPrice().getUnit();
         for (TDataTypes::TCurrency& cur : m_totalCurrencyValues) {
             if (cur.getUnit() == detUnit) {
-                cur += det.catalogItem->getPrice();
+                cur += catItem->getPrice();
                 return;
             }
         }
         // This is a new currency unit weve never seen before
-        m_totalCurrencyValues.push_back(det.catalogItem->getPrice());
+        m_totalCurrencyValues.push_back(catItem->getPrice());
     }
    
 
     void OutputPanel::removeFromTotalCurrency(const TItemSupport::DetectionResult& det) {
 
-        std::string detUnit = det.catalogItem->getPrice().getUnit();
+        const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det.catalogItem);
+
+        std::string detUnit = catItem->getPrice().getUnit();
         for (TDataTypes::TCurrency& cur : m_totalCurrencyValues) {
             if (cur.getUnit() == detUnit){
-                cur -= det.catalogItem->getPrice();
+                cur -= catItem->getPrice();
                 return;
             }
         }
@@ -211,22 +215,27 @@ namespace TUI {
     void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int count) {
         if (!det)
             return;
+
+        const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det->catalogItem);
+
+
+
         m_outputList->AppendRows(1);
         std::string countString = std::to_string(count);
         int row = m_outputList->GetNumberRows()-1;
         const std::unique_ptr<TItemTypes::TItem>& item = det->inputItem;
 
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), det->catalogItem->getName());
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), det->catalogItem->getDimAsString());
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), catItem->getName());
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), catItem->getDimAsString());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), countString);
 
 
         // Add price info
-        wxString fleaString = wxString::FromUTF8(det->catalogItem->getPrice().getCurrencyString());
-        if (!det->catalogItem->getPricePerSlot().getCurrencyString().empty())
-            fleaString += "\n" + wxString::FromUTF8(det->catalogItem->getPricePerSlot().getCurrencyString());
+        wxString fleaString = wxString::FromUTF8(catItem->getPrice().getCurrencyString());
+        if (!catItem->getPricePerSlot().getCurrencyString().empty())
+            fleaString += "\n" + wxString::FromUTF8(catItem->getPricePerSlot().getCurrencyString());
 
-        wxString traderString = wxString::FromUTF8(det->catalogItem->getTraderSellPrice().getCurrencyString()) + "\n" + det->catalogItem->getTrader();
+        wxString traderString = wxString::FromUTF8(catItem->getTraderSellPrice().getCurrencyString()) + "\n" + catItem->getTrader();
 
         m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
         m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
@@ -237,7 +246,7 @@ namespace TUI {
             new ImageGridCellRenderer(wxImage(fmtSourceImage.cols, fmtSourceImage.rows, fmtSourceImage.data, true)));
 
         // Add catalog image
-        cv::Mat fmtCatImage = formatImage(det->catalogItem->getImage(), m_imageMaxRows, m_imageMaxCols);
+        cv::Mat fmtCatImage = formatImage(catItem->getImage(), m_imageMaxRows, m_imageMaxCols);
         m_outputList->SetCellRenderer(row, m_columnIndexMap.at("CatalogImage"),
             new ImageGridCellRenderer(wxImage(fmtCatImage.cols, fmtCatImage.rows, fmtCatImage.data, true)));
 

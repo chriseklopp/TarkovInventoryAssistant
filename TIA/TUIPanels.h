@@ -180,7 +180,8 @@ namespace TUI {
         // When true, only active images will have their detections displayed.
         bool m_showActiveOnly;
 
-        std::map<const TItemTypes::TItem*, int> m_itemNameCountmap;
+        //std::map<const TItemTypes::TItem*, int> m_itemNameCountmap;
+        std::unordered_map<TDataTypes::dcID, int> m_itemIDCountMap;
 
 
     };
