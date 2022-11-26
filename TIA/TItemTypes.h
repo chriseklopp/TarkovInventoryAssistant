@@ -221,7 +221,7 @@ namespace TItemSupport {
         TDataTypes::dcID catalogItem;
         std::unique_ptr<TItemTypes::TItem> inputItem;
 
-        int parentImageID; // ImageID from where the item was detected.
+        int parentImageID; // ImageID from where the item was detected. TODO: Make this imageID.
         std::pair<cv::Point, cv::Point> imageLoc; // Point locations in the parent image where item was detected. (top left corner, bottom right corner).
 
         bool detectionError = false; // Mostly for testing and debug uses, signify that this detection was wrong.

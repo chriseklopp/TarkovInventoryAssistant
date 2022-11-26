@@ -22,7 +22,9 @@ namespace TUI {
    {"Dim", 3},
    {"SourceImage", 4},
    {"FleaPrice", 5},
-   {"TraderPrice", 6}
+   {"TraderPrice", 6},
+   {"CatalogItemId",7},
+   {"ParentImageId", 8}
     };
 
     OutputPanel::OutputPanel(TCore* core, wxWindow* parent,
@@ -87,6 +89,10 @@ namespace TUI {
         m_outputList->SetGridLineColour(wxColour(73, 81, 84));
         m_outputList->EnableEditing(false);
 
+
+        m_outputList->SetColSize(m_columnIndexMap.at("CatalogItemId"), 0);
+        m_outputList->SetColSize(m_columnIndexMap.at("ParentImageId"), 0);
+
         sizer->Add(m_outputList, 1, wxALL | wxEXPAND, 0);
         this->SetSizerAndFit(sizer);
 
@@ -95,7 +101,7 @@ namespace TUI {
 
     void OutputPanel::addImageInfo(imageID id) {
 
-        auto res = m_coreptr->getDetectionResults(id);
+        const std::vector<TItemSupport::DetectionResult>* res = m_coreptr->getDetectionResults(id);
 
         if (m_collapseSimilarItems) {
             // Populate collapsed list.
@@ -107,13 +113,11 @@ namespace TUI {
             }
             // Append any new items to the outputList
             for (TDataTypes::dcID& itm : newItems) {
-                addItemToOutputList(m_coreptr->getCatalogItem(itm), 1);
+                addItemToOutputList(itm, 1);
             }
 
-            // Update counts of all existing items. TODO: change below code.
-            for (auto p : m_itemIDCountMap) {
-                addItemToOutputList(m_coreptr->getCatalogItem(p.first), p.second);
-            }
+            // Update counts of all existing items.
+            updateCounts();
         }
 
         else {
@@ -126,8 +130,40 @@ namespace TUI {
     }
 
     void OutputPanel::removeImageInfo(imageID id) {
+        const std::vector<imageID> activeIds = m_coreptr->getActivatedIDs();
 
-        clearOutputList();
+        if (std::find(activeIds.begin(), activeIds.end(), id) == activeIds.end())
+            return;
+
+        if (activeIds.size() < 2) {
+            clearOutputList(); // More efficient to clear everything if theres only one image.
+            return;
+        }
+
+        const std::vector<TItemSupport::DetectionResult>* res = m_coreptr->getDetectionResults(id);
+
+        if (m_collapseSimilarItems) {
+            // Depopulate collapsed list.
+            std::vector<TDataTypes::dcID> itemsToRemove;
+            for (auto& det : *res) {
+                if (removeFromCountMap(det))
+                    itemsToRemove.push_back(det.catalogItem);
+                removeFromTotalCurrency(det);
+            }
+            removeItemsFromOutputList(itemsToRemove);
+
+            // Update counts of all existing items.
+            updateCounts();
+        }
+
+        else {
+            for (auto& det : *res) {
+                removeFromCountMap(det);
+                removeFromTotalCurrency(det);
+            }
+            removeItemsFromOutputList(res);
+        }
+
     }
 
     void OutputPanel::refreshOutputList() {
@@ -145,10 +181,11 @@ namespace TUI {
         }
     }
     void OutputPanel::clearOutputList() {
-        if (!m_outputList->GetNumberRows())
-            return;
-        m_outputList->DeleteRows(0, m_outputList->GetNumberRows());
+        if (m_outputList->GetNumberRows())
+            m_outputList->DeleteRows(0, m_outputList->GetNumberRows());
         m_itemIDCountMap.clear();
+        m_totalCurrencyValues.clear();
+
     }
 
     void OutputPanel::OnToggleCollapse(wxCommandEvent& evt) {
@@ -175,8 +212,10 @@ namespace TUI {
     bool OutputPanel::removeFromCountMap(const TItemSupport::DetectionResult& det) {
         if (m_itemIDCountMap.find(det.catalogItem) != m_itemIDCountMap.end()) {
             m_itemIDCountMap.at(det.catalogItem)--;
-            if (m_itemIDCountMap.at(det.catalogItem) == 0)
+            if (m_itemIDCountMap.at(det.catalogItem) == 0) {
+                m_itemIDCountMap.erase(det.catalogItem);
                 return true;
+            }
         }
         return false;
     }
@@ -228,7 +267,8 @@ namespace TUI {
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), catItem->getName());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), catItem->getDimAsString());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), countString);
-
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("CatalogItemId"), wxString::Format(wxT("%i"), det->catalogItem));
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("ParentImageId"), wxString::Format(wxT("%i"), det->parentImageID));
 
         // Add price info
         wxString fleaString = wxString::FromUTF8(catItem->getPrice().getCurrencyString());
@@ -252,7 +292,11 @@ namespace TUI {
 
     };
 
-    void OutputPanel::addItemToOutputList(const TItemTypes::TItem* itm, int count) {
+    // TODO: make it more clear that this is for when m_collapseSimilar is true...
+    void OutputPanel::addItemToOutputList(const TDataTypes::dcID id, int count) {
+
+        const TItemTypes::TItem* itm = m_coreptr->getCatalogItem(id);
+
         if (!itm)
             return;
         m_outputList->AppendRows(1);
@@ -262,6 +306,8 @@ namespace TUI {
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), itm->getName());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), itm->getDimAsString());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), countString);
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("CatalogItemId"), wxString::Format(wxT("%i"), id));
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("ParentImageId"), wxString::Format(wxT("%i"), -1)); // -1 because catalog images are not associated with a parent image.
 
 
         // Add price info
@@ -282,6 +328,31 @@ namespace TUI {
             new ImageGridCellRenderer(wxImage(fmtCatImage.cols, fmtCatImage.rows, fmtCatImage.data, true)));
 
     };
+
+    void OutputPanel::removeItemsFromOutputList(const std::vector<TDataTypes::dcID>& ids){
+    
+    }
+
+    void OutputPanel::removeItemsFromOutputList(const std::vector<TItemSupport::DetectionResult>* dets){
+    
+    }
+
+
+
+
+
+    void OutputPanel::updateCounts(){
+        int numRows = m_outputList->GetNumberRows();
+
+        for (int row = 0; row < numRows - 1; row++) {
+            TDataTypes::dcID id = wxAtoi(m_outputList->GetCellValue(row, m_columnIndexMap.at("CatalogItemId")));
+            int count = (m_itemIDCountMap.find(id) != m_itemIDCountMap.end()) ? m_itemIDCountMap.at(id) : -1;
+            m_outputList->SetCellValue(row, m_columnIndexMap.at("CatalogItemId"), wxString::Format(wxT("%i"), count));
+                                                                        
+        }
+
+    }
+
     void OutputPanel::TEventReceived(TEvent::TEvent e) {
 
         switch (e.getType()) {
@@ -293,17 +364,13 @@ namespace TUI {
 
         case TEvent::TEventEnum::ImageDeleted:
         case TEvent::TEventEnum::ImageDeactivated:
-            refreshOutputList();
+            removeImageInfo(std::stoi(e.getData()));
             break;
         case TEvent::TEventEnum::AllImagesDeactivated:
             clearOutputList();
             break;
         }
     };
-
-
-
-
 
 
     DisplayPanel::DisplayPanel(TCore* core, wxWindow* parent,
@@ -873,7 +940,7 @@ namespace TUI {
 
     void ImagePanel::makeImageWithDetections(imageID id) {
 
-        auto res = m_coreptr->getDetectionResults(id);
+        const std::vector<TItemSupport::DetectionResult>* res = m_coreptr->getDetectionResults(id);
         if (!res)
             return;
 
