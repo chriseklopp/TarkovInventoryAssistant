@@ -63,7 +63,7 @@ namespace TUI {
 
         void setActiveImage(imageID id);
 
-        imageID getActiveImage() { return m_imageID; }
+        const imageID& getActiveImage() { return m_imageID; }
 
 
         void clearDisplay();
@@ -114,10 +114,10 @@ namespace TUI {
 
 
         // Populate Output list with information from imageID;
-        void populateOutputList(imageID id);
+        void addImageInfo(imageID id);
 
-        // Removes items from an image from the output list.
-        void removeOutputListInfo(imageID id);
+        // Removes information from imageID;
+        void removeImageInfo(imageID id);
 
         // Resets output list and repopulates it with detections from all activated images.
         void refreshOutputList();
@@ -134,13 +134,24 @@ namespace TUI {
     private:
 
         void addItemToOutputList(const TItemSupport::DetectionResult* item, int count=1);
-
-
         void addItemToOutputList(const TItemTypes::TItem* itm, int count=1);
 
-        void populateCountMap(imageID id);
 
-        void depopulateCountMap(imageID id);
+
+        void addToCountMap(imageID id);
+        void removeFromCountMap(imageID id);
+
+        // Returns true if item is new, false if it was already present.
+        bool addToCountMap(const TItemSupport::DetectionResult& det);
+        // Returns true if counter for that item reaches 0, false if count remains > 0.
+        bool removeFromCountMap(const TItemSupport::DetectionResult& det);
+
+        void addToTotalCurrency(const TItemSupport::DetectionResult& det);
+        void removeFromTotalCurrency(const TItemSupport::DetectionResult& det);
+
+
+
+        void updateTotalValueDisplay();
 
         // Pointer to the core object.
         TCore* m_coreptr;
@@ -160,13 +171,14 @@ namespace TUI {
         wxCheckBox* m_toggleCollapse;
         wxCheckBox* m_toggleActiveOnly;
 
+        // Total Value display box
+        wxTextCtrl* m_totalValueBox;
+        std::vector<TDataTypes::TCurrency> m_totalCurrencyValues; // Store value for each currency type.
         // When true, detections with identical parents will be collapsed into one row with a count >=1.
         bool m_collapseSimilarItems;
 
         // When true, only active images will have their detections displayed.
         bool m_showActiveOnly;
-
-
 
         std::map<const TItemTypes::TItem*, int> m_itemNameCountmap;
 
@@ -214,7 +226,7 @@ namespace TUI {
         public:
             RightClickMenu() : m_imageID(-1) {};
             void setImageId(imageID id) { m_imageID = id; };
-            imageID getImageId() { return m_imageID; };
+            const imageID& getImageId() { return m_imageID; };
 
         private:
 

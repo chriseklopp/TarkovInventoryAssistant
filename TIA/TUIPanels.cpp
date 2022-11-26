@@ -62,9 +62,9 @@ namespace TUI {
 
         sizer->Add(m_toolbar, 0, wxEXPAND, 5);
 
-
-
-
+        // Add total value box
+        m_totalValueBox = new wxTextCtrl(this, wxUSE_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+        sizer->Add(m_totalValueBox, 0, wxEXPAND, 5);
 
         // Add output list
         m_outputList = new wxGrid(this, wxUSE_ANY);
@@ -93,32 +93,39 @@ namespace TUI {
     };
 
 
-    void OutputPanel::populateOutputList(imageID id) {
+    void OutputPanel::addImageInfo(imageID id) {
 
-
-        populateCountMap(id);
+        auto res = m_coreptr->getDetectionResults(id);
 
         if (m_collapseSimilarItems) {
             // Populate collapsed list.
+            std::vector<const TItemTypes::TItem*> newItems;
+            for (auto& det : *res) {
+                if (addToCountMap(det))
+                    newItems.push_back(det.catalogItem);
+                addToTotalCurrency(det);
+            }
+            // Append any new items to the outputList
+            for (const TItemTypes::TItem* itm : newItems) {
+                addItemToOutputList(itm, 1);
+            }
+
+            // Update counts of all existing items. TODO: change below code.
             for (auto p : m_itemNameCountmap) {
                 addItemToOutputList(p.first, p.second);
             }
         }
-        else {
-            // Populate uncollapsed list.
-            auto res = m_coreptr->getDetectionResults(id);
-            if (!res)
-                return;
 
+        else {
             for (auto& det : *res) {
+                addToCountMap(det);
+                addToTotalCurrency(det);
                 addItemToOutputList(&det, 1);
             }
-
         }
-
     }
 
-    void OutputPanel::removeOutputListInfo(imageID id) {
+    void OutputPanel::removeImageInfo(imageID id) {
 
         clearOutputList();
     }
@@ -128,12 +135,12 @@ namespace TUI {
 
         if (m_showActiveOnly) {
             for (int id : m_coreptr->getActivatedIDs()) {
-                populateOutputList(id);
+                addImageInfo(id);
             }
         }
         else {
             for (int id : m_coreptr->getLoadedImageIDs()) {
-                populateOutputList(id);
+                addImageInfo(id);
             }
         }
     }
@@ -154,40 +161,50 @@ namespace TUI {
         refreshOutputList();
     }
 
+    bool OutputPanel::addToCountMap(const TItemSupport::DetectionResult& det) {
+        if (m_itemNameCountmap.find(det.catalogItem) != m_itemNameCountmap.end()) {
+            m_itemNameCountmap.at(det.catalogItem)++;
+            return false;
+        }
+        else {
+            m_itemNameCountmap.insert({ det.catalogItem, 1 });
+            return true;
+        }
+    }
 
-    void OutputPanel::populateCountMap(imageID id) {
-
-        auto res = m_coreptr->getDetectionResults(id);
-        if (!res)
-            return;
-
-
-        for (auto& det : *res) {
-            if (m_itemNameCountmap.find(det.catalogItem) != m_itemNameCountmap.end()) {
-                m_itemNameCountmap.at(det.catalogItem)++;
-            }
-            else {
+    bool OutputPanel::removeFromCountMap(const TItemSupport::DetectionResult& det) {
+        if (m_itemNameCountmap.find(det.catalogItem) != m_itemNameCountmap.end()) {
+            m_itemNameCountmap.at(det.catalogItem)--;
+            if (m_itemNameCountmap.at(det.catalogItem) == 0)
+                return true;
+        }
+        return false;
+    }
 
 
+    void OutputPanel::addToTotalCurrency(const TItemSupport::DetectionResult& det) {
 
-                m_itemNameCountmap.insert({det.catalogItem ,1});
+        std::string detUnit = det.catalogItem->getPrice().getUnit();
+        for (TDataTypes::TCurrency& cur : m_totalCurrencyValues) {
+            if (cur.getUnit() == detUnit) {
+                cur += det.catalogItem->getPrice();
+                return;
             }
         }
+        // This is a new currency unit weve never seen before
+        m_totalCurrencyValues.push_back(det.catalogItem->getPrice());
+    }
+   
 
+    void OutputPanel::removeFromTotalCurrency(const TItemSupport::DetectionResult& det) {
 
-    };
-
-    void OutputPanel::depopulateCountMap(imageID id) {
-        auto res = m_coreptr->getDetectionResults(id);
-        if (!res)
-            return;
-
-        for (auto& det : *res) {
-            if (m_itemNameCountmap.find(det.catalogItem) != m_itemNameCountmap.end()) {
-                m_itemNameCountmap.at(det.catalogItem)--;
+        std::string detUnit = det.catalogItem->getPrice().getUnit();
+        for (TDataTypes::TCurrency& cur : m_totalCurrencyValues) {
+            if (cur.getUnit() == detUnit){
+                cur -= det.catalogItem->getPrice();
+                return;
             }
         }
-
     }
 
 
@@ -214,9 +231,6 @@ namespace TUI {
         m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
         m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
 
-
-
-
         // Add source image
         cv::Mat fmtSourceImage = formatImage(item->getImage(), m_imageMaxRows, m_imageMaxCols);
         m_outputList->SetCellRenderer(row, m_columnIndexMap.at("SourceImage"),
@@ -242,12 +256,12 @@ namespace TUI {
 
 
         // Add price info
-        wxString fleaString = wxString::FromUTF8(itm->getPrice().multiplyBy(count));
+        wxString fleaString = wxString::FromUTF8(itm->getPrice().getValueMultipledBy(count));
 
         if (!itm->getPricePerSlot().getCurrencyString().empty())
-            fleaString += "\n" + wxString::FromUTF8(itm->getPricePerSlot().multiplyBy(count));
+            fleaString += "\n" + wxString::FromUTF8(itm->getPricePerSlot().getValueMultipledBy(count));
 
-        wxString traderString = wxString::FromUTF8(itm->getTraderSellPrice().multiplyBy(count)) + "\n" + itm->getTrader();
+        wxString traderString = wxString::FromUTF8(itm->getTraderSellPrice().getValueMultipledBy(count)) + "\n" + itm->getTrader();
 
         m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
         m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
@@ -265,7 +279,7 @@ namespace TUI {
 
 
         case TEvent::TEventEnum::ImageActivated:
-            populateOutputList(std::stoi(e.getData()));
+            addImageInfo(std::stoi(e.getData()));
             break;
 
         case TEvent::TEventEnum::ImageDeleted:
