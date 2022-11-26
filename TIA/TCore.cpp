@@ -163,6 +163,12 @@ const std::vector<imageID> TCore::getLoadedImageIDs() {
     return idVect;
 }
 
+const TItemTypes::TItem* TCore::getCatalogItem(const TDataTypes::dcID catID) {
+    return m_dataCatalog.getItem(catID);
+}
+
+
+
 
 void TCore::setDATA_DIR(std::string dir) { m_configManager.setDATA_DIR(dir); };
 

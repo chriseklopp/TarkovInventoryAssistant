@@ -37,7 +37,11 @@ public:
     const std::vector<imageID> getLoadedImageIDs();
 
     // Return reference to our item catalog.
-    const std::vector<std::unique_ptr<TItemTypes::TItem>>& getCatalogItemList() { return m_dataCatalog.getItemList(); };
+    const std::vector<TDataTypes::dcID>& getCatalogItemList() { return m_dataCatalog.getItemIDList(); };
+
+    // Return pointer to the catalog item associated with ID.
+    const TItemTypes::TItem* getCatalogItem(const TDataTypes::dcID catID);
+
 
     // Return vector of activated image IDs.
     const std::vector<imageID> getActivatedIDs();
@@ -128,7 +132,7 @@ private:
     //std::vector<TItemSupport::DetectionResult> m_detectionResults; // Almost everything in this is a pointer.
     std::map<imageID, std::vector<TItemSupport::DetectionResult>> m_detectionResults;
 
-    TDataCatalog m_dataCatalog;
+    TDataCatalog::TDataCatalog m_dataCatalog;
     TImageReader m_imageReader;
 
 
