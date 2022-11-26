@@ -93,8 +93,81 @@ namespace TDataTypes
         this->j = p.second;
     };
 
+    TCurrency::TCurrency(const std::string& currString) {
+        if (currString.empty()) {
+            m_unit = "";
+            m_value = 0;
+            m_isPrependedUnit = false;
+            return;
+        }
 
+        int lastDigitIdx = -1;
+        for (int i = currString.size() - 1; i > 0; i--) {
+            if (std::isdigit(static_cast<unsigned char>(currString[i]))) {
+                lastDigitIdx = i;
+                break;
+            }
+        }
 
+        // Implies this has a prepended unit.
+        if (lastDigitIdx == currString.size() - 1) {
+            m_isPrependedUnit = true;
+            std::string val = currString.substr(1);
+            val.erase(std::remove(val.begin(), val.end(), ','), val.end());
+            m_value = std::stoi(val);
+        }
+        else {
+            // Appended unit. (these are utf8 symbols that take up multiple characters)
+            m_isPrependedUnit = false;
+            m_unit = currString.substr(lastDigitIdx + 1);
+            std::string val = currString.substr(0, lastDigitIdx + 1);
+            val.erase(std::remove(val.begin(), val.end(), ','), val.end());
+            m_value = std::stoi(val);
+        }
+
+    }
+
+    const int& TCurrency::getValue() const {
+        return m_value;
+    }
+
+    const std::string& TCurrency::getCurrencyString() const {
+        if (m_value) {
+            return m_isPrependedUnit ? m_unit + std::to_string(m_value) : std::to_string(m_value) + m_unit;
+        }
+        else
+            return "";
+    }
+
+    const std::string& TCurrency::getUnit() const {
+        return m_unit;
+    }
+
+    const bool& TCurrency::isPrependedUnit() const {
+        return m_isPrependedUnit;
+    }
+
+    std::string TCurrency::getValueMultipledBy(int num, bool prettify) const {
+        if (!prettify)
+            return m_isPrependedUnit ? m_unit + std::to_string(m_value * num) : std::to_string(m_value * num) + m_unit;
+
+        return m_isPrependedUnit ? m_unit + TDataTypes::prettifyToString(m_value * num) : TDataTypes::prettifyToString(m_value * num) + m_unit;
+
+    }
+
+    TCurrency& TCurrency::operator+=(const TCurrency& rhs) {
+        if (m_unit != rhs.m_unit)
+            throw  std::invalid_argument("LHS Unit: " + m_unit + " != " + "RHS Unit: " + rhs.m_unit);
+        m_value += rhs.m_value;
+        return *this;
+    }
+
+    TCurrency& TCurrency::operator-=(const TCurrency& rhs) {
+        if (m_unit != rhs.m_unit)
+            throw  std::invalid_argument("LHS Unit: " + m_unit + " != " + "RHS Unit: " + rhs.m_unit);
+        m_value -= rhs.m_value;
+        return *this;
+    }
 };
 
 namespace Hash {
