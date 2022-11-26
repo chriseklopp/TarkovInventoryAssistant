@@ -10,29 +10,6 @@
 // original meaning of the TItemTypes space
 namespace TItemSupport {
     
-    class TCurrency {
-
-    public:
-        TCurrency() {};
-        TCurrency(const std::string& currString);
-        ~TCurrency() {};
-
-        int getValue() const;
-        std::string getCurrencyString() const;
-        std::string getUnit() const;
-        bool isPrependedUnit() const;
-
-        // Multiply value by the given int and return a string result.
-        // Prettify will format the number to add commas where appropriate
-        std::string multiplyBy(int num, bool prettify=true) const;
-
-    private:
-        uint m_value;
-        std::string m_unit;
-        std::string m_rawString; 
-        bool m_isPrependedUnit;
-    };
-
 
     struct PriceInfo {
 
@@ -50,11 +27,10 @@ namespace TItemSupport {
             trader(trader) {}
 
 
-        TCurrency price;
-        TCurrency pricePerSlot;
-        TCurrency traderPrice;
-        std::string trader;
-
+        const TDataTypes::TCurrency price;
+        const TDataTypes::TCurrency pricePerSlot;
+        const TDataTypes::TCurrency traderPrice;
+        const std::string trader;
 
     };
 
@@ -100,25 +76,25 @@ namespace TItemTypes {
         static void makeQualified(TItem& to, TItem& from);
 
 
-        const cv::Mat getImage() const { return m_image; };
+        const cv::Mat& getImage() const { return m_image; };
 
-        const std::string getName() const { return m_name; };
+        const std::string& getName() const { return m_name; };
 
-        const std::pair<int, int> getDim() const { return m_dim; };
+        const std::pair<int, int>& getDim() const { return m_dim; };
         const std::string getDimAsString(char dlm = 'x') const { return std::to_string(m_dim.first) + dlm + std::to_string(m_dim.second); };
 
         // Price info
         // Returns average flea price for item
-        const TItemSupport::TCurrency getPrice() const;
+        const TDataTypes::TCurrency& getPrice() const;
 
         //Returns average flea price per slot for item
-        const TItemSupport::TCurrency getPricePerSlot() const;
+        const TDataTypes::TCurrency& getPricePerSlot() const;
 
         // Get best trader sell price
-        const TItemSupport::TCurrency getTraderSellPrice() const;
+        const TDataTypes::TCurrency& getTraderSellPrice() const;
 
         // Get name of best trader to sell to.
-        const std::string getTrader() const;
+        const std::string& getTrader() const;
 
 
         cv::Mat m_imageHash; // TODO: change this to proper type.

@@ -18,15 +18,15 @@ namespace TConfig {
 
     public:
 
-        const std::filesystem::path getDATA_DIR();
+        const std::filesystem::path& getDATA_DIR();
 
-        const std::filesystem::path getACTIVE_CATALOG();
+        const std::filesystem::path& getACTIVE_CATALOG();
 
-        const std::filesystem::path getRAW_CATALOGS_DIR();
+        const std::filesystem::path& getRAW_CATALOGS_DIR();
 
-        const std::filesystem::path getCATALOGS_DIR();
+        const std::filesystem::path& getCATALOGS_DIR();
 
-        const std::filesystem::path getROOT_DIR();
+        const std::filesystem::path& getROOT_DIR();
 
         bool isValid() { return m_isValid; };
 

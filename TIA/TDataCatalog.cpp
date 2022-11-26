@@ -136,37 +136,22 @@ std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
     TDataTypes::splitString(instring, ',', fields);
 
     // Populate necessary parameters.
-    std::string name;
-    std::filesystem::path imagePath;
-    std::pair<int, int> dims;
-    std::pair<int, int> contDims;
-
-    TItemSupport::PriceInfo priceData;
-
-
-
-    bool rotation;
-    cv::Mat hashVals;
-
-
     try {
         std::vector<int> temp;
         // Name
-        name = fields.at(0);
+        std::string name = fields.at(0);
 
         // Image
-        imagePath = m_catalogPath / "images" / fields.at(1);
+        std::filesystem::path imagePath = m_catalogPath / "images" / fields.at(1);
 
         // Dims
         TDataTypes::splitString(fields.at(2), '-', temp);
-        dims.first = temp.at(0);
-        dims.second = temp.at(1);
+        std::pair<int, int> dims(temp.at(0), temp.at(1));
         temp.clear();
 
         //Container Dims
         TDataTypes::splitString(fields.at(3), '-', temp);
-        contDims.first = temp.at(0);
-        contDims.second = temp.at(1);
+        std::pair<int, int> contDims(temp.at(0), temp.at(1));
         temp.clear();
 
         // Price info
@@ -182,10 +167,11 @@ std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
         std::string bestTrader = fields.at(7);
         std::replace(bestTrader.begin(), bestTrader.end(), '\'', ',');
 
-        priceData = TItemSupport::PriceInfo(avgPrice, pricePerSlot, traderPrice, bestTrader);
+        TItemSupport::PriceInfo priceData = TItemSupport::PriceInfo(avgPrice, pricePerSlot, traderPrice, bestTrader);
 
 
         //Rotation
+        bool rotation;
         if (fields.at(8) == "1")
             rotation = true;
         else if (fields.at(8) == "0")
@@ -195,8 +181,29 @@ std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
 
         //Hash
         TDataTypes::splitString(fields.at(9), '-', temp);
-        hashVals = cv::Mat(temp).t();
+        cv::Mat hashVals = cv::Mat(temp).t();
         hashVals.convertTo(hashVals, CV_8U);
+
+
+        // This is a container item.
+        if (contDims.first != 0 && contDims.second != 0)
+            return std::make_unique<TItemTypes::TItem>(TItemTypes::TContainerItem(
+                name,
+                imagePath,
+                dims,
+                contDims,
+                priceData,
+                rotation,
+                hashVals));
+
+        // This is a regular TItem.
+        return std::make_unique<TItemTypes::TItem>(TItemTypes::TItem(
+            name,
+            imagePath,
+            dims,
+            priceData,
+            rotation,
+            hashVals));
 
     }
     catch (std::invalid_argument) {
@@ -210,25 +217,7 @@ std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(con
         return std::unique_ptr<TItemTypes::TItem>(nullptr);
     }
 
-    // This is a container item.
-    if (contDims.first != 0 && contDims.second != 0)
-        return std::make_unique<TItemTypes::TItem>(TItemTypes::TContainerItem(
-            name,
-            imagePath,
-            dims,
-            contDims,
-            priceData,
-            rotation,
-            hashVals));
-
-    // This is a regular TItem.
-    return std::make_unique<TItemTypes::TItem>(TItemTypes::TItem(
-        name,
-        imagePath,
-        dims,
-        priceData,
-        rotation,
-        hashVals));
+    
 };
 
 

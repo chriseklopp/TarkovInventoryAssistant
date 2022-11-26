@@ -23,9 +23,9 @@ namespace TEvent {
             m_status(status){};
 
 
-        TEventEnum getType() {return eventType;}
-        std::string getData() { return m_data; }
-        int getStatus() { return m_status; }
+        const TEventEnum& getType() {return eventType;}
+        const std::string& getData() { return m_data; }
+        const int& getStatus() { return m_status; }
     private:
 
         TEventEnum eventType;

@@ -66,6 +66,36 @@ namespace TDataTypes
         DYNAMIC = 1 // Could have disconnected slots of varying sizes and positions.
     };
 
+
+    class TCurrency {
+
+    public:
+        TCurrency() {};
+        TCurrency(const std::string& currString);
+        ~TCurrency() {};
+
+        const int& getValue() const;
+        const std::string& getCurrencyString() const;
+        const std::string& getUnit() const;
+        const bool& isPrependedUnit() const;
+
+        // Multiply currency value by the given int and return a string result.
+        // Prettify will format the number to add commas where appropriate
+        std::string getValueMultipledBy(int num, bool prettify = true) const;
+
+        // Add the value of a TCurrency to this.
+        //!!! This will throw std::invalid argument if they do not have the same units !!!
+        TCurrency& operator+=(const TCurrency& rhs);
+
+        // Subtract the value of a TCurrency to this.
+        //!!! This will throw std::invalid argument if they do not have the same units !!!
+        TCurrency& operator-=(const TCurrency& rhs);
+
+    private:
+        uint m_value;
+        std::string m_unit;
+        bool m_isPrependedUnit;
+    };
   
 }
 
