@@ -237,7 +237,7 @@ namespace TDataCatalog {
     };
 
 
-    TItemTypes::TItem* TDataCatalog::getBestMatch(TItemTypes::TItem& in) {
+    TDataTypes::dcID TDataCatalog::getBestMatch(TItemTypes::TItem& in) {
 
 
         // Get 10 nearest results, then use template matching to more accurately determine the best choice.
@@ -249,7 +249,7 @@ namespace TDataCatalog {
         getNNearestMatches(in, items, dist, 10);
 
         if (!items.size())
-            return nullptr;
+            return -1;
 
 
         TItemTypes::TItem* bestIt;
@@ -269,8 +269,7 @@ namespace TDataCatalog {
         cv::imshow("in", in.getImage());
         cv::waitKey(0);*/
 
-
-        return bestIt;
+        return m_reverseItemMap.at(bestIt);
     };
 
 

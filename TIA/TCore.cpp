@@ -144,8 +144,8 @@ void TCore::detectImageContent(imageID id) {
     // I dont know if I fully like this.. but they are guaranteed to be the same size so it works.
     for (int i = 0; i < res.size(); i++)
     {
-        TItemTypes::TItem* catalogMatch = m_dataCatalog.getBestMatch(*(res[i].get()));
-        if (!catalogMatch) // TODO: Do something smarter here...
+        TDataTypes::dcID catalogMatch = m_dataCatalog.getBestMatch(*(res[i].get()));
+        if (catalogMatch == -1) // TODO: Do something smarter here...
             continue;
 
         detResults.push_back(TItemSupport::DetectionResult(catalogMatch, std::move(res[i]),

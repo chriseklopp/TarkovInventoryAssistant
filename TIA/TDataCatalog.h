@@ -56,8 +56,8 @@ namespace TDataCatalog {
         bool compileCatalogFromRaw(std::filesystem::path rawpath = "", bool makeRotatedItems = false);
 
 
-        // This function compares an item to the catalog and populates a reference to the item that best matches it.
-        TItemTypes::TItem* getBestMatch(TItemTypes::TItem& in);
+        // This function compares an item to the catalog and returns the item's ID.
+        TDataTypes::dcID getBestMatch(TItemTypes::TItem& in);
 
         // This function compares an item to the catalog and finds the N nearest items.
         // !! The NEAREST matches are not necessarily the BEST matches.

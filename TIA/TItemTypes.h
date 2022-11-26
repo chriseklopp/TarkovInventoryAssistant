@@ -202,7 +202,7 @@ namespace TItemSupport {
 
         DetectionResult() {};
 
-        DetectionResult(TItemTypes::TItem* catItem,
+        DetectionResult(TDataTypes::dcID catItem,
                         std::unique_ptr<TItemTypes::TItem> inItem,
                         int parentImageID,
                         std::pair<cv::Point, cv::Point> itemLoc= std::make_pair(cv::Point(-1, -1), cv::Point(-1, -1)),
@@ -218,7 +218,7 @@ namespace TItemSupport {
         };
 
 
-        const TItemTypes::TItem* catalogItem;
+        TDataTypes::dcID catalogItem;
         std::unique_ptr<TItemTypes::TItem> inputItem;
 
         int parentImageID; // ImageID from where the item was detected.
