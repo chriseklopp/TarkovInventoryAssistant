@@ -630,8 +630,8 @@ namespace TUI {
         m_catalogDisplay->AppendRows(m_coreptr->getCatalogItemList().size());
         int currentRow = 0;
 
-        for (auto& item : m_coreptr->getCatalogItemList()) {
-            addItemToCatalogDisplay(item.get(), currentRow);
+        for (const TDataTypes::dcID& id : m_coreptr->getCatalogItemList()) {
+            addItemToCatalogDisplay(m_coreptr->getCatalogItem(id), currentRow);
             currentRow++;
         }
 
@@ -639,7 +639,7 @@ namespace TUI {
 
 
 
-    void CatalogPanel::addItemToCatalogDisplay(TItemTypes::TItem* item, int row) {
+    void CatalogPanel::addItemToCatalogDisplay(const TItemTypes::TItem* item, int row) {
         if (!item)
             return;
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Name"), item->getName());

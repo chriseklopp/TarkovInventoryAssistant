@@ -320,7 +320,7 @@ namespace TUI {
         // Respected any active filters.
         void populateCatalogDisplay();
 
-        void addItemToCatalogDisplay(TItemTypes::TItem* item, int row);
+        void addItemToCatalogDisplay(const TItemTypes::TItem* item, int row);
 
         void clearCatalogDisplay();
 

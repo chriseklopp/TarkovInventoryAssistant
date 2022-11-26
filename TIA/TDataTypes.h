@@ -11,6 +11,15 @@
 
 namespace TDataTypes
 {
+
+
+    //Data catalog id. Unique ID corresponding to a catalog item.
+    typedef int dcID;
+
+
+
+
+
     // Split on character delimiter.
     void splitString(std::string s, char del, std::vector<std::string>& out);
     // Split on character delimiter.
@@ -75,7 +84,7 @@ namespace TDataTypes
         ~TCurrency() {};
 
         const int& getValue() const;
-        const std::string& getCurrencyString() const;
+        const std::string getCurrencyString() const;
         const std::string& getUnit() const;
         const bool& isPrependedUnit() const;
 

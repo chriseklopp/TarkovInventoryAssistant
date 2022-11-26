@@ -131,7 +131,7 @@ namespace TDataTypes
         return m_value;
     }
 
-    const std::string& TCurrency::getCurrencyString() const {
+    const std::string TCurrency::getCurrencyString() const {
         if (m_value) {
             return m_isPrependedUnit ? m_unit + std::to_string(m_value) : std::to_string(m_value) + m_unit;
         }
