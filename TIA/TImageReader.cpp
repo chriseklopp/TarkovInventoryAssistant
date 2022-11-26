@@ -142,7 +142,7 @@ void TImageReader::resolveContainerImage(const cv::Mat& image,
             }
 
 
-            cv::Mat itemImage = image(cv::Range(lowerP.y, upperP.y), cv::Range(lowerP.x, upperP.x));
+            cv::Mat itemImage = image(cv::Range(lowerP.y, upperP.y), cv::Range(lowerP.x, upperP.x+1));
             if (itemImage.empty())
                 continue;
 
