@@ -22,7 +22,9 @@ namespace TUI {
    {"Dim", 3},
    {"SourceImage", 4},
    {"FleaPrice", 5},
-   {"TraderPrice", 6}
+   {"TraderPrice", 6},
+   {"CatalogItemId",7},
+   {"ParentImageId", 8}
     };
 
     OutputPanel::OutputPanel(TCore* core, wxWindow* parent,
@@ -62,9 +64,9 @@ namespace TUI {
 
         sizer->Add(m_toolbar, 0, wxEXPAND, 5);
 
-
-
-
+        // Add total value box
+        m_totalValueBox = new wxTextCtrl(this, wxUSE_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+        sizer->Add(m_totalValueBox, 0, wxEXPAND, 5);
 
         // Add output list
         m_outputList = new wxGrid(this, wxUSE_ANY);
@@ -87,40 +89,89 @@ namespace TUI {
         m_outputList->SetGridLineColour(wxColour(73, 81, 84));
         m_outputList->EnableEditing(false);
 
+
+        m_outputList->SetColSize(m_columnIndexMap.at("CatalogItemId"), 0);
+        m_outputList->SetColSize(m_columnIndexMap.at("ParentImageId"), 0);
+
         sizer->Add(m_outputList, 1, wxALL | wxEXPAND, 0);
         this->SetSizerAndFit(sizer);
 
     };
 
 
-    void OutputPanel::populateOutputList(imageID id) {
+    void OutputPanel::addImageInfo(imageID id) {
 
-
-        populateCountMap(id);
-
+        const std::vector<TItemSupport::DetectionResult>* res = m_coreptr->getDetectionResults(id);
+        if (!res)
+            return;
         if (m_collapseSimilarItems) {
             // Populate collapsed list.
-            for (auto p : m_itemNameCountmap) {
-                addItemToOutputList(p.first, p.second);
-            }
-        }
-        else {
-            // Populate uncollapsed list.
-            auto res = m_coreptr->getDetectionResults(id);
-            if (!res)
-                return;
-
+            std::vector<TDataTypes::dcID> newItems;
             for (auto& det : *res) {
+                if (addToCountMap(det))
+                    newItems.push_back(det.catalogItem);
+                addToTotalCurrency(det);
+            }
+            // Append any new items to the outputList
+            for (TDataTypes::dcID& itm : newItems) {
+                addItemToOutputList(itm, 1);
+            }
+
+            // Update counts of all existing items.
+            updateCounts();
+        }
+
+        else {
+            for (auto& det : *res) {
+                addToCountMap(det);
+                addToTotalCurrency(det);
                 addItemToOutputList(&det, 1);
             }
-
         }
-
+        updateTotalValueDisplay();
     }
 
-    void OutputPanel::removeOutputListInfo(imageID id) {
+    void OutputPanel::removeImageInfo(imageID id) {
 
-        clearOutputList();
+
+        if (m_showActiveOnly) {
+            const std::vector<imageID> activeIds = m_coreptr->getActivatedIDs();
+
+            if (std::find(activeIds.begin(), activeIds.end(), id) == activeIds.end())
+                return;
+
+            if (activeIds.size() < 2) {
+                clearOutputList(); // More efficient to clear everything if theres only one image.
+                return;
+            }
+        }
+
+        const std::vector<TItemSupport::DetectionResult>* res = m_coreptr->getDetectionResults(id);
+        if (!res)
+            return;
+
+        if (m_collapseSimilarItems) {
+            // Depopulate collapsed list.
+            std::vector<TDataTypes::dcID> itemsToRemove;
+            for (auto& det : *res) {
+                if (removeFromCountMap(det))
+                    itemsToRemove.push_back(det.catalogItem);
+                removeFromTotalCurrency(det);
+            }
+            removeItemsFromOutputList(itemsToRemove);
+
+            // Update counts of all existing items.
+            updateCounts();
+        }
+
+        else {
+            for (auto& det : *res) {
+                removeFromCountMap(det);
+                removeFromTotalCurrency(det);
+            }
+            removeItemsFromOutputList(res);
+        }
+        updateTotalValueDisplay();
     }
 
     void OutputPanel::refreshOutputList() {
@@ -128,20 +179,22 @@ namespace TUI {
 
         if (m_showActiveOnly) {
             for (int id : m_coreptr->getActivatedIDs()) {
-                populateOutputList(id);
+                addImageInfo(id);
             }
         }
         else {
             for (int id : m_coreptr->getLoadedImageIDs()) {
-                populateOutputList(id);
+                addImageInfo(id);
             }
         }
     }
     void OutputPanel::clearOutputList() {
-        if (!m_outputList->GetNumberRows())
-            return;
-        m_outputList->DeleteRows(0, m_outputList->GetNumberRows());
-        m_itemNameCountmap.clear();
+        if (m_outputList->GetNumberRows())
+            m_outputList->DeleteRows(0, m_outputList->GetNumberRows());
+        m_itemIDCountMap.clear();
+        m_totalCurrencyValues.clear();
+        updateTotalValueDisplay();
+
     }
 
     void OutputPanel::OnToggleCollapse(wxCommandEvent& evt) {
@@ -154,68 +207,84 @@ namespace TUI {
         refreshOutputList();
     }
 
+    bool OutputPanel::addToCountMap(const TItemSupport::DetectionResult& det) {
+        if (m_itemIDCountMap.find(det.catalogItem) != m_itemIDCountMap.end()) {
+            m_itemIDCountMap.at(det.catalogItem)++;
+            return false;
+        }
+        else {
+            m_itemIDCountMap.insert({ det.catalogItem, 1 });
+            return true;
+        }
+    }
 
-    void OutputPanel::populateCountMap(imageID id) {
-
-        auto res = m_coreptr->getDetectionResults(id);
-        if (!res)
-            return;
-
-
-        for (auto& det : *res) {
-            if (m_itemNameCountmap.find(det.catalogItem) != m_itemNameCountmap.end()) {
-                m_itemNameCountmap.at(det.catalogItem)++;
-            }
-            else {
-
-
-
-                m_itemNameCountmap.insert({det.catalogItem ,1});
+    bool OutputPanel::removeFromCountMap(const TItemSupport::DetectionResult& det) {
+        if (m_itemIDCountMap.find(det.catalogItem) != m_itemIDCountMap.end()) {
+            m_itemIDCountMap.at(det.catalogItem)--;
+            if (m_itemIDCountMap.at(det.catalogItem) == 0) {
+                m_itemIDCountMap.erase(det.catalogItem);
+                return true;
             }
         }
+        return false;
+    }
 
 
-    };
+    void OutputPanel::addToTotalCurrency(const TItemSupport::DetectionResult& det) {
 
-    void OutputPanel::depopulateCountMap(imageID id) {
-        auto res = m_coreptr->getDetectionResults(id);
-        if (!res)
-            return;
+        const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det.catalogItem);
 
-        for (auto& det : *res) {
-            if (m_itemNameCountmap.find(det.catalogItem) != m_itemNameCountmap.end()) {
-                m_itemNameCountmap.at(det.catalogItem)--;
+        std::string detUnit = catItem->getPrice().getUnit();
+        if (detUnit == "$") {
+            std::cout << "wdawd";
+        }
+        for (TDataTypes::TCurrency& cur : m_totalCurrencyValues) {
+            if (cur.getUnit() == detUnit) {
+                cur += catItem->getPrice();
+                return;
             }
         }
+        // This is a new currency unit weve never seen before
+        m_totalCurrencyValues.push_back(catItem->getPrice());
+    }
+   
 
+    void OutputPanel::removeFromTotalCurrency(const TItemSupport::DetectionResult& det) {
+
+        const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det.catalogItem);
+
+        std::string detUnit = catItem->getPrice().getUnit();
+        for (TDataTypes::TCurrency& cur : m_totalCurrencyValues) {
+            if (cur.getUnit() == detUnit){
+                cur -= catItem->getPrice();
+                return;
+            }
+        }
     }
 
 
     void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int count) {
         if (!det)
             return;
+
+        const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det->catalogItem);
+
+
+
         m_outputList->AppendRows(1);
         std::string countString = std::to_string(count);
         int row = m_outputList->GetNumberRows()-1;
         const std::unique_ptr<TItemTypes::TItem>& item = det->inputItem;
 
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), det->catalogItem->getName());
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), det->catalogItem->getDimAsString());
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), catItem->getName());
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), catItem->getDimAsString());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), countString);
-
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("CatalogItemId"), wxString::Format(wxT("%i"), det->catalogItem));
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("ParentImageId"), wxString::Format(wxT("%i"), det->parentImageID));
 
         // Add price info
-        wxString fleaString = wxString::FromUTF8(det->catalogItem->getPrice());
-        if (!det->catalogItem->getPricePerSlot().empty())
-            fleaString += "\n" + wxString::FromUTF8(det->catalogItem->getPricePerSlot());
-
-        wxString traderString = wxString::FromUTF8(det->catalogItem->getTraderSellPrice()) + "\n" + det->catalogItem->getTrader();
-
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
-
-
-
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), makeFleaString(catItem,1));
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), makeTraderString(catItem,1));
 
         // Add source image
         cv::Mat fmtSourceImage = formatImage(item->getImage(), m_imageMaxRows, m_imageMaxCols);
@@ -223,13 +292,17 @@ namespace TUI {
             new ImageGridCellRenderer(wxImage(fmtSourceImage.cols, fmtSourceImage.rows, fmtSourceImage.data, true)));
 
         // Add catalog image
-        cv::Mat fmtCatImage = formatImage(det->catalogItem->getImage(), m_imageMaxRows, m_imageMaxCols);
+        cv::Mat fmtCatImage = formatImage(catItem->getImage(), m_imageMaxRows, m_imageMaxCols);
         m_outputList->SetCellRenderer(row, m_columnIndexMap.at("CatalogImage"),
             new ImageGridCellRenderer(wxImage(fmtCatImage.cols, fmtCatImage.rows, fmtCatImage.data, true)));
 
     };
 
-    void OutputPanel::addItemToOutputList(const TItemTypes::TItem* itm, int count) {
+    // TODO: make it more clear that this is for when m_collapseSimilar is true...
+    void OutputPanel::addItemToOutputList(const TDataTypes::dcID id, int count) {
+
+        const TItemTypes::TItem* itm = m_coreptr->getCatalogItem(id);
+
         if (!itm)
             return;
         m_outputList->AppendRows(1);
@@ -239,17 +312,13 @@ namespace TUI {
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), itm->getName());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), itm->getDimAsString());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), countString);
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("CatalogItemId"), wxString::Format(wxT("%i"), id));
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("ParentImageId"), wxString::Format(wxT("%i"), -1)); // -1 because catalog images are not associated with a parent image.
 
 
         // Add price info
-        wxString fleaString = wxString::FromUTF8(itm->getPrice());
-        if (!itm->getPricePerSlot().empty())
-            fleaString += "\n" + wxString::FromUTF8(itm->getPricePerSlot());
-
-        wxString traderString = wxString::FromUTF8(itm->getTraderSellPrice()) + "\n" + itm->getTrader();
-
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), makeFleaString(itm,count));
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), makeTraderString(itm,count));
 
 
         // Add catalog image
@@ -258,28 +327,175 @@ namespace TUI {
             new ImageGridCellRenderer(wxImage(fmtCatImage.cols, fmtCatImage.rows, fmtCatImage.data, true)));
 
     };
+    void OutputPanel::removeItemsFromOutputList(const std::vector<TDataTypes::dcID>& ids){
+        if (!ids.size())
+            return;
+
+        std::set<TDataTypes::dcID> idSet(ids.begin(), ids.end());
+
+        int endIdx = m_outputList->GetNumberRows() - 1;
+        int r = 0;
+        while (r < endIdx) {
+            TDataTypes::dcID rowCatID = wxAtoi(m_outputList->GetCellValue(r, m_columnIndexMap.at("CatalogItemId")));
+            if (idSet.find(rowCatID) != idSet.end()) { // This is a row that must be removed
+                swapListRows(r, endIdx); // Swap row to be removed to the back.
+                endIdx--;
+            }
+            else { // This row does not need to be removed
+                r++;
+            }
+        }
+
+        int idxOfRemoval = endIdx + 1; // DeleteRows is start index inclusive.
+
+        // Remove rows from the back
+        if (idxOfRemoval <= m_outputList->GetNumberRows() - 1)
+            m_outputList->DeleteRows(idxOfRemoval, m_outputList->GetNumberRows() - idxOfRemoval);
+
+    }
+
+    void OutputPanel::removeItemsFromOutputList(const std::vector<TItemSupport::DetectionResult>* dets){
+        if (!dets || !dets->size())
+            return;
+
+        int idToRemove = dets->at(0).parentImageID; // All dets should have the same parentImageID.
+
+        int endIdx = m_outputList->GetNumberRows() - 1;
+        int r = 0;
+        while (r < endIdx) {
+            imageID parentID = wxAtoi(m_outputList->GetCellValue(r, m_columnIndexMap.at("ParentImageId")));
+            if (parentID == idToRemove) { // This is a row that must be removed
+                swapListRows(r, endIdx); // Swap row to be removed to the back.
+                endIdx--;
+            }
+            else { // This row does not need to be removed
+                r++;
+            }
+        }
+
+        int idxOfRemoval = endIdx + 1; // DeleteRows is start index inclusive.
+
+        // Remove rows from the back
+        if (idxOfRemoval <= m_outputList->GetNumberRows() - 1)
+            m_outputList->DeleteRows(idxOfRemoval, m_outputList->GetNumberRows() - idxOfRemoval);
+    }
+
+
+    wxString OutputPanel::makeFleaString(const TItemTypes::TItem* itm, int count) {
+        wxString fleaString = wxString::FromUTF8(itm->getPrice().getValueMultipledBy(count, true));
+
+        if (!itm->getPricePerSlot().getCurrencyString().empty())
+            fleaString += "\n" + wxString::FromUTF8(itm->getPricePerSlot().getValueMultipledBy(count, true));
+        return fleaString;
+    }
+
+    wxString OutputPanel::makeTraderString(const TItemTypes::TItem* itm, int count) {
+        return wxString::FromUTF8(itm->getTraderSellPrice().getValueMultipledBy(count, true)) + "\n" + itm->getTrader();
+    }
+
+
+    // Swap the values of two rows in the outputList
+    void OutputPanel::swapListRows(int rowA, int rowB) {
+
+        // Temp store values from rowA.
+        std::vector<std::pair<int, wxString>> temp; // store column idx, and value from that col.
+        for (auto& c : m_columnIndexMap) {
+            temp.push_back(std::make_pair(c.second, m_outputList->GetCellValue(rowA, c.second)));
+        }
+
+        // Store image renders.
+        wxGridCellRenderer* tempCatRender = m_outputList->GetCellRenderer(rowA, m_columnIndexMap.at("CatalogImage"));
+        wxGridCellRenderer* tempSourceRender = m_outputList->GetCellRenderer(rowA, m_columnIndexMap.at("SourceImage"));
+
+
+        // Copy values from rowB to rowA
+        for (auto& c : m_columnIndexMap) {
+            m_outputList->SetCellValue(rowA, c.second, m_outputList->GetCellValue(rowB, c.second));
+        }
+        // Copy image renderers.
+        m_outputList->SetCellRenderer(rowA, m_columnIndexMap.at("CatalogImage"), m_outputList->GetCellRenderer(rowB, m_columnIndexMap.at("CatalogImage")));
+        m_outputList->SetCellRenderer(rowA, m_columnIndexMap.at("SourceImage"), m_outputList->GetCellRenderer(rowB, m_columnIndexMap.at("SourceImage")));
+
+
+        // Copy temp values to rowB
+        for (auto& p : temp) {
+            m_outputList->SetCellValue(rowB, p.first, p.second);
+        }
+
+        m_outputList->SetCellRenderer(rowB, m_columnIndexMap.at("CatalogImage"), tempCatRender);
+        m_outputList->SetCellRenderer(rowB, m_columnIndexMap.at("SourceImage"), tempSourceRender);
+
+    }
+
+    void OutputPanel::updateTotalValueDisplay() {
+        wxString displayString = "Total Value: ";
+        for (TDataTypes::TCurrency& currency : m_totalCurrencyValues) {
+
+            displayString += (wxString::FromUTF8(currency.getCurrencyString(true)) + "     ");
+        }
+        m_totalValueBox->Clear();
+        m_totalValueBox->AppendText(displayString);
+    }
+
+
+    void OutputPanel::updateCounts(){
+        int numRows = m_outputList->GetNumberRows();
+
+        for (int row = 0; row < numRows - 1; row++) {
+            TDataTypes::dcID id = wxAtoi(m_outputList->GetCellValue(row, m_columnIndexMap.at("CatalogItemId")));
+            int count = (m_itemIDCountMap.find(id) != m_itemIDCountMap.end()) ? m_itemIDCountMap.at(id) : -1;
+            m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), wxString::Format(wxT("%i"), count));
+            
+            const TItemTypes::TItem* itm = m_coreptr->getCatalogItem(id);
+            if (!itm)
+                return;
+
+            // Update monetary counts.
+            m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), makeFleaString(itm, count));
+            m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), makeTraderString(itm, count));
+
+        }
+
+    }
+
     void OutputPanel::TEventReceived(TEvent::TEvent e) {
 
         switch (e.getType()) {
 
-
+        case TEvent::TEventEnum::ImageAdded:
+            if (m_showActiveOnly) {
+                break;
+            }
+            else {
+                addImageInfo(std::stoi(e.getData()));
+                break;
+            }
+            
         case TEvent::TEventEnum::ImageActivated:
-            populateOutputList(std::stoi(e.getData()));
-            break;
+            if (m_showActiveOnly) {
+                addImageInfo(std::stoi(e.getData()));
+                break;
+            }
+            else {
+                break;
+            }
+        
+        case TEvent::TEventEnum::ImageDeactivated:
+            if (m_showActiveOnly)
+                removeImageInfo(std::stoi(e.getData()));
+            else {
+                break;
+            }
 
         case TEvent::TEventEnum::ImageDeleted:
-        case TEvent::TEventEnum::ImageDeactivated:
-            refreshOutputList();
+            removeImageInfo(std::stoi(e.getData()));
             break;
+
         case TEvent::TEventEnum::AllImagesDeactivated:
             clearOutputList();
             break;
         }
     };
-
-
-
-
 
 
     DisplayPanel::DisplayPanel(TCore* core, wxWindow* parent,
@@ -615,8 +831,8 @@ namespace TUI {
         m_catalogDisplay->AppendRows(m_coreptr->getCatalogItemList().size());
         int currentRow = 0;
 
-        for (auto& item : m_coreptr->getCatalogItemList()) {
-            addItemToCatalogDisplay(item.get(), currentRow);
+        for (const TDataTypes::dcID& id : m_coreptr->getCatalogItemList()) {
+            addItemToCatalogDisplay(m_coreptr->getCatalogItem(id), currentRow);
             currentRow++;
         }
 
@@ -624,18 +840,17 @@ namespace TUI {
 
 
 
-    void CatalogPanel::addItemToCatalogDisplay(TItemTypes::TItem* item, int row) {
+    void CatalogPanel::addItemToCatalogDisplay(const TItemTypes::TItem* item, int row) {
         if (!item)
             return;
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Name"), item->getName());
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Dim"), item->getDimAsString());
 
+        wxString fleaString = wxString::FromUTF8(item->getPrice().getCurrencyString(true));
+        if (!item->getPricePerSlot().getCurrencyString().empty())
+            fleaString += "\n" + wxString::FromUTF8(item->getPricePerSlot().getCurrencyString(true));
 
-        wxString fleaString = wxString::FromUTF8(item->getPrice());
-        if (!item->getPricePerSlot().empty())
-            fleaString += "\n" + wxString::FromUTF8(item->getPricePerSlot());
-
-        wxString traderString = wxString::FromUTF8(item->getTraderSellPrice()) + "\n" + item->getTrader();
+        wxString traderString = wxString::FromUTF8(item->getTraderSellPrice().getCurrencyString(true)) + "\n" + item->getTrader();
 
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
@@ -850,7 +1065,7 @@ namespace TUI {
 
     void ImagePanel::makeImageWithDetections(imageID id) {
 
-        auto res = m_coreptr->getDetectionResults(id);
+        const std::vector<TItemSupport::DetectionResult>* res = m_coreptr->getDetectionResults(id);
         if (!res)
             return;
 

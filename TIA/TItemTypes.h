@@ -10,6 +10,7 @@
 // original meaning of the TItemTypes space
 namespace TItemSupport {
     
+
     struct PriceInfo {
 
         PriceInfo() {};
@@ -26,12 +27,14 @@ namespace TItemSupport {
             trader(trader) {}
 
 
-        std::string price;
-        std::string pricePerSlot;
-        std::string traderPrice;
-        std::string trader;
+        const TDataTypes::TCurrency price;
+        const TDataTypes::TCurrency pricePerSlot;
+        const TDataTypes::TCurrency traderPrice;
+        const std::string trader;
 
     };
+
+
 }
 
 namespace TItemTypes {
@@ -73,25 +76,25 @@ namespace TItemTypes {
         static void makeQualified(TItem& to, TItem& from);
 
 
-        const cv::Mat getImage() const { return m_image; };
+        const cv::Mat& getImage() const { return m_image; };
 
-        const std::string getName() const { return m_name; };
+        const std::string& getName() const { return m_name; };
 
-        const std::pair<int, int> getDim() const { return m_dim; };
+        const std::pair<int, int>& getDim() const { return m_dim; };
         const std::string getDimAsString(char dlm = 'x') const { return std::to_string(m_dim.first) + dlm + std::to_string(m_dim.second); };
 
         // Price info
         // Returns average flea price for item
-        const std::string getPrice() const;
+        const TDataTypes::TCurrency& getPrice() const;
 
         //Returns average flea price per slot for item
-        const std::string getPricePerSlot() const;
+        const TDataTypes::TCurrency& getPricePerSlot() const;
 
         // Get best trader sell price
-        const std::string getTraderSellPrice() const;
+        const TDataTypes::TCurrency& getTraderSellPrice() const;
 
         // Get name of best trader to sell to.
-        const std::string getTrader() const;
+        const std::string& getTrader() const;
 
 
         cv::Mat m_imageHash; // TODO: change this to proper type.
@@ -199,7 +202,7 @@ namespace TItemSupport {
 
         DetectionResult() {};
 
-        DetectionResult(TItemTypes::TItem* catItem,
+        DetectionResult(TDataTypes::dcID catItem,
                         std::unique_ptr<TItemTypes::TItem> inItem,
                         int parentImageID,
                         std::pair<cv::Point, cv::Point> itemLoc= std::make_pair(cv::Point(-1, -1), cv::Point(-1, -1)),
@@ -215,10 +218,10 @@ namespace TItemSupport {
         };
 
 
-        const TItemTypes::TItem* catalogItem;
+        TDataTypes::dcID catalogItem;
         std::unique_ptr<TItemTypes::TItem> inputItem;
 
-        int parentImageID; // ImageID from where the item was detected.
+        int parentImageID; // ImageID from where the item was detected. TODO: Make this imageID.
         std::pair<cv::Point, cv::Point> imageLoc; // Point locations in the parent image where item was detected. (top left corner, bottom right corner).
 
         bool detectionError = false; // Mostly for testing and debug uses, signify that this detection was wrong.

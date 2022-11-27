@@ -18,23 +18,23 @@ namespace TConfig {
         loadConfig(iniPath);
     }
 
-    const std::filesystem::path TConfig::getDATA_DIR() {
+    const std::filesystem::path& TConfig::getDATA_DIR() {
         return DATA_PATH;
     };
 
-    const std::filesystem::path TConfig::getACTIVE_CATALOG() {
+    const std::filesystem::path& TConfig::getACTIVE_CATALOG() {
         return ACTIVE_CATALOG_PATH;
     };
 
-    const std::filesystem::path TConfig::getRAW_CATALOGS_DIR() {
+    const std::filesystem::path& TConfig::getRAW_CATALOGS_DIR() {
         return RAW_CATALOGS_PATH;
     };
 
-    const std::filesystem::path TConfig::getCATALOGS_DIR() {
+    const std::filesystem::path& TConfig::getCATALOGS_DIR() {
         return CATALOGS_PATH;
     };
 
-    const std::filesystem::path TConfig::getROOT_DIR() {
+    const std::filesystem::path& TConfig::getROOT_DIR() {
         return ROOT_DIR;
     }
 

@@ -33,9 +33,14 @@ imageID TCore::addImage(std::unique_ptr<cv::Mat> image) {
 };
 
 void TCore::deleteImage(imageID id) {
+
     // Remove from m_idImageMap
     if (m_idImageMap.find(id) != m_idImageMap.end())
         m_idImageMap.erase(id);
+
+    // Notify observers first, they may need the images detection results to clean up.
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageDeleted, std::to_string(id)));
+
 
     // Remove from m_detectionResults
     if (m_detectionResults.find(id) != m_detectionResults.end())
@@ -43,7 +48,7 @@ void TCore::deleteImage(imageID id) {
 
     // Remove from activated Images (but silently to not trigger sending two events)
     m_activeImages.erase(id);
-    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageDeleted, std::to_string(id)));
+
 }
 
 
@@ -85,8 +90,10 @@ void TCore::activateImage(imageID id){
 void TCore::deactivateImage(imageID id) {
     if (m_activeImages.find(id) == m_activeImages.end())
         return;
-    m_activeImages.erase(id);
+
     notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ImageDeactivated, std::to_string(id)));
+    m_activeImages.erase(id);
+
 }
 
 void TCore::deactivateAllImages() {
@@ -144,8 +151,8 @@ void TCore::detectImageContent(imageID id) {
     // I dont know if I fully like this.. but they are guaranteed to be the same size so it works.
     for (int i = 0; i < res.size(); i++)
     {
-        TItemTypes::TItem* catalogMatch = m_dataCatalog.getBestMatch(*(res[i].get()));
-        if (!catalogMatch) // TODO: Do something smarter here...
+        TDataTypes::dcID catalogMatch = m_dataCatalog.getBestMatch(*(res[i].get()));
+        if (catalogMatch == -1) // TODO: Do something smarter here...
             continue;
 
         detResults.push_back(TItemSupport::DetectionResult(catalogMatch, std::move(res[i]),
@@ -162,6 +169,12 @@ const std::vector<imageID> TCore::getLoadedImageIDs() {
     }
     return idVect;
 }
+
+const TItemTypes::TItem* TCore::getCatalogItem(const TDataTypes::dcID catID) {
+    return m_dataCatalog.getItem(catID);
+}
+
+
 
 
 void TCore::setDATA_DIR(std::string dir) { m_configManager.setDATA_DIR(dir); };

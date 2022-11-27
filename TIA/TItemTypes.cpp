@@ -65,22 +65,22 @@ namespace TItemTypes {
     };
 
 
-    const std::string TItem::getPrice() const {
+    const TDataTypes::TCurrency& TItem::getPrice() const {
         return m_priceInfo.price;
     }
 
-    //Returns average flea price per slot for item
-    const std::string TItem::getPricePerSlot() const {
+    //Returns TDataTypes flea price per slot for item
+    const TDataTypes::TCurrency& TItem::getPricePerSlot() const {
         return m_priceInfo.pricePerSlot;
     }
 
     // Get best trader sell price
-    const std::string TItem::getTraderSellPrice() const {
+    const TDataTypes::TCurrency& TItem::getTraderSellPrice() const {
         return m_priceInfo.traderPrice;
     }
 
     // Get name of best trader to sell to.
-    const std::string TItem::getTrader() const {
+    const std::string& TItem::getTrader() const {
         return m_priceInfo.trader;
     }
 
@@ -126,5 +126,13 @@ namespace TItemTypes {
     {
         return a.m_name < b.m_name;
     }
+
+}
+
+
+namespace TItemSupport {
+
+
+    
 
 }
