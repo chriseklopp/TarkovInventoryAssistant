@@ -52,7 +52,10 @@ namespace TDataTypes
 
     std::string prettifyToString(int val) {
         std::string stringVal = std::to_string(val);
-        std::string ret(stringVal.size() + int(stringVal.size() / 3), ' ');
+        int numCommas = round((stringVal.size() - 1) / 3);
+        if (!numCommas)
+            return stringVal;
+        std::string ret(stringVal.size() + numCommas, ' ');
 
         int count = 0;
         int retItr = ret.size() - 1;
@@ -112,6 +115,7 @@ namespace TDataTypes
         // Implies this has a prepended unit.
         if (lastDigitIdx == currString.size() - 1) {
             m_isPrependedUnit = true;
+            m_unit = currString.substr(0,1);
             std::string val = currString.substr(1);
             val.erase(std::remove(val.begin(), val.end(), ','), val.end());
             m_value = std::stoi(val);
@@ -131,9 +135,15 @@ namespace TDataTypes
         return m_value;
     }
 
-    const std::string TCurrency::getCurrencyString() const {
+    const std::string TCurrency::getCurrencyString(bool prettify) const {
         if (m_value) {
-            return m_isPrependedUnit ? m_unit + std::to_string(m_value) : std::to_string(m_value) + m_unit;
+            if (m_unit == "$") {
+                std::cout << "wed";
+            }
+            if(!prettify)
+                return m_isPrependedUnit ? m_unit + std::to_string(m_value) : std::to_string(m_value) + m_unit;
+            else
+                return m_isPrependedUnit ? m_unit + TDataTypes::prettifyToString(m_value) : TDataTypes::prettifyToString(m_value) + m_unit;
         }
         else
             return "";

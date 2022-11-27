@@ -128,6 +128,7 @@ namespace TUI {
                 addItemToOutputList(&det, 1);
             }
         }
+        updateTotalValueDisplay();
     }
 
     void OutputPanel::removeImageInfo(imageID id) {
@@ -170,7 +171,7 @@ namespace TUI {
             }
             removeItemsFromOutputList(res);
         }
-
+        updateTotalValueDisplay();
     }
 
     void OutputPanel::refreshOutputList() {
@@ -192,6 +193,7 @@ namespace TUI {
             m_outputList->DeleteRows(0, m_outputList->GetNumberRows());
         m_itemIDCountMap.clear();
         m_totalCurrencyValues.clear();
+        updateTotalValueDisplay();
 
     }
 
@@ -233,6 +235,9 @@ namespace TUI {
         const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det.catalogItem);
 
         std::string detUnit = catItem->getPrice().getUnit();
+        if (detUnit == "$") {
+            std::cout << "wdawd";
+        }
         for (TDataTypes::TCurrency& cur : m_totalCurrencyValues) {
             if (cur.getUnit() == detUnit) {
                 cur += catItem->getPrice();
@@ -278,14 +283,8 @@ namespace TUI {
         m_outputList->SetCellValue(row, m_columnIndexMap.at("ParentImageId"), wxString::Format(wxT("%i"), det->parentImageID));
 
         // Add price info
-        wxString fleaString = wxString::FromUTF8(catItem->getPrice().getCurrencyString());
-        if (!catItem->getPricePerSlot().getCurrencyString().empty())
-            fleaString += "\n" + wxString::FromUTF8(catItem->getPricePerSlot().getCurrencyString());
-
-        wxString traderString = wxString::FromUTF8(catItem->getTraderSellPrice().getCurrencyString()) + "\n" + catItem->getTrader();
-
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), makeFleaString(catItem,1));
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), makeTraderString(catItem,1));
 
         // Add source image
         cv::Mat fmtSourceImage = formatImage(item->getImage(), m_imageMaxRows, m_imageMaxCols);
@@ -318,15 +317,8 @@ namespace TUI {
 
 
         // Add price info
-        wxString fleaString = wxString::FromUTF8(itm->getPrice().getValueMultipledBy(count));
-
-        if (!itm->getPricePerSlot().getCurrencyString().empty())
-            fleaString += "\n" + wxString::FromUTF8(itm->getPricePerSlot().getValueMultipledBy(count));
-
-        wxString traderString = wxString::FromUTF8(itm->getTraderSellPrice().getValueMultipledBy(count)) + "\n" + itm->getTrader();
-
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
-        m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), makeFleaString(itm,count));
+        m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), makeTraderString(itm,count));
 
 
         // Add catalog image
@@ -335,7 +327,6 @@ namespace TUI {
             new ImageGridCellRenderer(wxImage(fmtCatImage.cols, fmtCatImage.rows, fmtCatImage.data, true)));
 
     };
-
     void OutputPanel::removeItemsFromOutputList(const std::vector<TDataTypes::dcID>& ids){
         if (!ids.size())
             return;
@@ -390,6 +381,19 @@ namespace TUI {
     }
 
 
+    wxString OutputPanel::makeFleaString(const TItemTypes::TItem* itm, int count) {
+        wxString fleaString = wxString::FromUTF8(itm->getPrice().getValueMultipledBy(count, true));
+
+        if (!itm->getPricePerSlot().getCurrencyString().empty())
+            fleaString += "\n" + wxString::FromUTF8(itm->getPricePerSlot().getValueMultipledBy(count, true));
+        return fleaString;
+    }
+
+    wxString OutputPanel::makeTraderString(const TItemTypes::TItem* itm, int count) {
+        return wxString::FromUTF8(itm->getTraderSellPrice().getValueMultipledBy(count, true)) + "\n" + itm->getTrader();
+    }
+
+
     // Swap the values of two rows in the outputList
     void OutputPanel::swapListRows(int rowA, int rowB) {
 
@@ -423,6 +427,16 @@ namespace TUI {
 
     }
 
+    void OutputPanel::updateTotalValueDisplay() {
+        wxString displayString = "Total Value: ";
+        for (TDataTypes::TCurrency& currency : m_totalCurrencyValues) {
+
+            displayString += (wxString::FromUTF8(currency.getCurrencyString(true)) + "     ");
+        }
+        m_totalValueBox->Clear();
+        m_totalValueBox->AppendText(displayString);
+    }
+
 
     void OutputPanel::updateCounts(){
         int numRows = m_outputList->GetNumberRows();
@@ -430,8 +444,16 @@ namespace TUI {
         for (int row = 0; row < numRows - 1; row++) {
             TDataTypes::dcID id = wxAtoi(m_outputList->GetCellValue(row, m_columnIndexMap.at("CatalogItemId")));
             int count = (m_itemIDCountMap.find(id) != m_itemIDCountMap.end()) ? m_itemIDCountMap.at(id) : -1;
-            m_outputList->SetCellValue(row, m_columnIndexMap.at("CatalogItemId"), wxString::Format(wxT("%i"), count));
-                                                                        
+            m_outputList->SetCellValue(row, m_columnIndexMap.at("Count"), wxString::Format(wxT("%i"), count));
+            
+            const TItemTypes::TItem* itm = m_coreptr->getCatalogItem(id);
+            if (!itm)
+                return;
+
+            // Update monetary counts.
+            m_outputList->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), makeFleaString(itm, count));
+            m_outputList->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), makeTraderString(itm, count));
+
         }
 
     }
@@ -824,11 +846,11 @@ namespace TUI {
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Name"), item->getName());
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("Dim"), item->getDimAsString());
 
-        wxString fleaString = wxString::FromUTF8(item->getPrice().getCurrencyString());
+        wxString fleaString = wxString::FromUTF8(item->getPrice().getCurrencyString(true));
         if (!item->getPricePerSlot().getCurrencyString().empty())
-            fleaString += "\n" + wxString::FromUTF8(item->getPricePerSlot().getCurrencyString());
+            fleaString += "\n" + wxString::FromUTF8(item->getPricePerSlot().getCurrencyString(true));
 
-        wxString traderString = wxString::FromUTF8(item->getTraderSellPrice().getCurrencyString()) + "\n" + item->getTrader();
+        wxString traderString = wxString::FromUTF8(item->getTraderSellPrice().getCurrencyString(true)) + "\n" + item->getTrader();
 
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("FleaPrice"), fleaString);
         m_catalogDisplay->SetCellValue(row, m_columnIndexMap.at("TraderPrice"), traderString);

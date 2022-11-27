@@ -84,7 +84,7 @@ namespace TDataTypes
         ~TCurrency() {};
 
         const int& getValue() const;
-        const std::string getCurrencyString() const;
+        const std::string getCurrencyString(bool prettify=false) const;
         const std::string& getUnit() const;
         const bool& isPrependedUnit() const;
 

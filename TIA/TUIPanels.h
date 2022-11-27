@@ -139,7 +139,8 @@ namespace TUI {
         void removeItemsFromOutputList(const std::vector<TDataTypes::dcID>& ids);
         void removeItemsFromOutputList(const std::vector<TItemSupport::DetectionResult>* dets);
 
-
+        wxString makeFleaString(const TItemTypes::TItem* itm, int count);
+        wxString makeTraderString(const TItemTypes::TItem* itm, int count);
 
         // Update all item counts using the count map.
         void updateCounts();
