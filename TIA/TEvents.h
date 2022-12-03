@@ -10,7 +10,8 @@ namespace TEvent {
         ImageActivated = 3,
         ImageDeactivated = 4,
         ImagesCleared = 5,
-        AllImagesDeactivated = 6
+        AllImagesDeactivated = 6,
+        ConsoleMessage = 7
     };
 
     class TEvent {
