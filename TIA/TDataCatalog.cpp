@@ -56,6 +56,7 @@ namespace TDataCatalog {
         if (!file.is_open())
             return false;
 
+        int writeSuccesses = 0;
         for (auto modulePath : modules) {
 
             // Write item data
@@ -63,7 +64,10 @@ namespace TDataCatalog {
             for (auto modFile : modItr) {
                 if (std::filesystem::is_directory(modFile))
                     continue;
-                writeFileToCompiledCatalog(modFile.path(), file, makeRotatedItems);
+                if (writeFileToCompiledCatalog(modFile.path(), file, makeRotatedItems))
+                    writeSuccesses++;
+                else
+                    continue;
             }
             // Copy images to new image directory.
             std::filesystem::copy(modulePath / "images", imPath, std::filesystem::copy_options::update_existing);
@@ -71,12 +75,19 @@ namespace TDataCatalog {
 
         // Clean Up
         file.close();
-        std::cout << "Successfully Generated Catalog: " << catPath << "\n";
+        if (!writeSuccesses) { // There we NO successful writes, clearly this directory is not a valid raw catalog..
+            std::filesystem::remove(catPath);
+            return false;
+        }
+
         return true;
+            
+
+        
     };
 
 
-    void TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
+    bool TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
         std::ofstream& out,
         bool makeRotations) {
 
@@ -88,60 +99,62 @@ namespace TDataCatalog {
         in.open(file);
 
         if (!in.is_open())
-            return;
+            return false;
 
         std::string line;
         std::vector<std::string> fields;
+        try {
+            // Skip header. (For now; maybe I'll utilize this in future to make it more robust).
+            std::getline(in, line);
 
-        // Skip header. (For now; maybe I'll utilize this in future to make it more robust).
-        std::getline(in, line);
+            while (std::getline(in, line)) {
+                fields.clear();
+                TDataTypes::splitString(line, ',', fields);
+                std::string imagesPath((file.parent_path() / "images" / fields.at(1)).string());
+                cv::Mat image(cv::imread(imagesPath));
+                if (image.empty()) {
+                    std::cout << "Attempted to load invalid image: skipping it \n";
+                    continue;
+                }
 
-        while (std::getline(in, line)) {
-            fields.clear();
-            TDataTypes::splitString(line, ',', fields);
+                // Make rotated items.
+                if (makeRotations) {
+                    std::vector<std::string> rotFields = fields;
+                    rotFields.push_back("1");
 
-            std::string imagesPath((file.parent_path() / "images" / fields.at(1)).string());
-            cv::Mat image(cv::imread(imagesPath));
-            if (image.empty()) {
-                std::cout << "Attempted to load invalid image: skipping it \n";
-                continue;
-            }
+                    // Rotate image clockwise??? 90 degrees.
+                    cv::Mat rotImage;
+                    cv::transpose(image, rotImage);
+                    cv::flip(rotImage, rotImage, 1);
 
-            // Make rotated items.
-            if (makeRotations) {
-                std::vector<std::string> rotFields = fields;
-                rotFields.push_back("1");
+                    // Construct hash, convert it to string and add to vector
 
-                // Rotate image clockwise??? 90 degrees.
-                cv::Mat rotImage;
-                cv::transpose(image, rotImage);
-                cv::flip(rotImage, rotImage, 1);
+                    cv::Mat rotImHash(Hash::PhashImage(rotImage));
+                    std::vector<int> hashvec(rotImHash.begin<cv::uint8_t>(), rotImHash.end<cv::uint8_t>());
+                    fields.push_back(TDataTypes::joinVector(hashvec, '-'));
+                    out << TDataTypes::joinVector(rotFields, ',') << "\n";
+                }
+
+                // Rotation indicator (false)
+                fields.push_back("0");
 
                 // Construct hash, convert it to string and add to vector
-
-                cv::Mat rotImHash(Hash::PhashImage(rotImage));
-                std::vector<int> hashvec(rotImHash.begin<cv::uint8_t>(), rotImHash.end<cv::uint8_t>());
+                cv::Mat imHash(Hash::PhashImage(image));
+                std::vector<int> hashvec(imHash.begin<cv::uint8_t>(), imHash.end<cv::uint8_t>());
                 fields.push_back(TDataTypes::joinVector(hashvec, '-'));
-                out << TDataTypes::joinVector(rotFields, ',') << "\n";
+
+                // Join and write to file.
+                out << TDataTypes::joinVector(fields, ',') << "\n";
+
             }
 
-            // Rotation indicator (false)
-            fields.push_back("0");
-
-            // Construct hash, convert it to string and add to vector
-            cv::Mat imHash(Hash::PhashImage(image));
-            std::vector<int> hashvec(imHash.begin<cv::uint8_t>(), imHash.end<cv::uint8_t>());
-            fields.push_back(TDataTypes::joinVector(hashvec, '-'));
-
-            // Join and write to file.
-            out << TDataTypes::joinVector(fields, ',') << "\n";
-
+            // Clean up
+            in.close();
         }
-
-        // Clean up
-        in.close();
-
-        return;
+        catch (std::out_of_range) {
+            return false; // Something is wrong with this module.
+        }
+        return true;
     };
 
     std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(const std::string& instring) {
@@ -350,6 +363,8 @@ namespace TDataCatalog {
 
         }
 
+        if (!m_items.size())
+            return false;
         // Finally make our VPTree structures.
         makeVPTrees();
         std::cout << "Loaded catalog of size: " << m_items.size() << "\n";
@@ -418,7 +433,10 @@ namespace TDataCatalog {
 
 
         // Find modules in the catalog.
-        for (auto itr = std::filesystem::directory_iterator(catalog); itr != std::filesystem::end(itr); ++itr) {
+        for (auto& itr = std::filesystem::directory_iterator(catalog); itr != std::filesystem::end(itr); ++itr) {
+            if (!std::filesystem::exists(*itr / "images"))
+                continue;
+
             outMods.push_back(*itr);
         }
 
