@@ -200,6 +200,11 @@ namespace TUI {
                 addImageInfo(id);
             }
         }
+        if (m_collapseSimilarItems)
+            m_outputList->HideCol(m_columnIndexMap.at("SourceImage"));
+        else
+            m_outputList->ShowCol(m_columnIndexMap.at("SourceImage"));
+
     }
     void OutputPanel::clearOutputList() {
         if (m_outputList->GetNumberRows())
