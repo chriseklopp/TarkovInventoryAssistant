@@ -98,10 +98,10 @@ public:
 
     // Loads the config specified.
     // If empty, will attempt to load catalog specified by the config.
-    void loadCatalog(std::string dir="");
+    bool loadCatalog(std::filesystem::path dir="");
 
     // Create a compiled catalog from a raw catalog.
-    void compileRawCatalog(std::filesystem::path& path);
+    void compileRawCatalog(std::filesystem::path& path, std::string name, bool makeRotations);
 
     // Save config settings to file.
     void saveConfig();

@@ -180,18 +180,18 @@ const TItemTypes::TItem* TCore::getCatalogItem(const TDataTypes::dcID catID) {
 void TCore::setDATA_DIR(std::string dir) { m_configManager.setDATA_DIR(dir); };
 
 void TCore::setACTIVECATALOG(std::string dir) {
-    m_configManager.setACTIVECATALOG(dir);
-    loadCatalog(dir);
+    if(loadCatalog(dir))
+        m_configManager.setACTIVECATALOG(dir);
 };
 
 void TCore::setRAW_CATALOGS_DIR(std::string dir){ m_configManager.setRAW_CATALOGS_DIR(dir); };
 
 void TCore::setCATALOGS_DIR(std::string dir) { m_configManager.setCATALOGS_DIR(dir); };
 
-void TCore::loadCatalog(std::string dir) {
+bool TCore::loadCatalog(std::filesystem::path dir) {
     if (dir.empty())
-        dir = m_config->getACTIVE_CATALOG().string();
-    bool success = m_dataCatalog.loadCatalog(m_config->getACTIVE_CATALOG());
+        dir = m_config->getACTIVE_CATALOG();
+    bool success = m_dataCatalog.loadCatalog(dir);
     if (success) {
         // We need to remake all detections using the new catalog.
         m_detectionResults.clear();
@@ -199,12 +199,22 @@ void TCore::loadCatalog(std::string dir) {
             detectImageContent(itr.first);
         }
     }
-    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::CatalogChanged, dir, success));
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::CatalogChanged, dir.string(), success));
+    return success;
 }
 
 
-void TCore::compileRawCatalog(std::filesystem::path& path) {
-    m_dataCatalog.compileCatalogFromRaw(path, false);
+void TCore::compileRawCatalog(std::filesystem::path& path, std::string name, bool makeRotations) {
+    bool res = m_dataCatalog.compileCatalogFromRaw(path, name, false);
+    std::string message;
+    if (res) {
+        message = "Successfully created Compiled Catalog: " + m_config->getCATALOGS_DIR().string() + "/" + name;
+    }
+    else {
+        message = "Failed to create Compiled Catalog: " + path.string() + "\nRaw Catalog may be invalid.";
+    }
+
+    notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ConsoleMessage, message));
 }
 
 

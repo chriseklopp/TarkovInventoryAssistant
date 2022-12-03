@@ -390,6 +390,43 @@ namespace TUI {
     };
 
 
+    class CompileCatalogDialog : public wxDialog
+    {
+
+    public:
+
+        CompileCatalogDialog(TCore* core, wxWindow* parent,
+            wxWindowID id = wxID_ANY,
+            const wxString& title = wxT("Catalog Compiler"),
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxSize(552, 240),
+            long style = wxDEFAULT_DIALOG_STYLE);
+
+    private:
+        void OnCompile(wxCommandEvent& evt);
+        void OnCancel(wxCommandEvent& evt);
+        void OnRawPathSelected(wxFileDirPickerEvent& evt);
+        void OnToggleRotations(wxCommandEvent& evt);
+
+        wxStaticLine* m_headerLine;
+        wxStaticText* m_rawCatalogPathText;
+        wxDirPickerCtrl* m_rawCatalogPathSelect;
+        wxStaticLine* m_optionLine;
+        wxStaticText* m_catalogNameText;
+        wxTextCtrl* m_catalogNameSelect;
+        wxCheckBox* m_toggleGenerateRotations;
+        wxStaticLine* m_footerLine;
+        wxButton* m_cancelButton;
+        wxButton* m_compileButton;
+
+        wxStaticBoxSizer* m_optionSizer;
+
+
+
+        // Pointer to the core object.
+        TCore* m_coreptr;
+
+    };
 
 
     class ImageGridCellRenderer : public wxGridCellStringRenderer
