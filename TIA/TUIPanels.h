@@ -405,7 +405,8 @@ namespace TUI {
     private:
         void OnCompile(wxCommandEvent& evt);
         void OnCancel(wxCommandEvent& evt);
-
+        void OnRawPathSelected(wxFileDirPickerEvent& evt);
+        void OnToggleRotations(wxCommandEvent& evt);
 
         wxStaticLine* m_headerLine;
         wxStaticText* m_rawCatalogPathText;
@@ -413,10 +414,14 @@ namespace TUI {
         wxStaticLine* m_optionLine;
         wxStaticText* m_catalogNameText;
         wxTextCtrl* m_catalogNameSelect;
-        wxCheckBox* m_generateRotationsCheckBox;
+        wxCheckBox* m_toggleGenerateRotations;
         wxStaticLine* m_footerLine;
         wxButton* m_cancelButton;
         wxButton* m_compileButton;
+
+        wxStaticBoxSizer* m_optionSizer;
+
+
 
         // Pointer to the core object.
         TCore* m_coreptr;

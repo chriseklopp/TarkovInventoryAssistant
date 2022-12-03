@@ -746,6 +746,11 @@ namespace TUI {
 
         switch (e.getType()) {
 
+            // Unlike other events, console message data is posted directly to the console.
+            case TEvent::TEventEnum::ConsoleMessage:
+                m_consoleOutput->AppendText(e.getData() + "\n");
+                break;
+
             case TEvent::TEventEnum::ImageAdded:
                 m_consoleOutput->AppendText("Image Added: ID=" + e.getData() +
                     " Detections=" + std::to_string(m_coreptr->getDetectionResults(std::stoi(e.getData()))->size()) + "\n");
@@ -925,7 +930,6 @@ namespace TUI {
         size,
         style) {
 
-
         wxBoxSizer* bSizer1;
         bSizer1 = new wxBoxSizer(wxVERTICAL);
 
@@ -946,8 +950,8 @@ namespace TUI {
         bSizer1->Add(m_compiledCatalogText, 0, wxALL, 5);
 
         m_catalogSelect = new wxDirPickerCtrl(this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE);
-        m_catalogSelect->SetInitialDirectory(m_coreptr->getConfigPtr()->getCATALOGS_DIR().string());
         m_catalogSelect->SetPath(m_coreptr->getConfigPtr()->getACTIVE_CATALOG().string());
+        m_catalogSelect->SetInitialDirectory(m_coreptr->getConfigPtr()->getCATALOGS_DIR().string());
         bSizer1->Add(m_catalogSelect, 0, wxEXPAND | wxALL, 5);
 
 
@@ -1015,6 +1019,7 @@ namespace TUI {
 
 
         m_rawCatalogPathSelect = new wxDirPickerCtrl(this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE);
+        m_rawCatalogPathSelect->SetInitialDirectory(m_coreptr->getConfigPtr()->getRAW_CATALOGS_DIR().string());
         sizer->Add(m_rawCatalogPathSelect, 1, wxEXPAND | wxALL, 5);
 
 
@@ -1022,23 +1027,22 @@ namespace TUI {
         sizer->Add(m_optionLine, 0, wxEXPAND | wxALL, 5);
 
 
-        wxBoxSizer* optionSizer;
-        optionSizer = new wxBoxSizer(wxHORIZONTAL);
+        m_optionSizer = new wxStaticBoxSizer(wxHORIZONTAL,this);
 
         wxBoxSizer* nameSizer;
         nameSizer = new wxBoxSizer(wxVERTICAL);
 
 
-        m_catalogNameText = new wxStaticText(this, wxID_ANY, wxT("Catalog Name"), wxDefaultPosition, wxDefaultSize, 0);
+        m_catalogNameText = new wxStaticText(m_optionSizer->GetStaticBox(), wxID_ANY, wxT("Catalog Name"), wxDefaultPosition, wxDefaultSize, 0);
         m_catalogNameText->Wrap(-1);
         nameSizer->Add(m_catalogNameText, 1, wxUP | wxLEFT, 5);
 
 
-        m_catalogNameSelect = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
+
+        m_catalogNameSelect = new wxTextCtrl(m_optionSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
         nameSizer->Add(m_catalogNameSelect, 1, wxEXPAND | wxALL, 5);
 
-
-        optionSizer->Add(nameSizer, 2, wxEXPAND, 5);
+        m_optionSizer->Add(nameSizer, 2, wxEXPAND, 5);
 
         wxBoxSizer* m_checkboxOptionSizer;
         m_checkboxOptionSizer = new wxBoxSizer(wxVERTICAL);
@@ -1046,14 +1050,16 @@ namespace TUI {
 
         m_checkboxOptionSizer->Add(0, 0, 1, wxEXPAND, 5);
 
-        m_toggleGenerateRotations = new wxCheckBox(this, wxID_ANY, wxT("Generate Rotations"), wxDefaultPosition, wxDefaultSize, 0);
+        m_toggleGenerateRotations = new wxCheckBox(m_optionSizer->GetStaticBox(), wxID_ANY, wxT("Generate Rotations"), wxDefaultPosition, wxDefaultSize, 0);
         m_checkboxOptionSizer->Add(m_toggleGenerateRotations, 0, wxALL, 5);
 
 
-        optionSizer->Add(m_checkboxOptionSizer, 1, wxEXPAND, 5);
+        m_optionSizer->Add(m_checkboxOptionSizer, 1, wxEXPAND, 5);
+
+        m_optionSizer->GetStaticBox()->Disable();
 
 
-        sizer->Add(optionSizer, 1, wxEXPAND, 5);
+        sizer->Add(m_optionSizer, 1, wxEXPAND, 5);
 
         m_footerLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
         sizer->Add(m_footerLine, 0, wxEXPAND | wxALL, 5);
@@ -1069,11 +1075,13 @@ namespace TUI {
 
         m_compileButton = new wxButton(this, wxID_OK, wxT("Compile"), wxDefaultPosition, wxDefaultSize, 0);
         footerSizer->Add(m_compileButton, 0, wxLEFT | wxRIGHT, 5);
-
+        m_compileButton->Disable();
 
         sizer->Add(footerSizer, 1, wxEXPAND);
 
         Bind(wxEVT_BUTTON, &CompileCatalogDialog::OnCompile, this, wxID_OK);
+        m_rawCatalogPathSelect->Bind(wxEVT_DIRPICKER_CHANGED, &CompileCatalogDialog::OnRawPathSelected, this, wxID_ANY);
+        m_toggleGenerateRotations->Bind(wxEVT_CHECKBOX, &CompileCatalogDialog::OnToggleRotations, this);
 
         this->SetSizer(sizer);
         this->Layout();
@@ -1085,12 +1093,23 @@ namespace TUI {
     void CompileCatalogDialog::OnCompile(wxCommandEvent& evt){
 
         // Send our request to the core.
-
-        std::string rawpath = m_rawCatalogPathSelect->GetTextCtrlValue().ToStdString();
-
+        std::filesystem::path rawpath = m_rawCatalogPathSelect->GetTextCtrlValue().ToStdString();
         std::string name = m_catalogNameSelect->GetValue().ToStdString();
         bool makeRotations = m_toggleGenerateRotations->GetValue();
-        // TODO: Finish
+
+        // Check if path exists and warn it will be overrwritten.
+        std::filesystem::path candidatePath = m_coreptr->getConfigPtr()->getCATALOGS_DIR() / name;
+        if (std::filesystem::exists(candidatePath)) {
+            // Open pop up that existing catalog will be overritten.
+            wxMessageDialog* pathExistsDialog = new wxMessageDialog(NULL,
+                wxT("Warning: " + candidatePath.string() + " already exists.\nWould you like to overrite it? "), wxT("Warning"), wxYES_NO | wxNO_DEFAULT | wxICON_EXCLAMATION);
+            int res = pathExistsDialog->ShowModal();
+            if (res == wxID_NO)
+                return;
+        }
+
+        m_coreptr->compileRawCatalog(rawpath, name, makeRotations);
+
         Close();
     }
 
@@ -1099,9 +1118,29 @@ namespace TUI {
     }
 
 
+    void CompileCatalogDialog::OnRawPathSelected(wxFileDirPickerEvent& evt) {
+        m_rawCatalogPathSelect->Unbind(wxEVT_DIRPICKER_CHANGED, &CompileCatalogDialog::OnRawPathSelected, this, wxID_ANY);
+        m_compileButton->Enable();
+        m_optionSizer->GetStaticBox()->Enable();
+        std::filesystem::path p = m_rawCatalogPathSelect->GetTextCtrlValue().ToStdString();
+        m_catalogNameSelect->SetValue("ItemCatalog_"+ p.filename().string());
+    }
 
+    void CompileCatalogDialog::OnToggleRotations(wxCommandEvent& evt) {
+        wxString currentName = m_catalogNameSelect->GetValue();
+        if (evt.IsChecked()) {
+            currentName += "_wRotations";
+            m_catalogNameSelect->SetValue(currentName);
+        }
+        else {
+            size_t idx = currentName.find("_wRotations");
+            if (idx != wxNOT_FOUND) {
+                currentName.erase(idx);
+                m_catalogNameSelect->SetValue(currentName);
+            }
+        }
 
-
+    }
 
     void ImagePanel::paintEvent(wxPaintEvent& evt)
     {
