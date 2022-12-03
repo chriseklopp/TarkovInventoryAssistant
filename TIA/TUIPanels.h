@@ -133,8 +133,8 @@ namespace TUI {
 
     private:
 
-        void addItemToOutputList(const TItemSupport::DetectionResult* item, int count=1);
-        void addItemToOutputList(const TDataTypes::dcID id, int count=1);
+        void addItemToOutputList(const TItemSupport::DetectionResult* item, int row,  int count=1);
+        void addItemToOutputList(const TDataTypes::dcID id, int row, int count=1);
 
         void removeItemsFromOutputList(const std::vector<TDataTypes::dcID>& ids);
         void removeItemsFromOutputList(const std::vector<TItemSupport::DetectionResult>* dets);

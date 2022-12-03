@@ -112,9 +112,15 @@ namespace TUI {
                     newItems.push_back(det.catalogItem);
                 addToTotalCurrency(det);
             }
+
+            // Get previous final row.
+            int row = m_outputList->GetNumberRows() - 1;
+            m_outputList->AppendRows(newItems.size());
+
             // Append any new items to the outputList
             for (TDataTypes::dcID& itm : newItems) {
-                addItemToOutputList(itm, 1);
+                row++;
+                addItemToOutputList(itm, row, 1);
             }
 
             // Update counts of all existing items.
@@ -122,10 +128,17 @@ namespace TUI {
         }
 
         else {
+
+            // Get previous final row.
+            int row = m_outputList->GetNumberRows() - 1;
+
+            m_outputList->AppendRows(res->size());
+
             for (auto& det : *res) {
+                row++;
                 addToCountMap(det);
                 addToTotalCurrency(det);
-                addItemToOutputList(&det, 1);
+                addItemToOutputList(&det, row, 1);
             }
         }
         updateTotalValueDisplay();
@@ -262,18 +275,14 @@ namespace TUI {
         }
     }
 
-
-    void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int count) {
+    void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int row, int count) {
         if (!det)
             return;
 
         const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det->catalogItem);
 
-
-
-        m_outputList->AppendRows(1);
         std::string countString = std::to_string(count);
-        int row = m_outputList->GetNumberRows()-1;
+
         const std::unique_ptr<TItemTypes::TItem>& item = det->inputItem;
 
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), catItem->getName());
@@ -299,15 +308,15 @@ namespace TUI {
     };
 
     // TODO: make it more clear that this is for when m_collapseSimilar is true...
-    void OutputPanel::addItemToOutputList(const TDataTypes::dcID id, int count) {
+    void OutputPanel::addItemToOutputList(const TDataTypes::dcID id, int row, int count) {
 
         const TItemTypes::TItem* itm = m_coreptr->getCatalogItem(id);
 
         if (!itm)
             return;
-        m_outputList->AppendRows(1);
+
         std::string countString = std::to_string(count);
-        int row = m_outputList->GetNumberRows() - 1;
+
 
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), itm->getName());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), itm->getDimAsString());
