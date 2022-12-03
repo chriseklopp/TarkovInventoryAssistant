@@ -133,10 +133,10 @@ namespace TUI {
 
     private:
 
-        void addItemToOutputList(const TItemSupport::DetectionResult* item, int count=1);
+        void addItemToOutputList(const TItemSupport::DetectionResult* item, int row, int count=1);
 
 
-        void addItemToOutputList(const TItemTypes::TItem* itm, int count=1);
+        void addItemToOutputList(const TItemTypes::TItem* itm, int row, int count=1);
 
         void populateCountMap(imageID id);
 

@@ -100,8 +100,17 @@ namespace TUI {
 
         if (m_collapseSimilarItems) {
             // Populate collapsed list.
+
+            // Get previous final row.
+            int row = m_outputList->GetNumberRows() - 1;
+
+
+            // Add number of rows to output list.
+            m_outputList->AppendRows(m_itemNameCountmap.size());
+
             for (auto p : m_itemNameCountmap) {
-                addItemToOutputList(p.first, p.second);
+                row++;
+                addItemToOutputList(p.first, row, p.second);
             }
         }
         else {
@@ -110,8 +119,15 @@ namespace TUI {
             if (!res)
                 return;
 
+            // Get previous final row.
+            int row = m_outputList->GetNumberRows() - 1;
+
+            // Add number of rows to output list.
+            m_outputList->AppendRows(res->size());
+
             for (auto& det : *res) {
-                addItemToOutputList(&det, 1);
+                row++;
+                addItemToOutputList(&det, row, 1);
             }
 
         }
@@ -191,12 +207,12 @@ namespace TUI {
     }
 
 
-    void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int count) {
+    void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int row, int count) {
         if (!det)
             return;
-        m_outputList->AppendRows(1);
+
         std::string countString = std::to_string(count);
-        int row = m_outputList->GetNumberRows()-1;
+
         const std::unique_ptr<TItemTypes::TItem>& item = det->inputItem;
 
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), det->catalogItem->getName());
@@ -229,12 +245,11 @@ namespace TUI {
 
     };
 
-    void OutputPanel::addItemToOutputList(const TItemTypes::TItem* itm, int count) {
+    void OutputPanel::addItemToOutputList(const TItemTypes::TItem* itm, int row, int count) {
         if (!itm)
             return;
-        m_outputList->AppendRows(1);
         std::string countString = std::to_string(count);
-        int row = m_outputList->GetNumberRows() - 1;
+
 
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), itm->getName());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), itm->getDimAsString());
