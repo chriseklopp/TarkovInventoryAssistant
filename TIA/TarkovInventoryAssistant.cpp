@@ -60,33 +60,41 @@ TIAFrame::TIAFrame()
     upperLowerSplitter->SetSashGravity(.7);
     this->SetSizerAndFit(rootSizer);
 
-
+    // Create file menu
     wxMenu* menuFile = new wxMenu;
     menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
         "Help string shown in status bar for this menu item");
     menuFile->Append(ID_Settings, "&Settings", "Application settings");
     menuFile->AppendSeparator();
-
     menuFile->Append(wxID_EXIT);
 
+
+    // Create tools menu
+    wxMenu* menuTools = new wxMenu;
+    menuTools->Append(ID_COMPILECAT, "&Catalog Compiler", "Create a compiled catalog from raw");
+
+    // Create help menu
     wxMenu* menuHelp = new wxMenu;
     menuHelp->Append(wxID_ABOUT);
 
+
+    // Set menu bar.
     wxMenuBar* menuBar = new wxMenuBar;
     menuBar->Append(menuFile, "&File");
+    menuBar->Append(menuTools, "&Tools");
     menuBar->Append(menuHelp, "&Help");
-
-
     SetMenuBar(menuBar);
+
 
     CreateStatusBar();
     SetStatusText("Welcome to Tarkov Inventory Assistant!");
 
+    // Create bindings.
     Bind(wxEVT_MENU, &TIAFrame::OnHello, this, ID_Hello);
     Bind(wxEVT_MENU, &TIAFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_MENU, &TIAFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &TIAFrame::OnSettings, this, ID_Settings);
-
+    Bind(wxEVT_MENU, &TIAFrame::OnCompileCatalog, this, ID_COMPILECAT);
 
     // Register observer panels with TCore
     m_core.registerTObserver(m_displayPanel);
@@ -98,7 +106,8 @@ TIAFrame::TIAFrame()
     // Load initial catalog defined in the config.
     m_core.loadCatalog();
 
-
+    //std::filesystem::path p = ("C:\\MyWorkspace\\TarkovInventoryAssistant\\Data\\RawCatalogs\\catalog-keyless");
+    //m_core.compileRawCatalog(p);
 
 }
 
@@ -127,3 +136,7 @@ void TIAFrame::OnSettings(wxCommandEvent& event)
     m_settingsDialog->ShowModal();
 }
 
+void TIAFrame::OnCompileCatalog(wxCommandEvent& evt) {
+    m_compileCatalogDialog = new TUI::CompileCatalogDialog(&m_core, this);
+    m_compileCatalogDialog->ShowModal();
+}

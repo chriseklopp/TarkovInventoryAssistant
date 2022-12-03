@@ -40,7 +40,7 @@ private:
     void OnExit(wxCommandEvent& evt);
     void OnAbout(wxCommandEvent& evt);
     void OnSettings(wxCommandEvent& evt);
-
+    void OnCompileCatalog(wxCommandEvent& evt);
     // Pointers to the four main window panels. These are created during TIAFrame construction.
     TUI::OutputPanel* m_outputPanel;
     TUI::DisplayPanel* m_displayPanel;
@@ -48,6 +48,7 @@ private:
     TUI::CatalogPanel* m_catalogPanel;
 
     TUI::SettingsDialog* m_settingsDialog;
+    TUI::CompileCatalogDialog* m_compileCatalogDialog;
 
     TCore m_core;
 
@@ -56,6 +57,7 @@ private:
 enum
 {
     ID_Hello = 1,
-    ID_Settings =2
+    ID_Settings = 2,
+    ID_COMPILECAT = 3
 };
 

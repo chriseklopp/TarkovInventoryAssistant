@@ -991,6 +991,118 @@ namespace TUI {
 
 
 
+    CompileCatalogDialog::CompileCatalogDialog(TCore* core, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
+        : m_coreptr(core), wxDialog(parent,
+          id,
+          title,
+          pos,
+          size,
+          style) {
+
+        this->SetSizeHints(wxDefaultSize, wxDefaultSize);
+
+        wxBoxSizer* sizer;
+        sizer = new wxBoxSizer(wxVERTICAL);
+
+
+        m_headerLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+        sizer->Add(m_headerLine, 0, wxEXPAND | wxALL, 5);
+
+
+        m_rawCatalogPathText = new wxStaticText(this, wxID_ANY, wxT("Raw Catalog Path"), wxDefaultPosition, wxDefaultSize, 0);
+        m_rawCatalogPathText->Wrap(-1);
+        sizer->Add(m_rawCatalogPathText, 0, wxUP | wxLEFT, 5);
+
+
+        m_rawCatalogPathSelect = new wxDirPickerCtrl(this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE);
+        sizer->Add(m_rawCatalogPathSelect, 1, wxEXPAND | wxALL, 5);
+
+
+        m_optionLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+        sizer->Add(m_optionLine, 0, wxEXPAND | wxALL, 5);
+
+
+        wxBoxSizer* optionSizer;
+        optionSizer = new wxBoxSizer(wxHORIZONTAL);
+
+        wxBoxSizer* nameSizer;
+        nameSizer = new wxBoxSizer(wxVERTICAL);
+
+
+        m_catalogNameText = new wxStaticText(this, wxID_ANY, wxT("Catalog Name"), wxDefaultPosition, wxDefaultSize, 0);
+        m_catalogNameText->Wrap(-1);
+        nameSizer->Add(m_catalogNameText, 1, wxUP | wxLEFT, 5);
+
+
+        m_catalogNameSelect = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
+        nameSizer->Add(m_catalogNameSelect, 1, wxEXPAND | wxALL, 5);
+
+
+        optionSizer->Add(nameSizer, 2, wxEXPAND, 5);
+
+        wxBoxSizer* m_checkboxOptionSizer;
+        m_checkboxOptionSizer = new wxBoxSizer(wxVERTICAL);
+
+
+        m_checkboxOptionSizer->Add(0, 0, 1, wxEXPAND, 5);
+
+        m_toggleGenerateRotations = new wxCheckBox(this, wxID_ANY, wxT("Generate Rotations"), wxDefaultPosition, wxDefaultSize, 0);
+        m_checkboxOptionSizer->Add(m_toggleGenerateRotations, 0, wxALL, 5);
+
+
+        optionSizer->Add(m_checkboxOptionSizer, 1, wxEXPAND, 5);
+
+
+        sizer->Add(optionSizer, 1, wxEXPAND, 5);
+
+        m_footerLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+        sizer->Add(m_footerLine, 0, wxEXPAND | wxALL, 5);
+
+        wxBoxSizer* footerSizer;
+        footerSizer = new wxBoxSizer(wxHORIZONTAL);
+
+
+        footerSizer->Add(0, 0, 1, wxEXPAND, 5);
+
+        m_cancelButton = new wxButton(this, wxID_CANCEL, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0);
+        footerSizer->Add(m_cancelButton, 0, wxLEFT | wxRIGHT, 5);
+
+        m_compileButton = new wxButton(this, wxID_OK, wxT("Compile"), wxDefaultPosition, wxDefaultSize, 0);
+        footerSizer->Add(m_compileButton, 0, wxLEFT | wxRIGHT, 5);
+
+
+        sizer->Add(footerSizer, 1, wxEXPAND);
+
+        Bind(wxEVT_BUTTON, &CompileCatalogDialog::OnCompile, this, wxID_OK);
+
+        this->SetSizer(sizer);
+        this->Layout();
+
+        this->Centre(wxBOTH);
+    }
+
+
+    void CompileCatalogDialog::OnCompile(wxCommandEvent& evt){
+
+        // Send our request to the core.
+
+        std::string rawpath = m_rawCatalogPathSelect->GetTextCtrlValue().ToStdString();
+
+        std::string name = m_catalogNameSelect->GetValue().ToStdString();
+        bool makeRotations = m_toggleGenerateRotations->GetValue();
+        // TODO: Finish
+        Close();
+    }
+
+    void CompileCatalogDialog::OnCancel(wxCommandEvent& evt) {
+
+    }
+
+
+
+
+
+
     void ImagePanel::paintEvent(wxPaintEvent& evt)
     {
 
