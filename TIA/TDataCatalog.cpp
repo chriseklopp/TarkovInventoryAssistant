@@ -29,22 +29,24 @@ namespace TDataCatalog {
     }
 
 
-    bool TDataCatalog::compileCatalogFromRaw(std::filesystem::path rawpath, bool makeRotatedItems) {
+    bool TDataCatalog::compileCatalogFromRaw(std::filesystem::path rawpath, std::string name, bool makeRotatedItems) {
         if (!m_configptr)
             return false;
         // Compiled Catalog will contain a CSV and folder of all images.
         bool success;
         std::vector<std::filesystem::path> modules;
-        if (rawpath.empty())
-            success = loadRawCatalog(modules);
-        else
-            success = loadRawCatalog(rawpath, modules);
+
+        if (!std::filesystem::exists(rawpath))
+            return false;
+      
+        success = loadRawCatalog(rawpath, modules);
         if (!success)
             return false;
 
+        //"ItemCatalog_"
         // Create Directory for new compiled catalog.
         time_t t = std::time(nullptr);
-        std::filesystem::path catPath = m_configptr->getCATALOGS_DIR() / ("ItemCatalog_" + std::to_string(t));
+        std::filesystem::path catPath = m_configptr->getCATALOGS_DIR() / name;
         std::filesystem::path imPath = catPath / "images";
         std::filesystem::create_directories(imPath);
 
@@ -64,7 +66,7 @@ namespace TDataCatalog {
                 writeFileToCompiledCatalog(modFile.path(), file, makeRotatedItems);
             }
             // Copy images to new image directory.
-            std::filesystem::copy(modulePath / "images", imPath);
+            std::filesystem::copy(modulePath / "images", imPath, std::filesystem::copy_options::update_existing);
         }
 
         // Clean Up
@@ -376,14 +378,13 @@ namespace TDataCatalog {
         m_catalogPath.clear();
         m_dimensionalTrees.clear();
         m_dimItemsMap.clear();
+        m_itemIDList.clear();
 
     };
 
     void TDataCatalog::searchVPTree(TItemTypes::TItem& inItem, TDataTypes::TVpTree& tree) {
 
     };
-
-
 
     bool TDataCatalog::loadRawCatalog(std::vector<std::filesystem::path>& outMods) {
         if (!m_configptr)
