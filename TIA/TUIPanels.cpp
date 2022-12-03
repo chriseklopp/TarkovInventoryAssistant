@@ -776,7 +776,7 @@ namespace TUI {
                 break;
             case TEvent::TEventEnum::CatalogChanged:
                 if (e.getStatus() == 1)
-                    m_consoleOutput->AppendText("Successfully Loaded Catalog: " + e.getData() + "\n");
+                    m_consoleOutput->AppendText("Successfully Loaded Catalog: " + e.getData() + " (Items: "+ wxString::Format(wxT("%i"), int(m_coreptr->getCatalogItemList().size())) + ")\n");
                 else
                     m_consoleOutput->AppendText("Failed to load catalog: " + e.getData() + "\n");
                 break;

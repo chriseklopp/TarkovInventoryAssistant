@@ -211,7 +211,7 @@ void TCore::compileRawCatalog(std::filesystem::path& path, std::string name, boo
         message = "Successfully created Compiled Catalog: " + m_config->getCATALOGS_DIR().string() + "/" + name;
     }
     else {
-        message = "Failed to create Compiled Catalog: " + path.string() + "\nRaw Catalog may be invalid.";
+        message = "Failed to create Compiled Catalog: " + path.string() + " Raw Catalog may be invalid.";
     }
 
     notifyTObservers(TEvent::TEvent(TEvent::TEventEnum::ConsoleMessage, message));
