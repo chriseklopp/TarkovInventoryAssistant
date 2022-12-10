@@ -64,7 +64,7 @@ namespace TDataCatalog {
             for (auto modFile : modItr) {
                 if (std::filesystem::is_directory(modFile))
                     continue;
-                if (writeFileToCompiledCatalog(modFile.path(), file, makeRotatedItems))
+                if (writeFileToCompiledCatalog(modFile.path(), imPath, file, makeRotatedItems))
                     writeSuccesses++;
                 else
                     continue;
@@ -88,8 +88,9 @@ namespace TDataCatalog {
 
 
     bool TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
-        std::ofstream& out,
-        bool makeRotations) {
+                                                  const std::filesystem::path& compiledImagesPath,
+                                                  std::ofstream& out,
+                                                  bool makeRotations) {
 
         // The defined ordering of read and write to compiled catalog string shall be:
         // Name, path, dims, containerDims, avgPrice, PPS, traderPrice, bestTrader, rotation, hash
@@ -110,8 +111,8 @@ namespace TDataCatalog {
             while (std::getline(in, line)) {
                 fields.clear();
                 TDataTypes::splitString(line, ',', fields);
-                std::string imagesPath((file.parent_path() / "images" / fields.at(1)).string());
-                cv::Mat image(cv::imread(imagesPath));
+                std::string imagePath((file.parent_path() / "images" / fields.at(1)).string());
+                cv::Mat image(cv::imread(imagePath));
                 if (image.empty()) {
                     std::cout << "Attempted to load invalid image: skipping it \n";
                     continue;
@@ -120,18 +121,39 @@ namespace TDataCatalog {
                 // Make rotated items.
                 if (makeRotations) {
                     std::vector<std::string> rotFields = fields;
-                    rotFields.push_back("1");
+
+                    rotFields[0] = rotFields.at(0) + "*"; // Change name to signify rotated; This behavior MAY be changed in the future.
 
                     // Rotate image clockwise??? 90 degrees.
                     cv::Mat rotImage;
                     cv::transpose(image, rotImage);
                     cv::flip(rotImage, rotImage, 1);
 
+                    // Save rotated image to compiled cat destination.
+                    std::string& imName = rotFields.at(1);
+                    size_t pos = imName.rfind(".");
+                    imName.insert(pos, "_rotated");
+                    cv::imwrite((compiledImagesPath / imName).string(), rotImage);
+
+                    // Swap dimensions
+                    std::vector<std::string> dSplit;
+                    TDataTypes::splitString(rotFields.at(2), '-', dSplit);
+                    std::string temp = dSplit.at(1);
+                    dSplit[1] = dSplit[0];
+                    dSplit[0] = temp;
+
+                    rotFields.at(2) = TDataTypes::joinVector(dSplit, '-');
+
+                    // Add rotation bit.
+                    rotFields.push_back("1");
+
                     // Construct hash, convert it to string and add to vector
 
                     cv::Mat rotImHash(Hash::PhashImage(rotImage));
                     std::vector<int> hashvec(rotImHash.begin<cv::uint8_t>(), rotImHash.end<cv::uint8_t>());
-                    fields.push_back(TDataTypes::joinVector(hashvec, '-'));
+                    rotFields.push_back(TDataTypes::joinVector(hashvec, '-'));
+
+
                     out << TDataTypes::joinVector(rotFields, ',') << "\n";
                 }
 

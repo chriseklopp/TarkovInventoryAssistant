@@ -205,7 +205,7 @@ bool TCore::loadCatalog(std::filesystem::path dir) {
 
 
 void TCore::compileRawCatalog(std::filesystem::path& path, std::string name, bool makeRotations) {
-    bool res = m_dataCatalog.compileCatalogFromRaw(path, name, false);
+    bool res = m_dataCatalog.compileCatalogFromRaw(path, name, makeRotations);
     std::string message;
     if (res) {
         message = "Successfully created Compiled Catalog: " + m_config->getCATALOGS_DIR().string() + "/" + name;

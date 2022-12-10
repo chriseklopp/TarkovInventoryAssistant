@@ -9,6 +9,8 @@ namespace TDataTypes
 
     // Split on character delimiter.
     void splitString(std::string s, char del, std::vector<std::string>& out) {
+        if (s.empty())
+            return;
         std::stringstream stream(s);
         std::string word;
         while (getline(stream, word, del)) {

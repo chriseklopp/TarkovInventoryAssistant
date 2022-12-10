@@ -88,7 +88,7 @@ namespace TDataCatalog {
         std::unique_ptr<TItemTypes::TItem> makeTItemFromCompiledString(const std::string& instring);
 
         // Methods for handling reading of raw catalog files.
-        bool writeFileToCompiledCatalog(const std::filesystem::path& file, std::ofstream& out, bool makeRotations);
+        bool writeFileToCompiledCatalog(const std::filesystem::path& file, const std::filesystem::path& compiledImagesPath, std::ofstream& out, bool makeRotations);
 
         void addItemToDimMap(TItemTypes::TItem* item);
 
