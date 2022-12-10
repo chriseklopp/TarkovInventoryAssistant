@@ -252,13 +252,14 @@ namespace TUI {
 
         const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det.catalogItem);
 
-        std::string detUnit = catItem->getPrice().getUnit();
-        if (detUnit == "$") {
-            std::cout << "wdawd";
-        }
+        const TDataTypes::TCurrency* currency = determineBestCurrency(*catItem);
+        if (!currency)
+            return;
+        std::string detUnit = currency->getUnit();
+
         for (TDataTypes::TCurrency& cur : m_totalCurrencyValues) {
             if (cur.getUnit() == detUnit) {
-                cur += catItem->getPrice();
+                cur += *currency;
                 return;
             }
         }
@@ -271,13 +272,35 @@ namespace TUI {
 
         const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det.catalogItem);
 
-        std::string detUnit = catItem->getPrice().getUnit();
+        const TDataTypes::TCurrency* currency = determineBestCurrency(*catItem);
+        if (!currency)
+            return;
+        std::string detUnit = currency->getUnit();
         for (TDataTypes::TCurrency& cur : m_totalCurrencyValues) {
             if (cur.getUnit() == detUnit){
-                cur -= catItem->getPrice();
+                cur -= *currency;
                 return;
             }
         }
+    }
+
+    const TDataTypes::TCurrency* OutputPanel::determineBestCurrency(const TItemTypes::TItem& catItem) {
+        const TDataTypes::TCurrency* currency;
+
+        const TDataTypes::TCurrency& fleaVal = catItem.getPrice();
+        const TDataTypes::TCurrency& traderVal = catItem.getTraderSellPrice();
+
+        if (fleaVal.getValue() != 0) { 
+            // If same units, use the maximum or else use flea
+            if (fleaVal.getUnit() == traderVal.getUnit())
+                currency = fleaVal.getValue() > traderVal.getValue() ? &fleaVal : &traderVal;
+            else
+                currency = &catItem.getPrice();
+        }
+        else { // If flea price is 0, use trader price instead
+            currency = &catItem.getTraderSellPrice();
+        }
+        return currency;
     }
 
     void OutputPanel::addItemToOutputList(const TItemSupport::DetectionResult* det, int row, int count) {

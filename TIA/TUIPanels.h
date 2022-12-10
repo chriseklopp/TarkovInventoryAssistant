@@ -156,6 +156,9 @@ namespace TUI {
         void addToTotalCurrency(const TItemSupport::DetectionResult& det);
         void removeFromTotalCurrency(const TItemSupport::DetectionResult& det);
 
+        // Determines the best price from a TItem and returns a pointer to its TCurrency
+        const TDataTypes::TCurrency* determineBestCurrency(const TItemTypes::TItem& catItem);
+
         // Swap the values of two rows in the outputList
         void swapListRows(int rowA, int rowB);
 
