@@ -22,14 +22,14 @@ from TScrapeTarkovMarket import MarketScraper
 class TWebScraper:
     def __init__(self, prices):
         # self.supplemental_item_information_gatherer("https://escapefromtarkov.fandom.com/wiki/Folder_with_intelligence")
-        tarkov_wiki_urls = ["https://escapefromtarkov.fandom.com/wiki/Weapon_mods",
+        tarkov_wiki_urls = ["https://escapefromtarkov.fandom.com/wiki/Armor_vests",
+                            "https://escapefromtarkov.fandom.com/wiki/Containers",
+                            "https://escapefromtarkov.fandom.com/wiki/Weapon_mods",
                             "https://escapefromtarkov.fandom.com/wiki/Chest_rigs",
                             "https://escapefromtarkov.fandom.com/wiki/Provisions",
                             "https://escapefromtarkov.fandom.com/wiki/Loot",
                             "https://escapefromtarkov.fandom.com/wiki/Weapons",
                             "https://escapefromtarkov.fandom.com/wiki/Keys_%26_Intel",
-                            "https://escapefromtarkov.fandom.com/wiki/Containers",
-                            "https://escapefromtarkov.fandom.com/wiki/Armor_vests",
                             "https://escapefromtarkov.fandom.com/wiki/Backpacks",
                             "https://escapefromtarkov.fandom.com/wiki/Headwear",
                             "https://escapefromtarkov.fandom.com/wiki/Eyewear",
@@ -56,10 +56,11 @@ class TWebScraper:
         ogwd = os.getcwd()
         source = requests.get(url).text
         soup = bs4.BeautifulSoup(source, 'lxml')
-        page_tables = soup.findAll('table', class_='wikitable sortable')
+        page_tables = soup.find_all("table", class_="wikitable")# sortable stickyheader jquery-tablesorter') # TODO: look for both
         for table_num, table in enumerate(page_tables):
             table_df = self.table_builder(table)
-
+            if table_df.empty:
+                continue
             os.chdir(ogwd)  # return working directory to original.
             wd = os.getcwd()
             page_name = url.split("/")[-1]
@@ -236,27 +237,34 @@ class TWebScraper:
             print("Image_url is empty")
             return
 
-        if ".gif" not in url:
-            source = requests.get(url, stream=True)
-            if source.status_code == 200:
-                with open(f"{df_row['Name']}.bmp", 'wb') as f:
-                    source.raw.decode_content = True
-                    shutil.copyfileobj(source.raw, f)
-                return f"{df_row['Name']}.bmp"
+        try:
+            if ".gif" not in url:
+                source = requests.get(url, stream=True)
+                if source.status_code == 200:
+                    with open(f"{df_row['Name']}.bmp", 'wb') as f:
+                        source.raw.decode_content = True
+                        shutil.copyfileobj(source.raw, f)
+                    return f"{df_row['Name']}.bmp"
+                else:
+                    print("uh oh")
 
-        else:  # occasionally the images are gifs that need to be dealt with properly.
-            source = requests.get(url, stream=True)
-            if source.status_code == 200:
-                with open(f"{df_row['Name']}.gif", 'wb') as f:
-                    source.raw.decode_content = True
-                    shutil.copyfileobj(source.raw, f)
+            else:  # occasionally the images are gifs that need to be dealt with properly.
+                source = requests.get(url, stream=True)
+                if source.status_code == 200:
+                    with open(f"{df_row['Name']}.gif", 'wb') as f:
+                        source.raw.decode_content = True
+                        shutil.copyfileobj(source.raw, f)
 
-                gif_path = os.path.join(os.getcwd(), f"{df_row['Name']}.gif")
-                im = Image.open(gif_path)
-                # transparency = im.info['transparency']
+                    gif_path = os.path.join(os.getcwd(), f"{df_row['Name']}.gif")
+                    im = Image.open(gif_path)
+                    # transparency = im.info['transparency']
 
-                im.save(f"{df_row['Name']}.bmp")
-                return f"{df_row['Name']}.bmp"
+                    im.save(f"{df_row['Name']}.bmp")
+                    return f"{df_row['Name']}.bmp"
+                else:
+                    print("uh oh")
+        except(requests.ConnectionError):
+            print("why do you hate me?")
 
 
 
@@ -322,7 +330,8 @@ class TWebScraper:
 
             else:
                 raise NameError('Incorrect column classifier')
-
+        if "Name" not in cleaned_df.columns:
+            return pd.DataFrame()
         cleaned_df['Name'] = cleaned_df['Name'].apply(self.name_cleaner)
 
         # apply both name_cleaner and rename_dimensional_column functions
@@ -475,4 +484,5 @@ class TWebScraper:
 if __name__ == "__main__":  # run this to update the catalog from the wiki.
     ms = MarketScraper()
     priceTable = ms.run() # get price data
+    #priceTable.to_csv("priceTabletest.csv")
     TWebScraper(priceTable)

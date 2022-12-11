@@ -97,7 +97,11 @@ class MarketScraper:
             outContent = []
             cellDivs = row.find_all('div', ['cell'], recursive=False)
             self.extractName(cellDivs[1], outContent)
-            self.extractPriceInfo(row.find("div", class_="cell alt", recursive=False), outContent)
+            if not self.detectBanFromFlea(cellDivs[1]):
+                self.extractPriceInfo(row.find("div", class_="cell alt", recursive=False), outContent)
+            else:
+                outContent.append("")
+                outContent.append("")
             self.extractSellToTraderInfo(cellDivs[6], outContent)
             row_contents.append(outContent)
 
@@ -105,6 +109,12 @@ class MarketScraper:
         table_df = pd.DataFrame(row_contents, columns=col_headers)
         print("Price table Created")
         return table_df
+
+    @staticmethod
+    def detectBanFromFlea(cellTag) -> bool:
+        if cellTag.find("div", class_="minus"):
+            return True
+        return False
 
     @staticmethod
     def extractName(cellTag, outList):
