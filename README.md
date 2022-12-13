@@ -4,7 +4,7 @@ Escape from Tarkov Inventory Assistant.
 
 
 
-![Alt text](/../../../chriseklopp/blob/main/TIA_screenshot6.PNG?raw=true "Title")
+![Alt text](/../../../chriseklopp/blob/main/TIA_screenshot7.PNG?raw=true "Title")
 
 *Releases:*
 https://github.com/chriseklopp/TarkovInventoryAssistant/releases
