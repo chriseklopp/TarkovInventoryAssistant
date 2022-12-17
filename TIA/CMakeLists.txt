@@ -21,31 +21,47 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 set(TIA_HEADERS
     "TarkovInventoryAssistant.h"
-    "./DataSupport/TDataTypes.h"
-    "./DataSupport/TItemTypes.h"
-    "./Core/TScreenCapture.h"
-    "./Core/TImageReader.h"
-    "./Core/TDataCatalog.h"
-    "./DataSupport/VPTree.h"
-    "./UI/TUIPanels.h"
-    "./Core/TCore.h"
     "./Core/TConfig.h"
+    "./Core/TCore.h"
+    "./Core/TDataCatalog.h"
+    "./Core/TImageReader.h"
+    "./Core/TScreenCapture.h"
+
+    "./DataSupport/TDataTypes.h"
     "./DataSupport/TEvents.h"
+    "./DataSupport/TItemTypes.h"
+    "./DataSupport/VPTree.h"
+
+    "./UI/CatalogPanel.h"
+    "./UI/ConsolePanel.h"
+    "./UI/DisplayPanel.h"
+    "./UI/OutputPanel.h"
+    "./UI/UISupport.h"
+    "./UI/TUIPanels.h"
+
 )
 
 
 set(TIA_SOURCES
     "TarkovInventoryAssistant.cpp"
-    "./DataSupport/TDataTypes.cpp"
-    "./DataSupport/TItemTypes.cpp"
-    "./Core/TScreenCapture.cpp"
-    "./Core/TImageReader.cpp"
-    "./Core/TDataCatalog.cpp"
-    "./DataSupport/VPTree.cpp"
-    "./UI/TUIPanels.cpp"
-    "./Core/TCore.cpp"
     "./Core/TConfig.cpp"
+    "./Core/TCore.cpp"
+    "./Core/TDataCatalog.cpp"
+    "./Core/TImageReader.cpp"
+    "./Core/TScreenCapture.cpp"
+
+    "./DataSupport/TDataTypes.cpp"
     "./DataSupport/TEvents.cpp"
+    "./DataSupport/TItemTypes.cpp"
+    "./DataSupport/VPTree.cpp"
+
+    "./UI/CatalogPanel.cpp"
+    "./UI/ConsolePanel.cpp"
+    "./UI/DisplayPanel.cpp"
+    "./UI/OutputPanel.cpp"
+    "./UI/UISupport.cpp"
+    "./UI/TUIPanels.cpp"
+
 )
 
 
