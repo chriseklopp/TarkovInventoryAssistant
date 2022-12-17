@@ -14,9 +14,9 @@
 #include <wx/popupwin.h>
 #include <wx/filepicker.h>
 #include <wx/grid.h>
-#include "TItemTypes.h"
-#include "TDataTypes.h"
-#include "TCore.h"
+#include <DataSupport/TItemTypes.h>
+#include <DataSupport/TDataTypes.h>
+#include <Core/TCore.h>
 
 
 /*

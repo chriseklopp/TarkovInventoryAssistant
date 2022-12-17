@@ -1,11 +1,10 @@
 #pragma once
-#include "TConfig.h"
+#include <Core/TConfig.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 #include <sstream>
-#include "TDataTypes.h"
-
+#include <DataSupport/TDataTypes.h>
 
 
 /* Container for environment paths and directories necessary for program execution

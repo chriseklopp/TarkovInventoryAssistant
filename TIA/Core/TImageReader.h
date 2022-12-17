@@ -2,9 +2,9 @@
 #include <string>
 #include <opencv2/opencv.hpp>
 #include <vector>
-#include "TItemTypes.h"
-#include "TDataTypes.h"
-#include "TConfig.h"
+#include <DataSupport/TItemTypes.h>
+#include <DataSupport/TDataTypes.h>
+#include <Core/TConfig.h>
 /*
 * 
 Processes the screenshot(s) into detected TItems.
