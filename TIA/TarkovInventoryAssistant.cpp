@@ -1,17 +1,13 @@
 ﻿// TarkovInventoryAssistant.cpp : Contains entry point and GUI Frame.
 //
 
-#include "TarkovInventoryAssistant.h"
+#include <TarkovInventoryAssistant.h>
 
 
 wxIMPLEMENT_APP(TIAApp); // wxWidgets entry point
 
 bool TIAApp::OnInit()
 {
-    // Create ini
-    //wxConfigBase::Set();
-
-
     TIAFrame* frame = new TIAFrame();
     frame->Show(true);
     frame->SetClientSize(1000, 600);
@@ -105,10 +101,6 @@ TIAFrame::TIAFrame()
 
     // Load initial catalog defined in the config.
     m_core.loadCatalog();
-
-    //std::filesystem::path p = ("C:\\MyWorkspace\\TarkovInventoryAssistant\\Data\\RawCatalogs\\catalog-keyless");
-    //m_core.compileRawCatalog(p);
-
 }
 
 

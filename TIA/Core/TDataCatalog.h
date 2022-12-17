@@ -1,15 +1,14 @@
 #pragma once
-#include "TItemTypes.h"
-
-#include "TDataTypes.h"
-#include "VPTree.h"
+#include <DataSupport/TItemTypes.h>
+#include <DataSupport/TDataTypes.h>
+#include <DataSupport/VPTree.h>
 #include <unordered_map>
 #include <map>
 #include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <numeric>
-#include "TConfig.h"
+#include <Core/TConfig.h>
 /*
 Singleton
 This class will manage the catalog of items and their properties

@@ -10,13 +10,13 @@
 #include <wx/fileconf.h>
 #include <wx/splitter.h>
 #include <iostream>
-#include "TItemTypes.h"
+#include <DataSupport/TItemTypes.h>
 
-#include "TCore.h"
+#include "Core/TCore.h"
 #include <filesystem>
 
 
-#include "TUIPanels.h"
+#include "UI/TUIPanels.h"
 
 
 

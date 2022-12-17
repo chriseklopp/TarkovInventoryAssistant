@@ -1,10 +1,11 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
-#include "TImageReader.h"
-#include "TDataCatalog.h"
-#include "TConfig.h"
-#include "TEvents.h"
+
+#include <Core/TImageReader.h>
+#include <Core/TDataCatalog.h>
+#include <Core/TConfig.h>
+#include <DataSupport/TEvents.h>
 //#include "TScreenCapture.h" // TODO: figure out how to stop this breaking wxWidgets..
 
 /* Acts as an interface between backend and gui.

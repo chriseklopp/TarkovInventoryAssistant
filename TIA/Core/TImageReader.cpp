@@ -1,5 +1,4 @@
-#include "TImageReader.h"
-
+#include <Core/TImageReader.h>
 
 bool TImageReader::parseImage(const cv::Mat& image,
     std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<std::pair<cv::Point, cv::Point>>& retLocs){
