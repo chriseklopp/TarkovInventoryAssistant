@@ -80,6 +80,9 @@ namespace TItemTypes {
 
         const std::string& getName() const { return m_name; };
 
+        const bool isRotated() const { return m_isRotated; }
+
+
         const std::pair<int, int>& getDim() const { return m_dim; };
         const std::string getDimAsString(char dlm = 'x') const { return std::to_string(m_dim.first) + dlm + std::to_string(m_dim.second); };
 
@@ -158,6 +161,7 @@ namespace TItemTypes {
             m_containerDim(containerDim)
         {};
 
+        ~TContainerItem() {};
 
         // Insert item(s) into the container. Returns true on success.
         bool insert(TItem item, cv::Point location) override;

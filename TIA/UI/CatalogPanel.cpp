@@ -77,10 +77,17 @@ namespace TUI {
         int currentRow = 0;
 
         for (const TDataTypes::dcID& id : m_coreptr->getCatalogItemList()) {
-            addItemToCatalogDisplay(m_coreptr->getCatalogItem(id), currentRow);
+            const TItemTypes::TItem* itm = m_coreptr->getCatalogItem(id);
+            if (!itm || itm->isRotated())
+                continue;
+            addItemToCatalogDisplay(itm, currentRow);
             currentRow++;
         }
 
+        // Clean up extra rows we may have created due to excluded items.
+
+        if (currentRow <= m_catalogDisplay->GetNumberRows() - 1)
+            m_catalogDisplay->DeleteRows(currentRow, m_catalogDisplay->GetNumberRows() - currentRow);
     };
 
 
