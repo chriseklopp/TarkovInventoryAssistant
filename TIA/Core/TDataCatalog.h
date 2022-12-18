@@ -29,10 +29,13 @@ namespace TDataCatalog {
     public:
 
         TDataCatalog(TConfig::TConfig* config) :
-            m_configptr(config),
             m_dimensionalTrees(),
             m_items(),
-            m_idCounter(0)
+            m_reverseItemMap(),
+            m_itemIDList(),
+            m_idCounter(0),
+            m_configptr(config),
+            m_catalogPath()
 
         {};
 
@@ -119,17 +122,15 @@ namespace TDataCatalog {
 
 
 
-
         // List of catalog item IDs. 
         std::vector<TDataTypes::dcID> m_itemIDList;
 
 
         TDataTypes::dcID m_idCounter;
 
+        TConfig::TConfig* m_configptr;
 
         std::filesystem::path m_catalogPath;
 
-
-        TConfig::TConfig* m_configptr;
     };
 }
