@@ -75,7 +75,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${TIA_HEADERS})
 target_include_directories(TarkovInventoryAssistant PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} )
 
 #target_link_libraries(TarkovInventoryAssistant "C:/MyWorkspace/opencv/Opencv_4.6/opencv/build/lib/Release/opencv_img_hash460.lib")
-target_link_libraries(TarkovInventoryAssistant "C:/MyWorkspace/opencv/Opencv_4.6/opencv/build/lib/Debug/opencv_img_hash460d.lib")
+#target_link_libraries(TarkovInventoryAssistant "C:/MyWorkspace/opencv/Opencv_4.6/opencv/build/lib/Debug/opencv_img_hash460d.lib")
 TARGET_LINK_LIBRARIES (TarkovInventoryAssistant ${OpenCV_LIBS})
 target_link_libraries(TarkovInventoryAssistant ${wxWidgets_LIBRARIES})
 set_property(TARGET TarkovInventoryAssistant PROPERTY CXX_STANDARD 17)
