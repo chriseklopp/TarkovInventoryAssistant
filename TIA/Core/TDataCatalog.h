@@ -20,7 +20,7 @@ Items are hashed using perceptual hash on their image and placed into VP-Trees.
 
 namespace TDataCatalog {
 
-
+    using DimItemMap = std::map<std::pair<int, int>, std::vector<TItemTypes::TItem*>>;
 
 
     class TDataCatalog {
@@ -29,10 +29,13 @@ namespace TDataCatalog {
     public:
 
         TDataCatalog(TConfig::TConfig* config) :
-            m_configptr(config),
             m_dimensionalTrees(),
             m_items(),
-            m_idCounter(0)
+            m_reverseItemMap(),
+            m_itemIDList(),
+            m_idCounter(0),
+            m_configptr(config),
+            m_catalogPath()
 
         {};
 
@@ -76,7 +79,7 @@ namespace TDataCatalog {
 
     private:
 
-        void makeVPTrees();
+        void makeVPTrees(DimItemMap& dMap);
         // Search the referenced VPTree for best matches to the item given. n specifices number to ret.
         void searchVPTree(TItemTypes::TItem& inItem, TDataTypes::TVpTree& tree);
 
@@ -89,7 +92,7 @@ namespace TDataCatalog {
         // Methods for handling reading of raw catalog files.
         bool writeFileToCompiledCatalog(const std::filesystem::path& file, const std::filesystem::path& compiledImagesPath, std::ofstream& out, bool makeRotations);
 
-        void addItemToDimMap(TItemTypes::TItem* item);
+        void addItemToDimMap(TItemTypes::TItem* item, DimItemMap& dMap);
 
 
         // NOTE: Currently autodetecting raw catalog is unused.
@@ -117,8 +120,8 @@ namespace TDataCatalog {
         */
         std::unordered_map<TItemTypes::TItem* , TDataTypes::dcID> m_reverseItemMap;
 
-
-
+        // Maps ItemID of a rotated item to the item ID of its non rotated variant.
+        std::unordered_map<TDataTypes::dcID, TDataTypes::dcID> m_rotatedItemAliasMap;
 
         // List of catalog item IDs. 
         std::vector<TDataTypes::dcID> m_itemIDList;
@@ -126,13 +129,9 @@ namespace TDataCatalog {
 
         TDataTypes::dcID m_idCounter;
 
-        // Map of dimensions to vectors of items. This structure will be used to generate the VP trees
-        // There will be a different tree for each unique dimension.
-        std::map<std::pair<int, int>, std::vector<TItemTypes::TItem*>> m_dimItemsMap;
+        TConfig::TConfig* m_configptr;
 
         std::filesystem::path m_catalogPath;
 
-
-        TConfig::TConfig* m_configptr;
     };
 }

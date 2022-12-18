@@ -119,8 +119,9 @@ namespace TDataCatalog {
                 }
 
                 // Make rotated items.
+                std::vector<std::string> rotFields;
                 if (makeRotations) {
-                    std::vector<std::string> rotFields = fields;
+                    rotFields = fields;
 
                     rotFields[0] = rotFields.at(0) + "*"; // Change name to signify rotated; This behavior MAY be changed in the future.
 
@@ -153,8 +154,6 @@ namespace TDataCatalog {
                     std::vector<int> hashvec(rotImHash.begin<cv::uint8_t>(), rotImHash.end<cv::uint8_t>());
                     rotFields.push_back(TDataTypes::joinVector(hashvec, '-'));
 
-
-                    out << TDataTypes::joinVector(rotFields, ',') << "\n";
                 }
 
                 // Rotation indicator (false)
@@ -167,6 +166,8 @@ namespace TDataCatalog {
 
                 // Join and write to file.
                 out << TDataTypes::joinVector(fields, ',') << "\n";
+                if(rotFields.size())
+                    out << TDataTypes::joinVector(rotFields, ',') << "\n";
 
             }
 
@@ -306,6 +307,11 @@ namespace TDataCatalog {
         cv::imshow("in", in.getImage());
         cv::waitKey(0);*/
 
+        // If this is a rotated item, return the non rotated variant instead.
+        // This is so hacky and I hate this but it avoids a massive refactor.
+        if (bestIt->isRotated())
+            return m_rotatedItemAliasMap.at(m_reverseItemMap.at(bestIt));
+
         return m_reverseItemMap.at(bestIt);
     };
 
@@ -316,7 +322,7 @@ namespace TDataCatalog {
         std::vector<double>& retDistances,
         int N) {
 
-        if (m_dimItemsMap.find(in.m_dim) != m_dimItemsMap.end())
+        if (m_dimensionalTrees.find(in.m_dim) != m_dimensionalTrees.end())
             m_dimensionalTrees.at(in.m_dim).search(&in, N, &out, &retDistances);
         return;
     }
@@ -367,6 +373,7 @@ namespace TDataCatalog {
         clearCatalog();
         m_catalogPath = catalog;
 
+        DimItemMap dmap = DimItemMap();
 
         std::string line;
         // Skip header. (For now; maybe I'll utilize this in future to make it more robust).
@@ -380,7 +387,13 @@ namespace TDataCatalog {
             TDataTypes::dcID id = createNewDCID();
             m_itemIDList.push_back(id);
             m_reverseItemMap.insert({ item.get(), id });
-            addItemToDimMap(item.get());
+
+            // Alias rotated item to its nonrotated variant (which should be the previous line)
+            if (item->isRotated()) {
+                m_rotatedItemAliasMap.insert({ id,id - 1 });
+            }
+
+            addItemToDimMap(item.get(), dmap);
             m_items.insert({ id,std::move(item) });
 
         }
@@ -388,23 +401,23 @@ namespace TDataCatalog {
         if (!m_items.size())
             return false;
         // Finally make our VPTree structures.
-        makeVPTrees();
+        makeVPTrees(dmap);
         std::cout << "Loaded catalog of size: " << m_items.size() << "\n";
         return true;
     };
 
-    void TDataCatalog::addItemToDimMap(TItemTypes::TItem* item) {
-        if (m_dimItemsMap.find(item->m_dim) != m_dimItemsMap.end()) {
-            m_dimItemsMap.at(item->m_dim).push_back(item);
+    void TDataCatalog::addItemToDimMap(TItemTypes::TItem* item, DimItemMap& dMap) {
+        if (dMap.find(item->m_dim) != dMap.end()) {
+            dMap.at(item->m_dim).push_back(item);
         }
         else {
-            m_dimItemsMap.insert({ item->m_dim,std::vector<TItemTypes::TItem*>() });
-            m_dimItemsMap.at(item->m_dim).push_back(item);
+            dMap.insert({ item->m_dim,std::vector<TItemTypes::TItem*>() });
+            dMap.at(item->m_dim).push_back(item);
         }
     };
 
-    void TDataCatalog::makeVPTrees() {
-        for (auto iter = m_dimItemsMap.begin(); iter != m_dimItemsMap.end(); ++iter) {
+    void TDataCatalog::makeVPTrees(DimItemMap& dMap) {
+        for (auto iter = dMap.begin(); iter != dMap.end(); ++iter) {
             m_dimensionalTrees.insert({ iter->first, TDataTypes::TVpTree() });
             m_dimensionalTrees.at(iter->first).create(iter->second);
         }
@@ -414,8 +427,8 @@ namespace TDataCatalog {
         m_items.clear();
         m_catalogPath.clear();
         m_dimensionalTrees.clear();
-        m_dimItemsMap.clear();
         m_itemIDList.clear();
+        m_rotatedItemAliasMap.clear();
 
     };
 

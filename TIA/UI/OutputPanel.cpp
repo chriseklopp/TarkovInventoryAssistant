@@ -521,6 +521,10 @@ namespace TUI {
         case TEvent::TEventEnum::AllImagesDeactivated:
             clearOutputList();
             break;
+
+        case TEvent::TEventEnum::CatalogChanged:
+            refreshOutputList();
+            break;
         }
     };
 

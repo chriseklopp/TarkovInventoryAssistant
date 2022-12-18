@@ -3,9 +3,12 @@
 
 
 TCore::TCore():
-    m_configManager(),
     m_idCounter(0),
+    m_configManager(),
     m_config(m_configManager.getConfigPtr()),
+    m_activeImages(),
+    m_idImageMap(),
+    m_detectionResults(),
     m_dataCatalog(m_config),
     m_imageReader(m_config)
 {
