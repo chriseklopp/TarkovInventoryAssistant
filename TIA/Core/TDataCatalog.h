@@ -20,7 +20,7 @@ Items are hashed using perceptual hash on their image and placed into VP-Trees.
 
 namespace TDataCatalog {
 
-
+    using DimItemMap = std::map<std::pair<int, int>, std::vector<TItemTypes::TItem*>>;
 
 
     class TDataCatalog {
@@ -76,7 +76,7 @@ namespace TDataCatalog {
 
     private:
 
-        void makeVPTrees();
+        void makeVPTrees(DimItemMap& dMap);
         // Search the referenced VPTree for best matches to the item given. n specifices number to ret.
         void searchVPTree(TItemTypes::TItem& inItem, TDataTypes::TVpTree& tree);
 
@@ -89,7 +89,7 @@ namespace TDataCatalog {
         // Methods for handling reading of raw catalog files.
         bool writeFileToCompiledCatalog(const std::filesystem::path& file, const std::filesystem::path& compiledImagesPath, std::ofstream& out, bool makeRotations);
 
-        void addItemToDimMap(TItemTypes::TItem* item);
+        void addItemToDimMap(TItemTypes::TItem* item, DimItemMap& dMap);
 
 
         // NOTE: Currently autodetecting raw catalog is unused.
@@ -126,9 +126,6 @@ namespace TDataCatalog {
 
         TDataTypes::dcID m_idCounter;
 
-        // Map of dimensions to vectors of items. This structure will be used to generate the VP trees
-        // There will be a different tree for each unique dimension.
-        std::map<std::pair<int, int>, std::vector<TItemTypes::TItem*>> m_dimItemsMap;
 
         std::filesystem::path m_catalogPath;
 

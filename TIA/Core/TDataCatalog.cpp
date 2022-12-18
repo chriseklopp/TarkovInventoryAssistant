@@ -316,7 +316,7 @@ namespace TDataCatalog {
         std::vector<double>& retDistances,
         int N) {
 
-        if (m_dimItemsMap.find(in.m_dim) != m_dimItemsMap.end())
+        if (m_dimensionalTrees.find(in.m_dim) != m_dimensionalTrees.end())
             m_dimensionalTrees.at(in.m_dim).search(&in, N, &out, &retDistances);
         return;
     }
@@ -367,6 +367,7 @@ namespace TDataCatalog {
         clearCatalog();
         m_catalogPath = catalog;
 
+        DimItemMap dmap = DimItemMap();
 
         std::string line;
         // Skip header. (For now; maybe I'll utilize this in future to make it more robust).
@@ -380,7 +381,7 @@ namespace TDataCatalog {
             TDataTypes::dcID id = createNewDCID();
             m_itemIDList.push_back(id);
             m_reverseItemMap.insert({ item.get(), id });
-            addItemToDimMap(item.get());
+            addItemToDimMap(item.get(), dmap);
             m_items.insert({ id,std::move(item) });
 
         }
@@ -388,23 +389,23 @@ namespace TDataCatalog {
         if (!m_items.size())
             return false;
         // Finally make our VPTree structures.
-        makeVPTrees();
+        makeVPTrees(dmap);
         std::cout << "Loaded catalog of size: " << m_items.size() << "\n";
         return true;
     };
 
-    void TDataCatalog::addItemToDimMap(TItemTypes::TItem* item) {
-        if (m_dimItemsMap.find(item->m_dim) != m_dimItemsMap.end()) {
-            m_dimItemsMap.at(item->m_dim).push_back(item);
+    void TDataCatalog::addItemToDimMap(TItemTypes::TItem* item, DimItemMap& dMap) {
+        if (dMap.find(item->m_dim) != dMap.end()) {
+            dMap.at(item->m_dim).push_back(item);
         }
         else {
-            m_dimItemsMap.insert({ item->m_dim,std::vector<TItemTypes::TItem*>() });
-            m_dimItemsMap.at(item->m_dim).push_back(item);
+            dMap.insert({ item->m_dim,std::vector<TItemTypes::TItem*>() });
+            dMap.at(item->m_dim).push_back(item);
         }
     };
 
-    void TDataCatalog::makeVPTrees() {
-        for (auto iter = m_dimItemsMap.begin(); iter != m_dimItemsMap.end(); ++iter) {
+    void TDataCatalog::makeVPTrees(DimItemMap& dMap) {
+        for (auto iter = dMap.begin(); iter != dMap.end(); ++iter) {
             m_dimensionalTrees.insert({ iter->first, TDataTypes::TVpTree() });
             m_dimensionalTrees.at(iter->first).create(iter->second);
         }
@@ -414,7 +415,6 @@ namespace TDataCatalog {
         m_items.clear();
         m_catalogPath.clear();
         m_dimensionalTrees.clear();
-        m_dimItemsMap.clear();
         m_itemIDList.clear();
 
     };
