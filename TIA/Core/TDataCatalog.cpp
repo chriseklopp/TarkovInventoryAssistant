@@ -119,8 +119,9 @@ namespace TDataCatalog {
                 }
 
                 // Make rotated items.
+                std::vector<std::string> rotFields;
                 if (makeRotations) {
-                    std::vector<std::string> rotFields = fields;
+                    rotFields = fields;
 
                     rotFields[0] = rotFields.at(0) + "*"; // Change name to signify rotated; This behavior MAY be changed in the future.
 
@@ -153,8 +154,6 @@ namespace TDataCatalog {
                     std::vector<int> hashvec(rotImHash.begin<cv::uint8_t>(), rotImHash.end<cv::uint8_t>());
                     rotFields.push_back(TDataTypes::joinVector(hashvec, '-'));
 
-
-                    out << TDataTypes::joinVector(rotFields, ',') << "\n";
                 }
 
                 // Rotation indicator (false)
@@ -167,6 +166,8 @@ namespace TDataCatalog {
 
                 // Join and write to file.
                 out << TDataTypes::joinVector(fields, ',') << "\n";
+                if(rotFields.size())
+                    out << TDataTypes::joinVector(rotFields, ',') << "\n";
 
             }
 
@@ -306,6 +307,11 @@ namespace TDataCatalog {
         cv::imshow("in", in.getImage());
         cv::waitKey(0);*/
 
+        // If this is a rotated item, return the non rotated variant instead.
+        // This is so hacky and I hate this but it avoids a massive refactor.
+        if (bestIt->isRotated())
+            return m_rotatedItemAliasMap.at(m_reverseItemMap.at(bestIt));
+
         return m_reverseItemMap.at(bestIt);
     };
 
@@ -381,6 +387,12 @@ namespace TDataCatalog {
             TDataTypes::dcID id = createNewDCID();
             m_itemIDList.push_back(id);
             m_reverseItemMap.insert({ item.get(), id });
+
+            // Alias rotated item to its nonrotated variant (which should be the previous line)
+            if (item->isRotated()) {
+                m_rotatedItemAliasMap.insert({ id,id - 1 });
+            }
+
             addItemToDimMap(item.get(), dmap);
             m_items.insert({ id,std::move(item) });
 
@@ -416,6 +428,7 @@ namespace TDataCatalog {
         m_catalogPath.clear();
         m_dimensionalTrees.clear();
         m_itemIDList.clear();
+        m_rotatedItemAliasMap.clear();
 
     };
 

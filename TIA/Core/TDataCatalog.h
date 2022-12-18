@@ -120,7 +120,8 @@ namespace TDataCatalog {
         */
         std::unordered_map<TItemTypes::TItem* , TDataTypes::dcID> m_reverseItemMap;
 
-
+        // Maps ItemID of a rotated item to the item ID of its non rotated variant.
+        std::unordered_map<TDataTypes::dcID, TDataTypes::dcID> m_rotatedItemAliasMap;
 
         // List of catalog item IDs. 
         std::vector<TDataTypes::dcID> m_itemIDList;
