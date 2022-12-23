@@ -1,5 +1,5 @@
 #include <DataSupport/VPTree.h>
-
+#include <opencv2/img_hash.hpp>
 namespace TDataTypes {
 
 

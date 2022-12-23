@@ -12,11 +12,15 @@
 #include <iostream>
 #include <DataSupport/TItemTypes.h>
 
-#include "Core/TCore.h"
+#include <Core/TCore.h>
 #include <filesystem>
 
 
-#include "UI/TUIPanels.h"
+#include <UI/TUIPanels.h>
+#include <UI/CatalogPanel.h>
+#include <UI/ConsolePanel.h>
+#include <UI/DisplayPanel.h>
+#include <UI/OutputPanel.h>
 
 
 

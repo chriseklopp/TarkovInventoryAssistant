@@ -1,4 +1,5 @@
 #include <UI/UISupport.h>
+#include <wx/statline.h>
 
 namespace TUI {
 

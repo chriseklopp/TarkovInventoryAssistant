@@ -6,7 +6,7 @@
 #include <queue>
 #include <limits>
 #include <DataSupport/TItemTypes.h>
-#include <opencv2/img_hash.hpp>
+
 
 namespace TDataTypes
 {

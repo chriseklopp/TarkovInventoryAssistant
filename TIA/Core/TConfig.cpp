@@ -1,5 +1,9 @@
 #include <Core/TConfig.h>
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <DataSupport/TDataTypes.h>
 
 
 namespace TConfig {

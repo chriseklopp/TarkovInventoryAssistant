@@ -1,6 +1,10 @@
 #include <Core/TDataCatalog.h>
 #include <locale>
 
+#include <iostream>
+#include <fstream>
+#include <numeric>
+
 
 
 namespace TDataCatalog {
