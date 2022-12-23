@@ -5,16 +5,10 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif
-#include <wx/fileconf.h>
-#include <wx/splitter.h>
-#include <wx/statline.h>
-#include <wx/listctrl.h>
-#include <wx/srchctrl.h>
-#include <wx/popupwin.h>
-#include <wx/filepicker.h>
+
+
 #include <wx/grid.h>
-#include <DataSupport/TItemTypes.h>
-#include <DataSupport/TDataTypes.h>
+
 #include <Core/TCore.h>
 
 

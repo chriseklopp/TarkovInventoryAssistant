@@ -1,14 +1,10 @@
 
-
 #pragma once
+#include <UI/UISupport.h>
 
-#include <UI/CatalogPanel.h>
-#include <UI/ConsolePanel.h>
-#include <UI/DisplayPanel.h>
-#include <UI/OutputPanel.h>
-
+#include <wx/statline.h>
+#include <wx/filepicker.h>
 /*
-Main include for all things UI. Includes the 4 main panels.
 Main frame dialogs are defined here.
 */
 

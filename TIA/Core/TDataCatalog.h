@@ -1,13 +1,9 @@
 #pragma once
 #include <DataSupport/TItemTypes.h>
-#include <DataSupport/TDataTypes.h>
 #include <DataSupport/VPTree.h>
+
 #include <unordered_map>
 #include <map>
-#include <filesystem>
-#include <iostream>
-#include <fstream>
-#include <numeric>
 #include <Core/TConfig.h>
 /*
 Singleton

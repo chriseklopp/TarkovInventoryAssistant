@@ -1,5 +1,5 @@
 #include <UI/UISupport.h>
-
+#include <wx/srchctrl.h>
 namespace TUI {
 
 

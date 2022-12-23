@@ -1,8 +1,7 @@
-#pragma once
-
 #include <DataSupport/TDataTypes.h>
 #include <iostream>
-
+#include <opencv2/core.hpp>
+#include <opencv2/img_hash.hpp>
 
 namespace TDataTypes
 {

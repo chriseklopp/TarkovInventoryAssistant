@@ -1,11 +1,6 @@
 #pragma once
 #include <Core/TConfig.h>
-#include <iostream>
-#include <fstream>
 #include <filesystem>
-#include <sstream>
-#include <DataSupport/TDataTypes.h>
-
 
 /* Container for environment paths and directories necessary for program execution
 * This attempts to populate on init using Settings.ini

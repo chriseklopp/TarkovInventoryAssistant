@@ -3,7 +3,6 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <DataSupport/TItemTypes.h>
-#include <DataSupport/TDataTypes.h>
 #include <Core/TConfig.h>
 /*
 * 

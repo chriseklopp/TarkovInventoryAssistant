@@ -2,7 +2,6 @@
 #include <iostream>
 #include <vector>
 #include <DataSupport/TDataTypes.h>
-#include <opencv2/opencv.hpp>
 #include <filesystem>
 
 
