@@ -24,6 +24,7 @@ set(TIA_HEADERS
     "./Core/TConfig.h"
     "./Core/TCore.h"
     "./Core/TDataCatalog.h"
+    "./Core/TDetectionValidator.h"
     "./Core/TImageReader.h"
     "./Core/TScreenCapture.h"
 
@@ -47,6 +48,7 @@ set(TIA_SOURCES
     "./Core/TConfig.cpp"
     "./Core/TCore.cpp"
     "./Core/TDataCatalog.cpp"
+    "./Core/TDetectionValidator.cpp"
     "./Core/TImageReader.cpp"
     "./Core/TScreenCapture.cpp"
 
