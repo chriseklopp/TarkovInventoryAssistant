@@ -3,6 +3,11 @@
 #include <opencv2/opencv.hpp>
 
 
+
+// Image id. Unique ID corresponding to a catalog item.
+typedef int imageID;
+
+
 namespace TDataTypes
 {
 

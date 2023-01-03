@@ -13,7 +13,6 @@
 */
 
 
-typedef int imageID;
 
 
 class TCore : public TEvent::TSubject {
