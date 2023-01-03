@@ -21,7 +21,7 @@
 #include <UI/ConsolePanel.h>
 #include <UI/DisplayPanel.h>
 #include <UI/OutputPanel.h>
-
+#include <UI/DetectionValidatorWidget.h>
 
 
 class TIAApp : public wxApp {
@@ -45,14 +45,12 @@ private:
     void OnAbout(wxCommandEvent& evt);
     void OnSettings(wxCommandEvent& evt);
     void OnCompileCatalog(wxCommandEvent& evt);
+    void OnDetectionValidator(wxCommandEvent& evt);
     // Pointers to the four main window panels. These are created during TIAFrame construction.
     TUI::OutputPanel* m_outputPanel;
     TUI::DisplayPanel* m_displayPanel;
     TUI::ConsolePanel* m_consolePanel;
     TUI::CatalogPanel* m_catalogPanel;
-
-    TUI::SettingsDialog* m_settingsDialog;
-    TUI::CompileCatalogDialog* m_compileCatalogDialog;
 
     TCore m_core;
 
@@ -62,6 +60,7 @@ enum
 {
     ID_Hello = 1,
     ID_Settings = 2,
-    ID_COMPILECAT = 3
+    ID_COMPILECAT = 3,
+    ID_DETVALIDATOR = 4
 };
 

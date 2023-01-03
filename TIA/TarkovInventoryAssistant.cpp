@@ -68,6 +68,7 @@ TIAFrame::TIAFrame()
     // Create tools menu
     wxMenu* menuTools = new wxMenu;
     menuTools->Append(ID_COMPILECAT, "&Catalog Compiler", "Create a compiled catalog from raw");
+    menuTools->Append(ID_DETVALIDATOR, "&Detection Validator", "Compare detections against a reference set for accuracy.");
 
     // Create help menu
     wxMenu* menuHelp = new wxMenu;
@@ -91,6 +92,7 @@ TIAFrame::TIAFrame()
     Bind(wxEVT_MENU, &TIAFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &TIAFrame::OnSettings, this, ID_Settings);
     Bind(wxEVT_MENU, &TIAFrame::OnCompileCatalog, this, ID_COMPILECAT);
+    Bind(wxEVT_MENU, &TIAFrame::OnDetectionValidator, this, ID_DETVALIDATOR);
 
     // Register observer panels with TCore
     m_core.registerTObserver(m_displayPanel);
@@ -124,11 +126,16 @@ void TIAFrame::OnHello(wxCommandEvent& event)
 
 void TIAFrame::OnSettings(wxCommandEvent& event)
 {
-    m_settingsDialog = new TUI::SettingsDialog(&m_core,this);
-    m_settingsDialog->ShowModal();
+    TUI::SettingsDialog settingsDialog = TUI::SettingsDialog(&m_core,this);
+    settingsDialog.ShowModal();
 }
 
 void TIAFrame::OnCompileCatalog(wxCommandEvent& evt) {
-    m_compileCatalogDialog = new TUI::CompileCatalogDialog(&m_core, this);
-    m_compileCatalogDialog->ShowModal();
+    TUI::CompileCatalogDialog compileCatalogDialog = TUI::CompileCatalogDialog(&m_core, this);
+    compileCatalogDialog.ShowModal();
+}
+
+void TIAFrame::OnDetectionValidator(wxCommandEvent& evt) {
+    TUI::DetectionValidatorWidget detValidatorWidget = TUI::DetectionValidatorWidget(&m_core, this);
+    detValidatorWidget.ShowModal();
 }
