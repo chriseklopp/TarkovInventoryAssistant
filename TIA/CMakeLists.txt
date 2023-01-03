@@ -24,7 +24,6 @@ set(TIA_HEADERS
     "./Core/TConfig.h"
     "./Core/TCore.h"
     "./Core/TDataCatalog.h"
-    "./Core/TDetectionValidator.h"
     "./Core/TImageReader.h"
     "./Core/TScreenCapture.h"
 
@@ -35,6 +34,7 @@ set(TIA_HEADERS
 
     "./UI/CatalogPanel.h"
     "./UI/ConsolePanel.h"
+    "./UI/DetectionValidatorWidget.h"
     "./UI/DisplayPanel.h"
     "./UI/OutputPanel.h"
     "./UI/UISupport.h"
@@ -48,7 +48,6 @@ set(TIA_SOURCES
     "./Core/TConfig.cpp"
     "./Core/TCore.cpp"
     "./Core/TDataCatalog.cpp"
-    "./Core/TDetectionValidator.cpp"
     "./Core/TImageReader.cpp"
     "./Core/TScreenCapture.cpp"
 
@@ -59,6 +58,7 @@ set(TIA_SOURCES
 
     "./UI/CatalogPanel.cpp"
     "./UI/ConsolePanel.cpp"
+    "./UI/DetectionValidatorWidget.cpp"
     "./UI/DisplayPanel.cpp"
     "./UI/OutputPanel.cpp"
     "./UI/UISupport.cpp"
