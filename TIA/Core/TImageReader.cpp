@@ -59,14 +59,14 @@ int TImageReader::detectOpenContainers(const cv::Mat& image,
     cv::findContours(dilated, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
 
 
-    for (auto cont = contours.begin(); cont != contours.end(); ++cont) {
+    for (auto& cont : contours){
 
-        double area = cv::contourArea(*cont, true);
+        double area = cv::contourArea(cont, true);
         if (area > 15000) {
-            double peri = cv::arcLength(*cont, true);
+            double peri = cv::arcLength(cont, true);
 
             std::vector<cv::Point> approx;
-            cv::approxPolyDP(*cont, approx, .2 * peri, true);
+            cv::approxPolyDP(cont, approx, .2 * peri, true);
 
             cv::Point lowerP = approx.at(0);
             cv::Point upperP = approx.at(1);
@@ -113,14 +113,14 @@ void TImageReader::resolveContainerImage(const cv::Mat& image,
     std::vector<std::vector<cv::Point> > contours;
     cv::findContours(mask, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
 
-    for (auto cont = contours.begin(); cont != contours.end(); ++cont) {
+    for (auto& cont : contours){
 
-        double area = cv::contourArea(*cont, true);
+        double area = cv::contourArea(cont, true);
         if (area > 900) {
-            double peri = cv::arcLength(*cont, true);
+            double peri = cv::arcLength(cont, true);
 
             std::vector<cv::Point> approx;
-            cv::approxPolyDP(*cont, approx, .2 * peri, true);
+            cv::approxPolyDP(cont, approx, .2 * peri, true);
 
             if (approx.size() < 2)
                 continue;
