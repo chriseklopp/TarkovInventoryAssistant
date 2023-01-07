@@ -1,20 +1,29 @@
 #include <UI/DetectionValidatorWidget.h>
 #include <wx/spinctrl.h>
+#include <fstream>
 
 
 namespace TUI {
 
-    DetectionValidatorWidget::DetectionValidatorWidget(TCore* corePtr,
-            wxWindow* parent,
-            wxWindowID id,
-            const wxString& title,
-            const wxPoint& pos,
-            const wxSize& size,
-            long style) :
+    // Catalog display column ordering
+    const std::map<std::string, int> DetectionValidatorWidget::m_columnIndexMap = {
+    {"Image",  0},
+    {"Name", 1}
+    };
 
-            m_corePtr(corePtr),
-            wxDialog(parent, id, title, pos, size, style)
+    DetectionValidatorWidget::DetectionValidatorWidget(TCore* corePtr,
+        wxWindow* parent,
+        wxWindowID id,
+        const wxString& title,
+        const wxPoint& pos,
+        const wxSize& size,
+        long style) :
+
+        m_corePtr(corePtr),
+        wxDialog(parent, id, title, pos, size, style)
     {
+
+
         this->SetSizeHints(wxDefaultSize, wxDefaultSize);
         // ---------------- Input -------------------------------------
         wxBoxSizer* mainsizer;
@@ -25,6 +34,7 @@ namespace TUI {
         mainsizer->Add(m_referenceFileText, 0, wxALL, 5);
 
         m_referenceFileSelector = new wxFilePickerCtrl(this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE);
+        m_referenceFileSelector->SetInitialDirectory(m_corePtr->getConfigPtr()->getDATA_DIR().string());
         mainsizer->Add(m_referenceFileSelector, 0, wxALL, 5);
 
         m_imageIDText = new wxStaticText(this, wxID_ANY, wxT("Comparison Image ID"), wxDefaultPosition, wxDefaultSize, 0);
@@ -34,8 +44,13 @@ namespace TUI {
         m_imageIDSelector = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9999, 0);
         mainsizer->Add(m_imageIDSelector, 0, wxALL, 5);
 
-        m_compareButton = new wxToggleButton(this, wxID_ANY, wxT("Compare"), wxDefaultPosition, wxDefaultSize, 0);
-        m_compareButton->SetValue(true);
+        m_saveButton = new wxButton(this, wxID_ANY, wxT("Save New Reference"), wxDefaultPosition, wxDefaultSize, 0);
+        m_saveButton->Bind(wxEVT_BUTTON, &DetectionValidatorWidget::OnSave, this);
+        mainsizer->Add(m_saveButton, 0, wxALL, 5);
+
+
+        m_compareButton = new wxButton(this, wxID_ANY, wxT("Compare"), wxDefaultPosition, wxDefaultSize, 0);
+        m_compareButton->Bind(wxEVT_BUTTON, &DetectionValidatorWidget::OnCompare, this);
         mainsizer->Add(m_compareButton, 0, wxALL | wxEXPAND, 5);
 
         m_inputOutputLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
@@ -115,38 +130,211 @@ namespace TUI {
         m_interactiveDisplayLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
         mainsizer->Add(m_interactiveDisplayLine, 0, wxEXPAND | wxALL, 5);
 
-        m_incorrectDetections = new wxGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0);
+        m_discrepancyGridText = new wxStaticText(this, wxID_ANY, wxT("Discrepancies"), wxDefaultPosition, wxDefaultSize, 0);
+        m_discrepancyGridText->Wrap(-1);
+        mainsizer->Add(m_discrepancyGridText, 0);
+
+        m_discrepancyGrid = new wxGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0);
 
         // Grid
-        m_incorrectDetections->CreateGrid(5, 5);
-        m_incorrectDetections->EnableEditing(true);
-        m_incorrectDetections->EnableGridLines(true);
-        m_incorrectDetections->EnableDragGridSize(false);
-        m_incorrectDetections->SetMargins(0, 0);
 
-        // Columns
-        m_incorrectDetections->EnableDragColMove(false);
-        m_incorrectDetections->EnableDragColSize(true);
-        m_incorrectDetections->SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+        m_discrepancyGrid->CreateGrid(0, m_columnIndexMap.size());
+        m_discrepancyGrid->HideRowLabels();
 
-        // Rows
-        m_incorrectDetections->EnableDragRowSize(true);
-        m_incorrectDetections->SetRowLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+        for (auto& c : m_columnIndexMap) {
+            m_discrepancyGrid->SetColLabelValue(c.second, c.first);
+        }
 
-        // Label Appearance
+        m_discrepancyGrid->SetColLabelSize(20);
+        m_discrepancyGrid->SetDefaultRowSize(m_imageMaxRows);
+        m_discrepancyGrid->SetColSize(m_columnIndexMap.at("Image"), m_imageMaxCols);
+        m_discrepancyGrid->SetColSize(m_columnIndexMap.at("Name"), 240);
+        m_discrepancyGrid->EnableEditing(false);
 
-        // Cell Defaults
-        m_incorrectDetections->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_TOP);
-        mainsizer->Add(m_incorrectDetections, 0, wxALL, 5);
+        m_discrepancyGrid->SetDefaultCellBackgroundColour(wxColor(20, 20, 20));
+        m_discrepancyGrid->SetDefaultCellTextColour(wxColor(255, 255, 255));
+        m_discrepancyGrid->SetDefaultCellFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+        m_discrepancyGrid->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
+        m_discrepancyGrid->SetGridLineColour(wxColour(73, 81, 84));
+
+        mainsizer->Add(m_discrepancyGrid, 1, wxALL| wxEXPAND, 5);
 
 
         this->SetSizer(mainsizer);
         this->Layout();
 
         this->Centre(wxVERTICAL);
+
+        this->SetMinSize(this->GetSize());
+        wxSize maxSize = this->GetSize();
+        maxSize.SetHeight(maxSize.GetHeight() * 4);
+        this->SetMaxSize(maxSize);
+
     }
 
-    DetectionValidatorWidget::~DetectionValidatorWidget()
-    {
+    DetectionValidatorWidget::~DetectionValidatorWidget() {
     }
+
+    void DetectionValidatorWidget::OnCompare(wxCommandEvent& evt) {
+        clearDiscrepancyGrid();
+        std::filesystem::path referenceInfoPath = m_referenceFileSelector->GetTextCtrlValue().ToStdString();
+
+        imageID id = std::stoi(m_imageIDSelector->GetTextValue().ToStdString());
+
+        const std::vector<TItemSupport::DetectionResult>* detections = m_corePtr->getDetectionResults(id);
+        std::unordered_set<ReferenceInfo, ReferenceInfo_hash> refSet = loadReferenceInfo(referenceInfoPath);
+
+        const cv::Mat* imagePtr = m_corePtr->getImage(id);
+
+        // Check for bad things
+        if (!std::filesystem::exists(referenceInfoPath) ||
+            !detections || detections->empty() || !refSet.size() || !imagePtr) {
+            wxMessageDialog* errorDialog = new wxMessageDialog(NULL,
+                wxT("An Error Occurred. Reference path may be invalid or Image ID is invalid or has 0 associated detections."),
+                wxT("Warning"), wxICON_EXCLAMATION);
+            errorDialog->ShowModal();
+            return;
+        }
+
+        m_comparisonImage = *imagePtr;
+
+        m_comparisonDetectionCount->SetValue(wxString::Format(wxT("%i"), int(detections->size())));
+        m_referenceDetectionCount->SetValue(wxString::Format(wxT("%i"), int(refSet.size())));
+
+        int originalRefSetSize = refSet.size(); // for use in accuracy calculation, since we remove elements while comparing.
+
+        int numMatches(0);
+        ReferenceInfo detRef;
+        for (auto& det : *detections) {
+            detRef = ReferenceInfo(m_corePtr->getCatalogItem(det.catalogItem)->getName(), det.imageLoc);
+            auto itr = refSet.find(detRef);
+            if (itr == refSet.end()) {
+                addToDiscrepancyGrid(detRef);
+                continue;
+            }
+            refSet.erase(itr); // Remove from the set.
+            numMatches++;
+        }
+
+        // Add any remaining items to incorrectDetectionsGrid
+        for (auto& ref : refSet) {
+            addToDiscrepancyGrid(ref);
+        }
+
+        m_numberDifferencesOutput->SetValue(wxString::Format(wxT("%i"), m_discrepancyGrid->GetNumberRows()));
+
+        auto huh = (1 - ((float)m_discrepancyGrid->GetNumberRows() / (float)(detections->size() + originalRefSetSize - numMatches)));
+        //accuracy =  1- (# incorrect / (||A|| + ||B|| - ||A intersect B||) )
+        float accuracy = 100* huh;
+        m_accuracyOutput->SetValue((std::to_string(accuracy) + "%"));
+    }
+
+    void DetectionValidatorWidget::OnSave(wxCommandEvent& evt) {
+        TUI::SaveFileDialog saveDialog = TUI::SaveFileDialog(".csv",this, wxID_ANY, "Save New Reference");
+        if (saveDialog.ShowModal() == wxID_CANCEL)
+            return;
+
+        std::filesystem::path path = saveDialog.getFilePath();
+
+        if (!std::filesystem::exists(path.parent_path()) || path.extension().string() != ".csv") {
+            wxMessageDialog* badPathDialog = new wxMessageDialog(NULL,
+                wxT("Warning: " + path.parent_path().string() + " Path does not exist"), wxT("Warning"));
+            badPathDialog->ShowModal();
+            return;
+        }
+        saveDetectionInfo(std::stoi(m_imageIDSelector->GetTextValue().ToStdString()), path);
+    }
+
+    void DetectionValidatorWidget::saveDetectionInfo(imageID id, const std::filesystem::path& path) {
+
+        // Format is Name,x1-y1-x2-y2
+        const std::vector<TItemSupport::DetectionResult>* detections = m_corePtr->getDetectionResults(id);
+
+        if (detections) {
+            std::ofstream file;
+            file.open(path, std::ios::out);
+            if (!file.is_open())
+                return;
+            file << "[Reference Info]\n";
+
+            std::string out;
+            for (auto& det : *detections) {
+
+                out = m_corePtr->getCatalogItem(det.catalogItem)->getName();
+
+                out += ("," + std::to_string(det.imageLoc.first.x) + "-"
+                    + std::to_string(det.imageLoc.first.y) + "-"
+                    + std::to_string(det.imageLoc.second.x) + "-"
+                    + std::to_string(det.imageLoc.second.y) + "\n");
+                file << out;
+            }
+            // clean up
+            file.close();
+
+        }
+
+
+    }
+
+    // This is one hell of a mouthfull.. 
+    std::unordered_set<DetectionValidatorWidget::ReferenceInfo, DetectionValidatorWidget::ReferenceInfo_hash> DetectionValidatorWidget::loadReferenceInfo(const std::filesystem::path& path) {
+
+        // Format is Name,x1-y1-x2-y2
+        auto retSet = std::unordered_set<DetectionValidatorWidget::ReferenceInfo, DetectionValidatorWidget::ReferenceInfo_hash>();
+        std::ifstream in;
+        std::string line;
+        std::vector<std::string> fields;
+        std::vector<std::string> locStrings;
+        ReferenceInfo refInfo;
+        in.open(path);
+        if (!in.is_open())
+            return retSet;
+
+        std::getline(in, line);
+        if (line != "[Reference Info]")
+            return retSet;
+
+        while (std::getline(in, line)) {
+            fields.clear();
+            locStrings.clear();
+            try {
+                TDataTypes::splitString(line, ',', fields);
+                refInfo.name = fields.at(0);
+                TDataTypes::splitString(fields.at(1), '-', locStrings);
+                if (locStrings.size() < 4)
+                    continue;
+
+                refInfo.location = std::make_pair(cv::Point(std::stoi(locStrings[0]), std::stoi(locStrings[1])),
+                    cv::Point(std::stoi(locStrings[2]), std::stoi(locStrings[3])));
+
+                retSet.insert(refInfo);
+            }
+            catch (std::invalid_argument) {}
+            catch (std::out_of_range) {}
+
+        }
+
+        return retSet;
+    }
+
+    void DetectionValidatorWidget::addToDiscrepancyGrid(const ReferenceInfo& refInfo) {
+        int row = m_discrepancyGrid->GetNumberRows();
+        m_discrepancyGrid->AppendRows(1);
+        m_discrepancyGrid->SetCellValue(row, m_columnIndexMap.at("Name"), refInfo.name);
+
+        cv::Mat fmtImage = formatImage(m_comparisonImage(cv::Range(refInfo.location.first.y, refInfo.location.second.y),
+            cv::Range(refInfo.location.first.x, refInfo.location.second.x)), m_imageMaxRows, m_imageMaxCols);
+
+        m_discrepancyGrid->SetCellRenderer(row, m_columnIndexMap.at("Image"),
+            new ImageGridCellRenderer(wxImage(fmtImage.cols, fmtImage.rows, fmtImage.data, true)));
+    }
+
+    void DetectionValidatorWidget::clearDiscrepancyGrid() {
+        if (m_discrepancyGrid->GetNumberRows())
+            m_discrepancyGrid->DeleteRows(0, m_discrepancyGrid->GetNumberRows());
+    }
+
+    DetectionValidatorWidget::ReferenceInfo::ReferenceInfo(const std::string& name, const std::pair<cv::Point, cv::Point>& loc)
+        : name(name), location(loc) { }
+
 }

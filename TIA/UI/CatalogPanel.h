@@ -49,7 +49,6 @@ namespace TUI {
         std::string m_nameFilter;
 
         // Maps column name to column index in the catalog display.
-        // TODO: Make some sort of column info struct.
         static const std::map<std::string, int> m_columnIndexMap;
 
 
