@@ -8,7 +8,7 @@
 
 
 #include <wx/grid.h>
-
+#include <wx/filepicker.h>
 #include <Core/TCore.h>
 
 
@@ -98,6 +98,41 @@ namespace TUI {
     private:
         wxBitmap m_image;
     };
+
+
+    /*
+    * Dialog that allows a user to select a path and a file name.
+    * Extension will be added to the end of the file name.
+    * The path and filename will be combined and the user is responsible for getting it and using it.
+    */
+    class SaveFileDialog : public wxDialog
+    {
+
+    public:
+
+        SaveFileDialog(const std::string& extension, wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Save File"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(301, 182), long style = wxDEFAULT_DIALOG_STYLE);
+
+        ~SaveFileDialog();
+
+        std::filesystem::path getFilePath();
+
+    protected:
+        wxStaticText* m_directoryText;
+        wxDirPickerCtrl* m_directoryPicker;
+        wxStaticText* m_fileNameText;
+        wxTextCtrl* m_fileNameBox;
+        wxButton* m_saveButton;
+        wxButton* m_cancelButton;
+
+    private:
+
+        void OnSave(wxCommandEvent& evt);
+        std::string m_fileName;
+        std::string m_path;
+        std::string m_extension;
+        bool m_saved;
+    };
+
 
     struct columnProperties {
         int width;
