@@ -132,7 +132,7 @@ imageID TCore::createNewImageID() {
 
 }
 
-cv::Mat* const TCore::getImage(imageID id) {
+const cv::Mat*  TCore::getImage(imageID id) {
     if (m_idImageMap.find(id) != m_idImageMap.end())
         return m_idImageMap.at(id).get();
 
@@ -141,7 +141,7 @@ cv::Mat* const TCore::getImage(imageID id) {
 
 void TCore::detectImageContent(imageID id) {
 
-    cv::Mat* const image = getImage(id);
+    const cv::Mat*  image = getImage(id);
     if (!image)
         return;
 

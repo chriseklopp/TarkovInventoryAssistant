@@ -103,6 +103,60 @@ namespace TUI {
     }
 
 
+    SaveFileDialog::SaveFileDialog(const std::string& extension, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : m_extension(extension), m_fileName("Unknown"), m_saved(false), wxDialog(parent, id, title, pos, size, style)
+    {
+        this->SetSizeHints(wxDefaultSize, wxDefaultSize);
+
+        wxBoxSizer* mainSizer;
+        mainSizer = new wxBoxSizer(wxVERTICAL);
+
+        m_directoryText = new wxStaticText(this, wxID_ANY, wxT("Directory"), wxDefaultPosition, wxDefaultSize, 0);
+        m_directoryText->Wrap(-1);
+        mainSizer->Add(m_directoryText, 0, wxALL, 5);
+
+        m_directoryPicker = new wxDirPickerCtrl(this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE);
+        mainSizer->Add(m_directoryPicker, 0, wxALL, 5);
+
+        m_fileNameText = new wxStaticText(this, wxID_ANY, wxT("File Name"), wxDefaultPosition, wxDefaultSize, 0);
+        m_fileNameText->Wrap(-1);
+        mainSizer->Add(m_fileNameText, 0, wxALL, 5);
+
+        m_fileNameBox = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
+        mainSizer->Add(m_fileNameBox, 0, wxALL, 5);
+
+        wxBoxSizer* buttonsizer;
+        buttonsizer = new wxBoxSizer(wxHORIZONTAL);
+
+        m_saveButton = new wxButton(this, wxID_OK, wxT("Save"), wxDefaultPosition, wxDefaultSize, 0);
+        m_saveButton->Bind(wxEVT_BUTTON, &SaveFileDialog::OnSave, this);
+
+        buttonsizer->Add(m_saveButton, 0, wxALL, 5);
+
+        m_cancelButton = new wxButton(this, wxID_CANCEL, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0);
+        buttonsizer->Add(m_cancelButton, 0, wxALL, 5);
+
+
+        mainSizer->Add(buttonsizer, 1, wxEXPAND, 5);
+
+
+        this->SetSizer(mainSizer);
+
+        this->Centre(wxBOTH);
+    }
+
+    SaveFileDialog::~SaveFileDialog()
+    {
+    }
+    std::filesystem::path SaveFileDialog::getFilePath() {
+        return m_saved ? std::filesystem::path(m_path) / (m_fileName + m_extension) : "";
+    }
+    void SaveFileDialog::OnSave(wxCommandEvent& evt) {
+        m_path = m_directoryPicker->GetTextCtrlValue().ToStdString();
+        m_fileName = m_fileNameBox->GetValue().ToStdString();
+        m_saved = true;
+        EndModal(wxID_OK);
+    }
+
     cv::Mat formatImage(const cv::Mat image, int maxRows, int maxCols) {
         cv::Mat im;
         cv::cvtColor(image, im, cv::COLOR_BGR2RGB);

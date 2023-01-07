@@ -34,6 +34,7 @@ set(TIA_HEADERS
 
     "./UI/CatalogPanel.h"
     "./UI/ConsolePanel.h"
+    "./UI/DetectionValidatorWidget.h"
     "./UI/DisplayPanel.h"
     "./UI/OutputPanel.h"
     "./UI/UISupport.h"
@@ -57,6 +58,7 @@ set(TIA_SOURCES
 
     "./UI/CatalogPanel.cpp"
     "./UI/ConsolePanel.cpp"
+    "./UI/DetectionValidatorWidget.cpp"
     "./UI/DisplayPanel.cpp"
     "./UI/OutputPanel.cpp"
     "./UI/UISupport.cpp"

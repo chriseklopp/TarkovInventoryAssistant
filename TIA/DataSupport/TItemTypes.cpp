@@ -97,7 +97,6 @@ namespace TItemTypes {
     bool TContainerItem::insert(std::vector<std::pair<TItem, cv::Point>> items)
     {
         for (std::pair<TItem, cv::Point> p : items) {
-            // TODO: this is so so so inefficient. Also needs to use shared ptr.
             TItem it = p.first;
             cv::Point loc = p.second;
             m_spaceFilled += it.m_dim.first * it.m_dim.second;

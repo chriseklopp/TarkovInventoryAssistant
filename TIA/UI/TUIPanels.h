@@ -3,7 +3,6 @@
 #include <UI/UISupport.h>
 
 #include <wx/statline.h>
-#include <wx/filepicker.h>
 /*
 Main frame dialogs are defined here.
 */

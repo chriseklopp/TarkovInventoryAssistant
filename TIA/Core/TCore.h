@@ -13,7 +13,6 @@
 */
 
 
-typedef int imageID;
 
 
 class TCore : public TEvent::TSubject {
@@ -27,12 +26,12 @@ public:
     * Each returns a reference to the underlying information.
     */
 
-    //Returns a reference to detection results for given ID.
+    //Returns a pointer to detection results for given ID. Returns nullptr if invalid id.
     const std::vector<TItemSupport::DetectionResult>* getDetectionResults(imageID imageID);
 
     // Returns pointer to image associated with the given id.
     // ** If no image is associated with the ID this will return null ptr **
-    cv::Mat* const getImage(imageID id);
+    const cv::Mat*  getImage(imageID id);
 
     // Returns reference to our loaded images.
     const std::vector<imageID> getLoadedImageIDs();
