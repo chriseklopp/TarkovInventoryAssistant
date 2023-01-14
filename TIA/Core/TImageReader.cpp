@@ -8,21 +8,41 @@ bool TImageReader::parseImage(const cv::Mat& image,
 
     // Determine if this is an image containing containers or a stash (TODO: check for gamerun mode)
     std::vector<std::pair<cv::Point, cv::Point>> containerLocations;
-    int numDet = detectOpenContainers(image, containerLocations);
+    int numContainers = detectOpenContainers(image, containerLocations);
 
     // Detect containers, detect if a stash is present.
     // If containers are within stash, ignore stash.
-    // Stash ignore items cut off by top and bottom of frame.
+    std::pair<cv::Point, cv::Point> stashLoc;
+    bool stashDetected = detectStash(image, stashLoc);
+    if (stashDetected) {
+        // Check if any containers obfuscate the stash. If so, we toss out the stash detection.
+        auto inRange = [&](int value, int lower, int upper) {
+            return lower <= value && value <= upper;
+        };
+        for (auto& cont : containerLocations) {
+            // Test if any 4 corners of the container rect are inside the stash.
+            if ((inRange(stashLoc.first.x, cont.first.x, stashLoc.second.x) && inRange(stashLoc.first.y, cont.first.y, stashLoc.second.y)) ||
+                (inRange(stashLoc.first.x, cont.second.x, stashLoc.second.x) && inRange(stashLoc.first.y, cont.first.y, stashLoc.second.y)) ||
+                (inRange(stashLoc.first.x, cont.first.x, stashLoc.second.x) && inRange(stashLoc.first.y, cont.second.y, stashLoc.second.y)) ||
+                (inRange(stashLoc.first.x, cont.second.x, stashLoc.second.x) && inRange(stashLoc.first.y, cont.second.y, stashLoc.second.y)) )
+            {
+                stashDetected = false;
+                break;
+            }
+        }
+    }
 
-    if (numDet > 0) {
+
+    bool success = false;
+    if (numContainers > 0) {
         resolveContainerImage(image, containerLocations, retItems, retLocs);
-        return true;
+        success =  true;
     }
-    else {
-        std::pair<cv::Point, cv::Point> stashLoc;
-        bool stashDetected = detectStash(image, stashLoc);
-    }
-    return true;
+
+    if (stashDetected)
+        resolveStashImage(image, stashLoc, retItems, retLocs);
+
+    return success;
 } 
 
 
