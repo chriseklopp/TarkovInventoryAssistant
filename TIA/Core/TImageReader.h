@@ -4,6 +4,9 @@
 #include <vector>
 #include <DataSupport/TItemTypes.h>
 #include <Core/TConfig.h>
+
+
+#include <Tests/TTestLibrary.h> // TODO: REMOVE BEFORE MERGE!!!!!!!
 /*
 * 
 Processes the screenshot(s) into detected TItems.
@@ -38,7 +41,7 @@ private:
 
      // Accept container coordinates. Returns all items in the container.
     void resolveContainerImage(const cv::Mat& image,
-        std::vector<std::pair<cv::Point, cv::Point>> locs,
+        const std::vector<std::pair<cv::Point, cv::Point>>& locs,
         std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<std::pair<cv::Point, cv::Point>>& retLocs);
 
     void resolveStashImage(const cv::Mat& image,
@@ -48,7 +51,9 @@ private:
 
     void resolveContainerHeader(); //Find the header in a container image.
 
-
+    // Determine if a detected "item" image is actually empty space!
+    // Input hsv image ONLY!
+    bool isEmptySpace(const cv::Mat& hsvImg);
 
     int m_cellsize;
     // std::vector<TEMP> m_containerList;

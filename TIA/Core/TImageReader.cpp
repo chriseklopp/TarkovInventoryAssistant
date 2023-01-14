@@ -10,6 +10,10 @@ bool TImageReader::parseImage(const cv::Mat& image,
     std::vector<std::pair<cv::Point, cv::Point>> containerLocations;
     int numDet = detectOpenContainers(image, containerLocations);
 
+    // Detect containers, detect if a stash is present.
+    // If containers are within stash, ignore stash.
+    // Stash ignore items cut off by top and bottom of frame.
+
     if (numDet > 0) {
         resolveContainerImage(image, containerLocations, retItems, retLocs);
         return true;
@@ -54,15 +58,14 @@ int TImageReader::detectOpenContainers(const cv::Mat& image,
     cv::Mat dilated;
     cv::dilate(eroded, dilated, cv::Mat(), cv::Point(-1, -1), 1);
 
-
     std::vector<std::vector<cv::Point> > contours;
-    cv::findContours(dilated, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
+    cv::findContours(dilated, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 
     for (auto& cont : contours){
 
         double area = cv::contourArea(cont, true);
-        if (area > 15000) {
+        if (std::abs(area) > 15000) {
             double peri = cv::arcLength(cont, true);
 
             std::vector<cv::Point> approx;
@@ -71,6 +74,7 @@ int TImageReader::detectOpenContainers(const cv::Mat& image,
             cv::Point lowerP = approx.at(0);
             cv::Point upperP = approx.at(1);
             
+
             // Occasionally the points in the first item of approx are not the lowest points.
             if (lowerP.x > upperP.x) {
                 int temp = upperP.x;
@@ -95,62 +99,70 @@ int TImageReader::detectOpenContainers(const cv::Mat& image,
 }
 
 void TImageReader::resolveContainerImage(const cv::Mat& image,
-                                         std::vector<std::pair<cv::Point, cv::Point>> locs,
+                                         const std::vector<std::pair<cv::Point, cv::Point>>& locs,
                                          std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems,
                                          std::vector<std::pair<cv::Point, cv::Point>>& retLocs) {
 
-    cv::Mat imgHSV;
-    cv::cvtColor(image, imgHSV, cv::COLOR_BGR2HSV);
 
-    // Our "Magic" threshold values to detect item outlines.
-    cv::Scalar lower(94, 7, 50);
-    cv::Scalar upper(105, 36, 115);
+    for (auto& loc : locs) {
+        const cv::Point& containerUL = loc.first;
+        const cv::Point& containerBR = loc.second;
+        cv::Mat containerSlice = image(cv::Range(containerUL.y, containerBR.y), cv::Range(containerUL.x, containerBR.x + 1));
+        cv::Mat imgHSV;
+        cv::cvtColor(containerSlice, imgHSV, cv::COLOR_BGR2HSV);
 
-    cv::Mat mask;
-    cv::inRange(imgHSV, lower, upper, mask);
+        // Our "Magic" threshold values to detect item outlines.
+        cv::Scalar lower(94, 7, 50);
+        cv::Scalar upper(105, 36, 115);
+
+        cv::Mat mask;
+        cv::inRange(imgHSV, lower, upper, mask);
+
+        std::vector<std::vector<cv::Point> > contours;
+        cv::findContours(mask, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
+
+        for (auto& cont : contours) {
+
+            double area = cv::contourArea(cont, true);
+            if (area > 900) {
+                double peri = cv::arcLength(cont, true);
+
+                std::vector<cv::Point> approx;
+                cv::approxPolyDP(cont, approx, .2 * peri, true);
+
+                if (approx.size() < 2)
+                    continue;
+                cv::Point lowerP = approx.at(0);
+                cv::Point upperP = approx.at(1);
+
+                // Occasionally the points in the first item of approx are not the lowest points.
+                if (lowerP.x > upperP.x) {
+                    int temp = upperP.x;
+                    upperP.x = lowerP.x;
+                    lowerP.x = temp;
+                }
+
+                if (lowerP.y > upperP.y) {
+                    int temp = upperP.y;
+                    upperP.y = lowerP.y;
+                    lowerP.y = temp;
+                }
 
 
-    std::vector<std::vector<cv::Point> > contours;
-    cv::findContours(mask, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
+                cv::Mat itemImage = containerSlice(cv::Range(lowerP.y, upperP.y), cv::Range(lowerP.x, upperP.x + 1));
+                if (itemImage.empty() ||
+                    isEmptySpace(imgHSV(cv::Range(lowerP.y, upperP.y), cv::Range(lowerP.x, upperP.x + 1))))
+                    continue;
 
-    for (auto& cont : contours){
-
-        double area = cv::contourArea(cont, true);
-        if (area > 900) {
-            double peri = cv::arcLength(cont, true);
-
-            std::vector<cv::Point> approx;
-            cv::approxPolyDP(cont, approx, .2 * peri, true);
-
-            if (approx.size() < 2)
-                continue;
-            cv::Point lowerP = approx.at(0);
-            cv::Point upperP = approx.at(1);
-
-            // Occasionally the points in the first item of approx are not the lowest points.
-            if (lowerP.x > upperP.x) {
-                int temp = upperP.x;
-                upperP.x = lowerP.x;
-                lowerP.x = temp;
+                // We create a placeholder TItem with our image and its dimensions.
+                retItems.push_back(TItemTypes::TItem::makePlaceHolder(itemImage, m_cellsize));
+                retLocs.push_back(std::make_pair(lowerP+ containerUL, upperP+ containerUL)); // Shift to parent image coordinates.
             }
 
-            if (lowerP.y > upperP.y) {
-                int temp = upperP.y;
-                upperP.y = lowerP.y;
-                lowerP.y = temp;
-            }
-
-
-            cv::Mat itemImage = image(cv::Range(lowerP.y, upperP.y), cv::Range(lowerP.x, upperP.x+1));
-            if (itemImage.empty())
-                continue;
-
-            // We create a placeholder TItem with our image and its dimensions.
-            retItems.push_back(TItemTypes::TItem::makePlaceHolder(itemImage, m_cellsize));
-            retLocs.push_back(std::make_pair(lowerP, upperP));
         }
-
     }
+
+    
 
 
 }
@@ -160,6 +172,24 @@ void TImageReader::resolveStashImage(const cv::Mat& image,
     std::pair<cv::Point, cv::Point> loc,
     std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<std::pair<cv::Point, cv::Point>>& retLocs) {};
 
+
+
 bool TImageReader::detectStash(const cv::Mat& image, std::pair<cv::Point, cv::Point>& loc) {
     return false;
 };
+
+bool TImageReader::isEmptySpace(const cv::Mat& hsvImg) {
+
+    /*
+    * Empty spaces tend to have:
+    * H = 0
+    * S = 0
+    * V = [7,10]
+    */
+    cv::Scalar avgHSV = cv::mean(hsvImg);
+    std::cout << avgHSV << std::endl;
+    if (avgHSV.channels < 3 || (avgHSV[0] < 10 && avgHSV[1] < 10 && avgHSV[2] < 30))
+        return true;
+
+    return false;
+}
