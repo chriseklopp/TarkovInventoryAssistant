@@ -8,7 +8,8 @@ namespace TUI {
     // Catalog display column ordering
     const std::map<std::string, int> DetectionValidatorWidget::m_columnIndexMap = {
     {"Image",  0},
-    {"Name", 1}
+    {"Name", 1},
+    {"Loc", 2}
     };
 
     DetectionValidatorWidget::DetectionValidatorWidget(TCore* corePtr,
@@ -206,14 +207,26 @@ namespace TUI {
         int numMatches(0);
         ReferenceInfo detRef;
         for (auto& det : *detections) {
-            detRef = ReferenceInfo(m_corePtr->getCatalogItem(det.catalogItem)->getName(), det.imageLoc);
+            const TItemTypes::TItem* catItem = m_corePtr->getCatalogItem(det.catalogItem);
+            if (!catItem)
+                continue;
+            detRef = ReferenceInfo(catItem->getName(), det.imageLoc);
             auto itr = refSet.find(detRef);
+
             if (itr == refSet.end()) {
+                // This location is NOT in our reference set.
                 addToDiscrepancyGrid(detRef);
                 continue;
             }
-            refSet.erase(itr); // Remove from the set.
-            numMatches++;
+
+            // This location IS in our reference set.
+            if (itr->name != detRef.name)
+                addToDiscrepancyGrid(detRef); // If the names are different it is a discrepancy.
+            else
+                numMatches++;
+
+            refSet.erase(itr); // remove from reference set
+
         }
 
         // Add any remaining items to incorrectDetectionsGrid
@@ -223,9 +236,8 @@ namespace TUI {
 
         m_numberDifferencesOutput->SetValue(wxString::Format(wxT("%i"), m_discrepancyGrid->GetNumberRows()));
 
-        auto huh = (1 - ((float)m_discrepancyGrid->GetNumberRows() / (float)(detections->size() + originalRefSetSize - numMatches)));
         //accuracy =  1- (# incorrect / (||A|| + ||B|| - ||A intersect B||) )
-        float accuracy = 100* huh;
+        float accuracy = 100* (1 - ((float)m_discrepancyGrid->GetNumberRows() / (float)(detections->size() + originalRefSetSize - numMatches)));
         m_accuracyOutput->SetValue((std::to_string(accuracy) + "%"));
     }
 
@@ -327,12 +339,21 @@ namespace TUI {
 
         m_discrepancyGrid->SetCellRenderer(row, m_columnIndexMap.at("Image"),
             new ImageGridCellRenderer(wxImage(fmtImage.cols, fmtImage.rows, fmtImage.data, true)));
+
+        m_discrepancyGrid->SetCellValue(row, m_columnIndexMap.at("Loc"), locToString(refInfo.location));
+
     }
 
     void DetectionValidatorWidget::clearDiscrepancyGrid() {
         if (m_discrepancyGrid->GetNumberRows())
             m_discrepancyGrid->DeleteRows(0, m_discrepancyGrid->GetNumberRows());
     }
+
+    std::string DetectionValidatorWidget::locToString(const std::pair<cv::Point, cv::Point>& loc) {
+        return "(" + std::to_string(loc.first.x) + "," + std::to_string(loc.first.y) + ")\n" +
+            "(" + std::to_string(loc.second.x) + "," + std::to_string(loc.second.y) + ")";
+    }
+
 
     DetectionValidatorWidget::ReferenceInfo::ReferenceInfo(const std::string& name, const std::pair<cv::Point, cv::Point>& loc)
         : name(name), location(loc) { }

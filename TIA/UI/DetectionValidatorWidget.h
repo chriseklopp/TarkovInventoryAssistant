@@ -32,6 +32,7 @@ namespace TUI {
     private:
 
         // Contains info read from a reference info file
+        // NOTE: == operator ONLY compares location NOT name. This is necessary for proper hashing comparison.
         struct ReferenceInfo {
             ReferenceInfo() = default;
             ReferenceInfo(const std::string& name, const std::pair<cv::Point, cv::Point>& loc);
@@ -52,11 +53,10 @@ namespace TUI {
 
         }
 
-        // TODO: Make location within some margin of error.
+
         friend bool operator==(const ReferenceInfo& lhs, const ReferenceInfo& rhs)
         {
-            return lhs.name == rhs.name && locationWithinMOE(lhs.location, rhs.location);
-            //return lhs.name == rhs.name && lhs.location == rhs.location;
+            return locationWithinMOE(lhs.location, rhs.location);
         }
 
  
@@ -65,11 +65,9 @@ namespace TUI {
         struct ReferenceInfo_hash {
 
             std::size_t operator() (const ReferenceInfo& rinfo) const {
-                return std::hash<std::string>()(rinfo.name) ^
-                    std::hash<int>()(rinfo.location.first.x + rinfo.location.first.y) ^
+                return std::hash<int>()(rinfo.location.first.x + rinfo.location.first.y) ^
                     std::hash<int>()(rinfo.location.second.x + rinfo.location.second.y);
             }
-
 
 
             template <class T1, class T2>
@@ -80,6 +78,7 @@ namespace TUI {
         };
 
 
+
         void saveDetectionInfo(imageID id, const std::filesystem::path& path);
 
 
@@ -88,6 +87,8 @@ namespace TUI {
         void addToDiscrepancyGrid(const ReferenceInfo& refInfo);
 
         void clearDiscrepancyGrid();
+
+        std::string locToString(const std::pair<cv::Point, cv::Point>& loc);
 
         static const std::map<std::string, int> m_columnIndexMap;
 
