@@ -40,16 +40,17 @@ private:
 
 
      // Accept container coordinates. Returns all items in the container.
-    void resolveContainerImage(const cv::Mat& image,
+    void resolveContainerImageItems(const cv::Mat& image,
         const std::vector<std::pair<cv::Point, cv::Point>>& locs,
         std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<std::pair<cv::Point, cv::Point>>& retLocs);
 
-    void resolveStashImage(const cv::Mat& image,
+    // Accept stash coordinates. Returns all items in the stash.
+    void resolveStashImageItems(const cv::Mat& image,
         std::pair<cv::Point, cv::Point> loc,
         std::vector<std::unique_ptr<TItemTypes::TItem>>& retItems, std::vector<std::pair<cv::Point, cv::Point>>& retLocs);
 
 
-    void resolveContainerHeader(); //Find the header in a container image.
+    //void resolveContainerHeader(); //Find the header in a container image.
 
     // Determine if a detected "item" image is actually empty space!
     // Input hsv image ONLY!
