@@ -9,6 +9,7 @@ Escape from Tarkov Inventory Assistant.
 *Releases:*
 https://github.com/chriseklopp/TarkovInventoryAssistant/releases
 
+*NOTE: Still WIP, only currently works on open containers*
 
 Motivation:
 ------------------------------------------------------------------------------------------------------------------------
