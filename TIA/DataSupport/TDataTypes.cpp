@@ -132,7 +132,7 @@ namespace TDataTypes
 
     }
 
-    const int& TCurrency::getValue() const {
+    const int TCurrency::getValue() const {
         return m_value;
     }
 
@@ -154,7 +154,7 @@ namespace TDataTypes
         return m_unit;
     }
 
-    const bool& TCurrency::isPrependedUnit() const {
+    const bool TCurrency::isPrependedUnit() const {
         return m_isPrependedUnit;
     }
 

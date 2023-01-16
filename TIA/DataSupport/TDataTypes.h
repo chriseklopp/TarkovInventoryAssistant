@@ -82,10 +82,10 @@ namespace TDataTypes
         TCurrency(const std::string& currString);
         ~TCurrency() {};
 
-        const int& getValue() const;
+        const int getValue() const;
         const std::string getCurrencyString(bool prettify=false) const;
         const std::string& getUnit() const;
-        const bool& isPrependedUnit() const;
+        const bool isPrependedUnit() const;
 
         // Multiply currency value by the given int and return a string result.
         // Prettify will format the number to add commas where appropriate

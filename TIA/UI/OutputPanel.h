@@ -85,7 +85,7 @@ namespace TUI {
         wxGrid* m_outputList;
 
         // Ratio threshold at which a row where the flea and trader prices are similar are highlighted.
-        float m_highlightThreshold;
+        double m_highlightThreshold;
         // Tool bar widgets.
         wxToolBar* m_toolbar;
         wxCheckBox* m_toggleCollapse;

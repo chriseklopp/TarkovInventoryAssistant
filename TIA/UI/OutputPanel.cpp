@@ -31,7 +31,6 @@ namespace TUI {
 
         this->SetBackgroundColour(wxColor(100, 200, 200));
 
-
         auto sizer = new wxBoxSizer(wxVERTICAL);
 
 
@@ -281,7 +280,8 @@ namespace TUI {
     void OutputPanel::applyTraderSellHighlight(int row, const TItemTypes::TItem* itm) {
         if (!itm)
             return;
-        if (float(itm->getTraderSellPrice().getValue()) / float(itm->getPrice().getValue()) >= m_highlightThreshold) {
+
+        if (double(itm->getTraderSellPrice().getValue()) / double(itm->getPrice().getValue()) >= m_highlightThreshold) {
             m_outputList->SetCellBackgroundColour(row, m_columnIndexMap.at("FleaPrice"), wxColor(0, 200, 0));
             m_outputList->SetCellBackgroundColour(row, m_columnIndexMap.at("TraderPrice"), wxColor(0, 200, 0));
         }
