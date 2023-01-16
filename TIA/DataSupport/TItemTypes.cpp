@@ -18,7 +18,7 @@ namespace TItemTypes {
     {};
 
     // Construct a fully-fledged TItem. This should be the most common way to construct a TItem.
-    TItem::TItem(std::string& name, cv::Mat& image, std::pair<int, int>& dim, bool rotated, bool placeholder) :
+    TItem::TItem(const std::string& name, const cv::Mat& image, const std::pair<int, int>& dim, bool rotated, bool placeholder) :
         m_name(name),
         m_image(image),
         m_dim(dim),
@@ -28,7 +28,7 @@ namespace TItemTypes {
     {};
 
     // Construct a fully-fledged TItem, using an image from a path.
-    TItem::TItem(std::string& name, std::filesystem::path& imagePath, std::pair<int, int>& dim, bool rotated, bool placeholder) :
+    TItem::TItem(const std::string& name, const std::filesystem::path& imagePath, const std::pair<int, int>& dim, bool rotated, bool placeholder) :
         m_name(name),
         m_image(cv::imread(imagePath.string())),
         m_dim(dim),
@@ -38,7 +38,7 @@ namespace TItemTypes {
     {};
 
     // Construct a fully-fledged TItem, using an image from a path and a premade hash. Mostly used for loading catalog items.
-    TItem::TItem(std::string& name, std::filesystem::path& imagePath, std::pair<int, int>& dim, TItemSupport::PriceInfo& priceInfo, bool rotated, cv::Mat& hash, bool placeholder) :
+    TItem::TItem(const std::string& name, const std::filesystem::path& imagePath, const std::pair<int, int>& dim, const TItemSupport::PriceInfo& priceInfo, bool rotated, const cv::Mat& hash, bool placeholder) :
         m_name(name),
         m_image(cv::imread(imagePath.string())),
         m_dim(dim),
@@ -51,7 +51,7 @@ namespace TItemTypes {
 
 
 
-    std::unique_ptr<TItem> TItem::makePlaceHolder(cv::Mat& image, double cellSize) {
+    std::unique_ptr<TItem> TItem::makePlaceHolder(const cv::Mat& image, double cellSize) {
         int width = round(image.cols / cellSize);
         int height = round(image.rows / cellSize);
         return  std::make_unique<TItem>(TItem(image, std::make_pair(width, height)));

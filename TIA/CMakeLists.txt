@@ -40,6 +40,7 @@ set(TIA_HEADERS
     "./UI/UISupport.h"
     "./UI/TUIPanels.h"
 
+    "./Tests/TTestLibrary.h"
 )
 
 
@@ -64,6 +65,7 @@ set(TIA_SOURCES
     "./UI/UISupport.cpp"
     "./UI/TUIPanels.cpp"
 
+    "./Tests/TTestLibrary.cpp"
 )
 
 

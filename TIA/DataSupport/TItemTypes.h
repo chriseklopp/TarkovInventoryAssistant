@@ -48,13 +48,13 @@ namespace TItemTypes {
         TItem();
 
         // Construct a fully-fledged TItem. This should be the most common way to construct a TItem.
-        TItem(std::string& name, cv::Mat& image, std::pair<int, int>& dim, bool rotated, bool placeholder = false);
+        TItem(const std::string& name, const cv::Mat& image, const std::pair<int, int>& dim, bool rotated, bool placeholder = false);
 
         // Construct a fully-fledged TItem, using an image from a path.
-        TItem(std::string& name, std::filesystem::path& imagePath, std::pair<int, int>& dim, bool rotated, bool placeholder = false);
+        TItem(const std::string& name, const std::filesystem::path& imagePath, const std::pair<int, int>& dim, bool rotated, bool placeholder = false);
 
         // Construct a fully-fledged TItem, using an image from a path and a premade hash. Mostly used for loading catalog items.
-        TItem(std::string& name, std::filesystem::path& imagePath, std::pair<int, int>& dim, TItemSupport::PriceInfo& priceInfo, bool rotated, cv::Mat& hash, bool placeholder = false);
+        TItem(const std::string& name, const std::filesystem::path& imagePath, const std::pair<int, int>& dim, const TItemSupport::PriceInfo& priceInfo, bool rotated, const cv::Mat& hash, bool placeholder = false);
 
 
         virtual ~TItem() {};
@@ -62,7 +62,7 @@ namespace TItemTypes {
         // Construct a NEW placeholder item from an image and populate its dims using cellsize.
         // Will have isPlaceHolder flag = true to signify it is not fully populated.
         // A placeholder is intended to be populated by another fully formed TItem (or derived) object.
-        static std::unique_ptr<TItem> makePlaceHolder(cv::Mat& image, double cellSize);
+        static std::unique_ptr<TItem> makePlaceHolder(const cv::Mat& image, double cellSize);
 
         // TItem does not hold items. But we need this functionality for derived TContainerItem
         virtual bool insert(TItem item, cv::Point location) { return false; };
@@ -116,7 +116,7 @@ namespace TItemTypes {
 
 
 
-        TItem(cv::Mat& image, std::pair<int,int> dim ): 
+        TItem(const cv::Mat& image, std::pair<int,int> dim ): 
             m_name("None"),
             m_image(image),
             m_dim(dim),
@@ -132,10 +132,10 @@ namespace TItemTypes {
     public:
             
         // Construct a fully-fledged TContainerItem. This should be the most common way to construct a TContainerItem.
-        TContainerItem(std::string& name,
-            cv::Mat& image,
-            std::pair<int, int>& dim,
-            std::pair<int,int>& containerDim,
+        TContainerItem(const std::string& name,
+            const cv::Mat& image,
+            const std::pair<int, int>& dim,
+            const std::pair<int,int>& containerDim,
             bool rotated,
             bool placeholder = false) : 
 
@@ -145,11 +145,11 @@ namespace TItemTypes {
             m_containerDim(containerDim)
         {};
 
-        TContainerItem(std::string& name,
-            std::filesystem::path& imagePath,
-            std::pair<int, int>& dim,
-            std::pair<int, int>& containerDim,
-            TItemSupport::PriceInfo& priceInfo,
+        TContainerItem(const std::string& name,
+            const std::filesystem::path& imagePath,
+            const std::pair<int, int>& dim,
+            const std::pair<int, int>& containerDim,
+            const TItemSupport::PriceInfo& priceInfo,
             bool rotated,
             cv::Mat& hash,
             bool placeholder = false) :

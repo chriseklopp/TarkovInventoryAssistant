@@ -284,7 +284,6 @@ namespace TDataCatalog {
 
         // Get 10 nearest results, then use template matching to more accurately determine the best choice.
         // TODO: This still needs to be improved. 
-        // TODO: Keys are so oppressive they need to be in their own separate groups.
         std::vector<TItemTypes::TItem*> items;
         std::vector<double> dist;
 

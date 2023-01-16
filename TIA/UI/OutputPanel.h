@@ -38,6 +38,8 @@ namespace TUI {
 
         void OnToggleActiveOnly(wxCommandEvent& evt);
 
+        void setHighlightThreshold(int thresh);
+
         virtual void TEventReceived(TEvent::TEvent e) override;
 
     private:
@@ -54,9 +56,6 @@ namespace TUI {
         // Update all item counts using the count map.
         void updateCounts();
 
-        void addToCountMap(imageID id);
-        void removeFromCountMap(imageID id);
-
         // Returns true if item is new, false if it was already present.
         bool addToCountMap(const TItemSupport::DetectionResult& det);
         // Returns true if counter for that item reaches 0, false if count remains > 0.
@@ -65,6 +64,7 @@ namespace TUI {
         void addToTotalCurrency(const TItemSupport::DetectionResult& det);
         void removeFromTotalCurrency(const TItemSupport::DetectionResult& det);
 
+        void applyTraderSellHighlight(int row, const TItemTypes::TItem* itm);
         // Determines the best price from a TItem and returns a pointer to its TCurrency
         const TDataTypes::TCurrency* determineBestCurrency(const TItemTypes::TItem& catItem);
 
@@ -80,12 +80,12 @@ namespace TUI {
         // Maps column name to column index in the outputList.
         static const std::map<std::string, int> m_columnIndexMap;
         static const int m_imageMaxRows = 64;
-
         static const int m_imageMaxCols = 128;
 
         wxGrid* m_outputList;
 
-
+        // Ratio threshold at which a row where the flea and trader prices are similar are highlighted.
+        float m_highlightThreshold;
         // Tool bar widgets.
         wxToolBar* m_toolbar;
         wxCheckBox* m_toggleCollapse;
