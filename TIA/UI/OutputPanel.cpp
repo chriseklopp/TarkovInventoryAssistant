@@ -22,7 +22,7 @@ namespace TUI {
         const wxPoint& pos,
         const wxSize& size,
         long 	style,
-        const wxString& name) : m_coreptr(core), m_collapseSimilarItems(false), m_showActiveOnly(true), wxPanel(parent,
+        const wxString& name) : m_coreptr(core), m_collapseSimilarItems(false), m_showActiveOnly(true),m_highlightThreshold(.80), wxPanel(parent,
             id,
             pos,
             size,
@@ -215,6 +215,10 @@ namespace TUI {
         refreshOutputList();
     }
 
+    void OutputPanel::setHighlightThreshold(int thresh) {
+        m_highlightThreshold = thresh;
+    }
+
     bool OutputPanel::addToCountMap(const TItemSupport::DetectionResult& det) {
         if (m_itemIDCountMap.find(det.catalogItem) != m_itemIDCountMap.end()) {
             m_itemIDCountMap.at(det.catalogItem)++;
@@ -274,6 +278,16 @@ namespace TUI {
         }
     }
 
+    void OutputPanel::applyTraderSellHighlight(int row, const TItemTypes::TItem* itm) {
+        if (!itm)
+            return;
+        if (float(itm->getTraderSellPrice().getValue()) / float(itm->getPrice().getValue()) >= m_highlightThreshold) {
+            m_outputList->SetCellBackgroundColour(row, m_columnIndexMap.at("FleaPrice"), wxColor(0, 200, 0));
+            m_outputList->SetCellBackgroundColour(row, m_columnIndexMap.at("TraderPrice"), wxColor(0, 200, 0));
+        }
+
+    }
+
     const TDataTypes::TCurrency* OutputPanel::determineBestCurrency(const TItemTypes::TItem& catItem) {
         const TDataTypes::TCurrency* currency;
 
@@ -300,6 +314,8 @@ namespace TUI {
         const TItemTypes::TItem* catItem = m_coreptr->getCatalogItem(det->catalogItem);
 
         std::string countString = std::to_string(count);
+
+        applyTraderSellHighlight(row, catItem);
 
         const std::unique_ptr<TItemTypes::TItem>& item = det->inputItem;
 
@@ -335,6 +351,8 @@ namespace TUI {
 
         std::string countString = std::to_string(count);
 
+
+        applyTraderSellHighlight(row, itm);
 
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Name"), itm->getName());
         m_outputList->SetCellValue(row, m_columnIndexMap.at("Dim"), itm->getDimAsString());
@@ -448,6 +466,17 @@ namespace TUI {
         for (auto& p : temp) {
             m_outputList->SetCellValue(rowB, p.first, p.second);
         }
+
+        // Swap background colors.
+        wxColour tempFlea = m_outputList->GetCellBackgroundColour(rowA, m_columnIndexMap.at("FleaPrice"));
+        wxColour tempTrader = m_outputList->GetCellBackgroundColour(rowA, m_columnIndexMap.at("TraderPrice"));
+
+
+        m_outputList->SetCellBackgroundColour(rowA, m_columnIndexMap.at("FleaPrice"), m_outputList->GetCellBackgroundColour(rowB, m_columnIndexMap.at("FleaPrice")));
+        m_outputList->SetCellBackgroundColour(rowA, m_columnIndexMap.at("TraderPrice"), m_outputList->GetCellBackgroundColour(rowB, m_columnIndexMap.at("TraderPrice")));
+
+        m_outputList->SetCellBackgroundColour(rowB, m_columnIndexMap.at("FleaPrice"), tempFlea);
+        m_outputList->SetCellBackgroundColour(rowB, m_columnIndexMap.at("TraderPrice"), tempTrader);
 
         m_outputList->SetCellRenderer(rowB, m_columnIndexMap.at("CatalogImage"), tempCatRender);
         m_outputList->SetCellRenderer(rowB, m_columnIndexMap.at("SourceImage"), tempSourceRender);
