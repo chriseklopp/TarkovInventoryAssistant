@@ -36,7 +36,8 @@ class TWebScraper:
                             "https://escapefromtarkov.fandom.com/wiki/Gear_components",
                             "https://escapefromtarkov.fandom.com/wiki/Armbands",
                             "https://escapefromtarkov.fandom.com/wiki/Face_cover",
-                            "https://escapefromtarkov.fandom.com/wiki/Medical"
+                            "https://escapefromtarkov.fandom.com/wiki/Medical",
+                            "https://escapefromtarkov.fandom.com/wiki/Headsets"
                             #"https://escapefromtarkov.fandom.com/wiki/Ammunition" TODO: need spec handling for this
                             ]
 
@@ -461,7 +462,7 @@ class TWebScraper:
     @staticmethod
     def name_cleaner(name: str) -> str:  # applied to dataframe to remove spaces and special characters from item names.
         name = name.replace(" ", "_")
-        name = name.replace('"', '')
+        name = name.replace('"', "")
         name = name.replace("'", "")
         name = name.replace("/", "")
         name = name.replace("*", "")
@@ -484,5 +485,5 @@ class TWebScraper:
 if __name__ == "__main__":  # run this to update the catalog from the wiki.
     ms = MarketScraper()
     priceTable = ms.run() # get price data
-    #priceTable.to_csv("priceTabletest.csv")
+    priceTable.to_csv("priceTabletest.csv")
     TWebScraper(priceTable)
