@@ -6,7 +6,6 @@
 #include <Core/TConfig.h>
 
 
-#include <Tests/TTestLibrary.h> // TODO: REMOVE BEFORE MERGE!!!!!!!
 /*
 * 
 Processes the screenshot(s) into detected TItems.
