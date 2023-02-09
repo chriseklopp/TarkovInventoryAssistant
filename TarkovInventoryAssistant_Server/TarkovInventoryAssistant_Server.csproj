@@ -1,0 +1,231 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <EnableDefaultItems>false</EnableDefaultItems>
+        <BaseOutputPath>build\</BaseOutputPath>
+        <BaseIntermediateOutputPath>build\obj\</BaseIntermediateOutputPath>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <OutputType>Exe</OutputType>
+        <Configurations>Debug;Release;s</Configurations>
+        <Platforms>AnyCPU;x64</Platforms>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug|x64'">
+        <OutputPath>..\Debug\</OutputPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Release|x64'">
+        <OutputPath>..\Release\</OutputPath>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="Source\Properties\launchSettings.json">
+            <Link>Properties\launchSettings.json</Link>
+        </None>
+        <Compile Include="Source\Models\ErrorViewModel.cs">
+            <Link>Models\ErrorViewModel.cs</Link>
+        </Compile>
+        <Content Include="Source\Views\Home\Index.cshtml">
+            <Link>Views\Home\Index.cshtml</Link>
+        </Content>
+        <Content Include="Source\Views\Home\Privacy.cshtml">
+            <Link>Views\Home\Privacy.cshtml</Link>
+        </Content>
+        <Content Include="Source\Views\Shared\_Layout.cshtml">
+            <Link>Views\Shared\_Layout.cshtml</Link>
+        </Content>
+        <Content Include="Source\Views\Shared\_Layout.cshtml.css">
+            <Link>Views\Shared\_Layout.cshtml.css</Link>
+        </Content>
+        <Content Include="Source\Views\Shared\_ValidationScriptsPartial.cshtml">
+            <Link>Views\Shared\_ValidationScriptsPartial.cshtml</Link>
+        </Content>
+        <Content Include="Source\Views\Shared\Error.cshtml">
+            <Link>Views\Shared\Error.cshtml</Link>
+        </Content>
+        <Content Include="Source\Views\_ViewImports.cshtml">
+            <Link>Views\_ViewImports.cshtml</Link>
+        </Content>
+        <Content Include="Source\Views\_ViewStart.cshtml">
+            <Link>Views\_ViewStart.cshtml</Link>
+        </Content>
+        <Compile Include="Source\Controllers\HomeController.cs">
+            <Link>Controllers\HomeController.cs</Link>
+        </Compile>
+        <Content Include="appsettings.json">
+            <Link>appsettings.json</Link>
+        </Content>
+        <Content Include="Source\wwwroot\css\site.css">
+            <Link>wwwroot\css\site.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\js\site.js">
+            <Link>wwwroot\js\site.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap.min.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map">
+            <Link>wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.js">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.js.map">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.js.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.min.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map">
+            <Link>wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\jquery\dist\jquery.js">
+            <Link>wwwroot\lib\jquery\dist\jquery.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\jquery\dist\jquery.min.js">
+            <Link>wwwroot\lib\jquery\dist\jquery.min.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\jquery\dist\jquery.min.map">
+            <Link>wwwroot\lib\jquery\dist\jquery.min.map</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\jquery-validation\dist\additional-methods.js">
+            <Link>wwwroot\lib\jquery-validation\dist\additional-methods.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\jquery-validation\dist\additional-methods.min.js">
+            <Link>wwwroot\lib\jquery-validation\dist\additional-methods.min.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\jquery-validation\dist\jquery.validate.js">
+            <Link>wwwroot\lib\jquery-validation\dist\jquery.validate.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\jquery-validation\dist\jquery.validate.min.js">
+            <Link>wwwroot\lib\jquery-validation\dist\jquery.validate.min.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js">
+            <Link>wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js</Link>
+        </Content>
+        <Content Include="Source\wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js">
+            <Link>wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js</Link>
+        </Content>
+        <Compile Include="Program.cs">
+            <Link>Program.cs</Link>
+        </Compile>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.2" />
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.2" />
+    </ItemGroup>
+</Project>
