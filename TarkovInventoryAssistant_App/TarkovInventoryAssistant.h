@@ -12,7 +12,7 @@
 #include <iostream>
 #include <DataSupport/TItemTypes.h>
 
-#include <Core/TCore.h>
+#include <Interfaces/TAppInterface.h>
 #include <filesystem>
 
 
@@ -52,7 +52,7 @@ private:
     TUI::ConsolePanel* m_consolePanel;
     TUI::CatalogPanel* m_catalogPanel;
 
-    TCore m_core;
+    TAppInterface m_core;
 
 
 };

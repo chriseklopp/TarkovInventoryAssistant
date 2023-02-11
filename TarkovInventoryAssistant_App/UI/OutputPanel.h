@@ -12,7 +12,7 @@ namespace TUI {
     class OutputPanel : public wxPanel, public TEvent::TObserver {
 
     public:
-        OutputPanel(TCore* core, wxWindow* parent,
+        OutputPanel(TAppInterface* core, wxWindow* parent,
             wxWindowID 	id = wxID_ANY,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
@@ -74,7 +74,7 @@ namespace TUI {
         void updateTotalValueDisplay();
 
         // Pointer to the core object.
-        TCore* m_coreptr;
+        TAppInterface* m_coreptr;
 
 
         // Maps column name to column index in the outputList.

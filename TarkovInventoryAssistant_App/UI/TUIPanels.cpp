@@ -4,7 +4,7 @@
 
 namespace TUI {
 
-    SettingsDialog::SettingsDialog(TCore* core, wxWindow* parent,
+    SettingsDialog::SettingsDialog(TAppInterface* core, wxWindow* parent,
         wxWindowID id,
         const wxString& titl,
         const wxPoint& pos,
@@ -81,7 +81,7 @@ namespace TUI {
 
     };
 
-    CompileCatalogDialog::CompileCatalogDialog(TCore* core, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
+    CompileCatalogDialog::CompileCatalogDialog(TAppInterface* core, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
         : m_coreptr(core), wxDialog(parent,
             id,
             title,

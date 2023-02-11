@@ -4,7 +4,7 @@
 
 namespace TUI {
 
-    ConsolePanel::ConsolePanel(TCore* core, wxWindow* parent,
+    ConsolePanel::ConsolePanel(TAppInterface* core, wxWindow* parent,
         wxWindowID 	id,
         const wxPoint& pos,
         const wxSize& size,

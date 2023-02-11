@@ -3,7 +3,7 @@
 
 namespace TUI {
 
-    DisplayPanel::DisplayPanel(TCore* core, wxWindow* parent,
+    DisplayPanel::DisplayPanel(TAppInterface* core, wxWindow* parent,
         wxWindowID 	id,
         const wxPoint& pos,
         const wxSize& size,

@@ -12,7 +12,7 @@ namespace TUI {
     {"Loc", 2}
     };
 
-    DetectionValidatorWidget::DetectionValidatorWidget(TCore* corePtr,
+    DetectionValidatorWidget::DetectionValidatorWidget(TAppInterface* corePtr,
         wxWindow* parent,
         wxWindowID id,
         const wxString& title,

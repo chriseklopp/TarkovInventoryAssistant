@@ -13,7 +13,7 @@ namespace TUI {
     {
 
     public:
-        SettingsDialog(TCore* core, wxWindow* parent,
+        SettingsDialog(TAppInterface* core, wxWindow* parent,
             wxWindowID id = wxID_ANY,
             const wxString& title = wxT("Settings"),
             const wxPoint& pos = wxDefaultPosition,
@@ -36,7 +36,7 @@ namespace TUI {
         wxButton* m_saveButton;
 
         // Pointer to the core object.
-        TCore* m_coreptr;
+        TAppInterface* m_coreptr;
 
     };
 
@@ -45,7 +45,7 @@ namespace TUI {
 
     public:
 
-        CompileCatalogDialog(TCore* core, wxWindow* parent,
+        CompileCatalogDialog(TAppInterface* core, wxWindow* parent,
             wxWindowID id = wxID_ANY,
             const wxString& title = wxT("Catalog Compiler"),
             const wxPoint& pos = wxDefaultPosition,
@@ -74,7 +74,7 @@ namespace TUI {
 
 
         // Pointer to the core object.
-        TCore* m_coreptr;
+        TAppInterface* m_coreptr;
 
     };
 

@@ -304,11 +304,9 @@ namespace TDataCatalog {
             }
         }
 
+        if (!bestIt)
+            return -1; // This should be impossible
 
-        //DEBUG:
-        /*cv::imshow("res", bestIt->getImage());
-        cv::imshow("in", in.getImage());
-        cv::waitKey(0);*/
 
         // If this is a rotated item, return the non rotated variant instead.
         // This is so hacky and I hate this but it avoids a massive refactor.

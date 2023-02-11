@@ -9,7 +9,7 @@ namespace TUI {
     class ConsolePanel : public wxPanel, public TEvent::TObserver {
 
     public:
-        ConsolePanel(TCore* core, wxWindow* parent,
+        ConsolePanel(TAppInterface* core, wxWindow* parent,
             wxWindowID 	id = wxID_ANY,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
@@ -21,7 +21,7 @@ namespace TUI {
         virtual void TEventReceived(TEvent::TEvent e) override;
 
         // Pointer to the core object.
-        TCore* m_coreptr;
+        TAppInterface* m_coreptr;
 
         wxTextCtrl* m_consoleOutput;
 

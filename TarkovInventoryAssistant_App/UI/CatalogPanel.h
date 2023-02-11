@@ -8,7 +8,7 @@ namespace TUI {
     class CatalogPanel : public wxPanel, public TEvent::TObserver {
 
     public:
-        CatalogPanel(TCore* core, wxWindow* parent,
+        CatalogPanel(TAppInterface* core, wxWindow* parent,
             wxWindowID 	id = wxID_ANY,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
@@ -53,7 +53,7 @@ namespace TUI {
 
 
         // Pointer to the core object.
-        TCore* m_coreptr;
+        TAppInterface* m_coreptr;
 
     };
 

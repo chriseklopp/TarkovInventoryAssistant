@@ -7,7 +7,7 @@ namespace TUI {
     class DisplayPanel : public wxPanel, public TEvent::TObserver {
 
     public:
-        DisplayPanel(TCore* core, wxWindow* parent,
+        DisplayPanel(TAppInterface* core, wxWindow* parent,
             wxWindowID 	id = wxID_ANY,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
@@ -54,7 +54,7 @@ namespace TUI {
     private:
 
         // Pointer to the core object.
-        TCore* m_coreptr;
+        TAppInterface* m_coreptr;
 
         static const int m_scrollListMaxRows = 120;
         static const int m_scrollListMaxCols = 260;

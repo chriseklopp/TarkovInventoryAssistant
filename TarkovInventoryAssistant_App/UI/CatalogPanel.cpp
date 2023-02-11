@@ -12,7 +12,7 @@ namespace TUI {
     };
 
 
-    CatalogPanel::CatalogPanel(TCore* core, wxWindow* parent,
+    CatalogPanel::CatalogPanel(TAppInterface* core, wxWindow* parent,
         wxWindowID 	id,
         const wxPoint& pos,
         const wxSize& size,

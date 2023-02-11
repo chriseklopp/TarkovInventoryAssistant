@@ -15,7 +15,7 @@ namespace TUI {
     {
     public:
 
-        DetectionValidatorWidget(TCore* corePtr,
+        DetectionValidatorWidget(TAppInterface* corePtr,
             wxWindow* parent,
             wxWindowID id = wxID_ANY,
             const wxString& title = wxT("Detection Validator"),
@@ -96,7 +96,7 @@ namespace TUI {
 
         static const int m_imageMaxCols = 128;
 
-        TCore* m_corePtr;
+        TAppInterface* m_corePtr;
         cv::Mat m_comparisonImage;
         wxStaticText* m_referenceFileText;
         wxFilePickerCtrl* m_referenceFileSelector;

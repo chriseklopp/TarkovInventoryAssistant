@@ -173,7 +173,6 @@ namespace TItemTypes {
 
     private:
 
-        TDataTypes::gridType m_storageType; // Will be used when we try to accurately reflect the contents of images.
         std::vector<TItem> m_contents; // Contains all items placed in the container.
 
         std::pair<int, int> m_containerDim; // (Width, Height) of storage grid inside the container.
@@ -203,7 +202,7 @@ namespace TItemSupport {
   */
     struct DetectionResult {
 
-        DetectionResult() {};
+        //DetectionResult() {};
 
         DetectionResult(TDataTypes::dcID catItem,
                         std::unique_ptr<TItemTypes::TItem> inItem,

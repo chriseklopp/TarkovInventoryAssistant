@@ -9,7 +9,7 @@
 
 #include <wx/grid.h>
 #include <wx/filepicker.h>
-#include <Core/TCore.h>
+#include <Interfaces/TAppInterface.h>
 
 
 namespace TUI {
@@ -27,7 +27,7 @@ namespace TUI {
     public:
 
 
-        ImagePanel(TCore* core, wxWindow* parent) :
+        ImagePanel(TAppInterface* core, wxWindow* parent) :
             m_coreptr(core),
             m_imageID(-1),
             m_drawDetections(false),
@@ -69,7 +69,7 @@ namespace TUI {
         int m_imWidth;
         int m_imHeight;
 
-        TCore* m_coreptr;
+        TAppInterface* m_coreptr;
 
         bool m_drawDetections;
 

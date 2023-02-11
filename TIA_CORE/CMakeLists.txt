@@ -29,7 +29,12 @@ set(TIA_HEADERS
     "./DataSupport/TItemTypes.h"
     "./DataSupport/VPTree.h"
 
+    "./Interfaces/TAppInterface.h"
+    "./Interfaces/TWebInterface.h"
+
     "./Tests/TTestLibrary.h"
+
+
 )
 
 
@@ -44,6 +49,9 @@ set(TIA_SOURCES
     "./DataSupport/TEvents.cpp"
     "./DataSupport/TItemTypes.cpp"
     "./DataSupport/VPTree.cpp"
+
+    "./Interfaces/TAppInterface.cpp"
+    "./Interfaces/TWebInterface.cpp"
 
     "./Tests/TTestLibrary.cpp"
 )

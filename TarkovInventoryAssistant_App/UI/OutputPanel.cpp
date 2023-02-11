@@ -17,7 +17,7 @@ namespace TUI {
    {"ParentImageId", 8}
     };
 
-    OutputPanel::OutputPanel(TCore* core, wxWindow* parent,
+    OutputPanel::OutputPanel(TAppInterface* core, wxWindow* parent,
         wxWindowID 	id,
         const wxPoint& pos,
         const wxSize& size,
