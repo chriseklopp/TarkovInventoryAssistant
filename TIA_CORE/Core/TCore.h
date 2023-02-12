@@ -26,7 +26,7 @@ public:
     std::vector<TItemSupport::DetectionResult> detectImageContent(cv::Mat image, int imID = -1);
 
     // Returns a pointer to the config. This is safe because the config is read only.
-    TConfig::TConfig* getConfigPtr() { return m_config; };
+    TConfig::TConfig* getConfigPtr() const { return m_config; };
 
     void setDATA_DIR(std::string dir);
 
