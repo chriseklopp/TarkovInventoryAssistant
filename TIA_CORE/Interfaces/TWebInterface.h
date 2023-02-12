@@ -40,7 +40,46 @@ namespace WebInterface {
 
         int getUsefulNumber() { return 69; }
 
+
         DetectionResultMarshal detectImageContent(int image);
+
+        const char* getDATA_DIR() const;
+
+        const char* getACTIVE_CATALOG() const;
+
+        const char* getRAW_CATALOGS_DIR() const;
+
+        const char* getCATALOGS_DIR() const;
+
+        const char* getROOT_DIR() const;
+
+        void setDATA_DIR(const char* dir);
+
+        void setACTIVECATALOG(const char* dir);
+
+        void setRAW_CATALOGS_DIR(const char* dir);
+
+        void setCATALOGS_DIR(const char* dir);
+
+        // Save config settings to file.
+        void saveConfig();
+
+
+        // Loads the config specified.
+        // If empty, will attempt to load catalog specified by the config.
+        bool loadCatalog(const char* dir = "");
+
+        // Create a compiled catalog from a raw catalog.
+        bool compileRawCatalog(const char* path, const char* name, bool makeRotations);
+
+        // Return pointer to the catalog item associated with ID.
+        //const TItemTypes::TItem* getCatalogItem(const TDataTypes::dcID catID) const;
+
+        // Return reference to our item catalog.
+        //const std::vector<TDataTypes::dcID>& getCatalogItemList() const { return m_dataCatalog.getItemIDList(); };
+
+
+
 
     private:
 

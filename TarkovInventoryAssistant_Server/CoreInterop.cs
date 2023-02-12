@@ -56,7 +56,7 @@ namespace Interop
     {
         public CoreInterop()
         {
-            IntPtr myCore = CreateCore();
+            IntPtr myCore = CreateCoreInterface();
 
            
 
@@ -72,7 +72,7 @@ namespace Interop
 
         // UnmanagedType is the cool thingy 
         [DllImport("TIA_Core", SetLastError = true)]
-        static extern IntPtr CreateCore();
+        static extern IntPtr CreateCoreInterface();
 
         [DllImport("TIA_Core", SetLastError = true)]
         static extern DetectionResultMarshal detectImageContent(IntPtr core, int image);
