@@ -5,3 +5,5 @@
 /TarkovInventoryAssistant_Server/build/
 /TarkovInventoryAssistant_Server/obj/
 /TarkovInventoryAssistant_Server/.vs/
+
+*.ini
