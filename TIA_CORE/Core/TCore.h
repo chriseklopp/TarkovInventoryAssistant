@@ -48,10 +48,10 @@ public:
     bool compileRawCatalog(std::filesystem::path& path, std::string name, bool makeRotations);
 
     // Return pointer to the catalog item associated with ID.
-    const TItemTypes::TItem* getCatalogItem(const TDataTypes::dcID catID);
+    const TItemTypes::TItem* getCatalogItem(const TDataTypes::dcID catID) const;
 
     // Return reference to our item catalog.
-    const std::vector<TDataTypes::dcID>& getCatalogItemList() { return m_dataCatalog.getItemIDList(); };
+    const std::vector<TDataTypes::dcID>& getCatalogItemList() const { return m_dataCatalog.getItemIDList(); };
 
 
 private:

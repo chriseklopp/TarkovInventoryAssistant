@@ -38,14 +38,14 @@ namespace TDataCatalog {
         // Search catalog for item by name. !! This will return nullptr if it fails !!
 
         // TODO: We are sorting but are still using linear search.Utilize bianry search.
-        const TItemTypes::TItem* getItem(std::string& name);
+        const TItemTypes::TItem* getItem(std::string& name) const;
 
-        const TItemTypes::TItem* getItem(TDataTypes::dcID id);
+        const TItemTypes::TItem* getItem(TDataTypes::dcID id) const;
 
 
 
         // Returns const reference to the underlying item list.
-        const std::vector<TDataTypes::dcID>& getItemIDList();
+        const std::vector<TDataTypes::dcID>& getItemIDList() const;
 
 
         /* This function will compile the raw information from Data/catalog

@@ -36,7 +36,7 @@ std::vector<TItemSupport::DetectionResult> TCore::detectImageContent(cv::Mat ima
 
 
 
-const TItemTypes::TItem* TCore::getCatalogItem(const TDataTypes::dcID catID) {
+const TItemTypes::TItem* TCore::getCatalogItem(const TDataTypes::dcID catID) const {
     return m_dataCatalog.getItem(catID);
 }
 

@@ -10,7 +10,7 @@
 namespace TDataCatalog {
 
 
-    const TItemTypes::TItem* TDataCatalog::getItem(std::string& name) {
+    const TItemTypes::TItem* TDataCatalog::getItem(std::string& name) const {
 
         //// Search by item name. Switch to std::lower_bound??
         //auto res = std::find_if(m_items.begin(), m_items.end(),
@@ -21,14 +21,14 @@ namespace TDataCatalog {
         return nullptr;
     };
 
-    const TItemTypes::TItem* TDataCatalog::getItem(TDataTypes::dcID id) {
+    const TItemTypes::TItem* TDataCatalog::getItem(TDataTypes::dcID id) const {
         if (m_items.find(id) != m_items.end())
             return m_items.at(id).get();
 
         return nullptr;
     }
 
-    const std::vector<TDataTypes::dcID>& TDataCatalog::getItemIDList() {
+    const std::vector<TDataTypes::dcID>& TDataCatalog::getItemIDList() const {
         return m_itemIDList;
     }
 

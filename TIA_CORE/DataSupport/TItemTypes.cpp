@@ -14,7 +14,7 @@ namespace TItemTypes {
         m_dim(std::make_pair(0, 0)),
         m_isRotated(false),
         isPlaceHolder(true),
-        m_imageHash(Hash::PhashImage(cv::Mat()))
+        m_imageHash(Hash::PhashImage(cv::Mat(32, 32, CV_8UC3)))
     {};
 
     // Construct a fully-fledged TItem. This should be the most common way to construct a TItem.
