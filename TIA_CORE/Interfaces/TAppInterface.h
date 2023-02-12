@@ -1,6 +1,8 @@
 #pragma once
 /*
 Interface used as a medium between the Core library and the TarkovInventoryAssistant App
+This preserves the previous functionality the App UI came to expect from the TCore yet
+allows TCore to not care about a bunch of functionality that was expected of it.
 */
 #include <Core/TCore.h>
 
