@@ -54,11 +54,14 @@ set(TIA_SOURCES
     "./Interfaces/TWebInterface.cpp"
 
     "./Tests/TTestLibrary.cpp"
+
+    "./DLL/dllmain.cpp"
 )
 
 
 # Add source to this project's executable.
-add_library (TIA_CORE  ${TIA_HEADERS})
+add_library (TIA_CORE  SHARED ${TIA_HEADERS})
+
 target_sources (TIA_CORE PRIVATE ${TIA_SOURCES})
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${TIA_SOURCES})
@@ -71,4 +74,10 @@ TARGET_LINK_LIBRARIES (TIA_CORE ${OpenCV_LIBS})
 #TARGET_LINK_LIBRARIES(TIA_CORE ${wxWidgets_LIBRARIES})
 set_property(TARGET TIA_CORE PROPERTY CXX_STANDARD 17)
 # TODO: Add tests and install targets if needed.
-install (TARGETS TIA_CORE LIBRARY DESTINATION "TarkovInventoryAssistant/bin")
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES CACHE BOOL "Export all symbols")
+install(
+    TARGETS TIA_CORE
+    LIBRARY DESTINATION lib
+    #ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+)
