@@ -21,9 +21,14 @@
         <None Include="Source\Properties\launchSettings.json">
             <Link>Properties\launchSettings.json</Link>
         </None>
+        <Compile Include="CoreInterop.cs" />
         <Compile Include="Source\Models\ErrorViewModel.cs">
             <Link>Models\ErrorViewModel.cs</Link>
         </Compile>
+        <Compile Include ="Source\Models\DetectionResultsModel.cs">
+            <Link>Models\DetectionResultsModel.cs</Link>
+        </Compile>
+
         <Content Include="Source\Views\Home\Index.cshtml">
             <Link>Views\Home\Index.cshtml</Link>
         </Content>

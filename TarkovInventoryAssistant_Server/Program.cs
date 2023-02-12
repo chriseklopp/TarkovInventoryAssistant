@@ -1,9 +1,17 @@
+using System.Runtime.InteropServices;
+
+
+
+var x = new Interop.CoreInterop();
+
+
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions() {WebRootPath = "Source/wwwroot" });
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
