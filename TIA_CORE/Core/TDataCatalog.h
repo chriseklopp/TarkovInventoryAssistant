@@ -52,7 +52,7 @@ namespace TDataCatalog {
          * This information will be saved to Data/CompiledCatalog
          * This should ONLY be used when a compiled catalog isnt present or when the raw catalog has been updated.
          */
-        bool compileCatalogFromRaw(std::filesystem::path rawpath, std::string name, bool makeRotatedItems = false);
+        bool compileCatalogFromRaw(const std::filesystem::path& rawpath, std::string name, bool makeRotatedItems = false);
 
 
         // This function compares an item to the catalog and returns the item's ID.
@@ -95,7 +95,7 @@ namespace TDataCatalog {
         bool loadRawCatalog(std::vector<std::filesystem::path>& outMods);
 
         // Load raw catalog from Data/catalog. Raw catalog data used to make compiled catalog.
-        bool loadRawCatalog(std::filesystem::path& catalog, std::vector<std::filesystem::path>& outMods);
+        bool loadRawCatalog(const std::filesystem::path& catalog, std::vector<std::filesystem::path>& outMods);
 
 
         TDataTypes::dcID createNewDCID();

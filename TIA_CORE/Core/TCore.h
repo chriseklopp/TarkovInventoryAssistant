@@ -30,12 +30,13 @@ public:
 
     void setDATA_DIR(std::string dir);
 
-    // ** Notifies observers with TEventEnum::CatalogChanged **
+
     void setACTIVECATALOG(std::string dir);
 
     void setRAW_CATALOGS_DIR(std::string dir);
 
     void setCATALOGS_DIR(std::string dir);
+
     // Save config settings to file.
     void saveConfig();
 
@@ -45,7 +46,7 @@ public:
     bool loadCatalog(std::filesystem::path dir = "");
 
     // Create a compiled catalog from a raw catalog.
-    bool compileRawCatalog(std::filesystem::path& path, std::string name, bool makeRotations);
+    bool compileRawCatalog(const std::filesystem::path& path, std::string name, bool makeRotations);
 
     // Return pointer to the catalog item associated with ID.
     const TItemTypes::TItem* getCatalogItem(const TDataTypes::dcID catID) const;

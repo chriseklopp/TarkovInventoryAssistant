@@ -33,7 +33,7 @@ namespace TDataCatalog {
     }
 
 
-    bool TDataCatalog::compileCatalogFromRaw(std::filesystem::path rawpath, std::string name, bool makeRotatedItems) {
+    bool TDataCatalog::compileCatalogFromRaw(const std::filesystem::path& rawpath, std::string name, bool makeRotatedItems) {
         if (!m_configptr)
             return false;
         // Compiled Catalog will contain a CSV and folder of all images.
@@ -465,7 +465,7 @@ namespace TDataCatalog {
         return loadRawCatalog(newestCat, outMods);
     };
 
-    bool TDataCatalog::loadRawCatalog(std::filesystem::path& catalog, std::vector<std::filesystem::path>& outMods) {
+    bool TDataCatalog::loadRawCatalog(const std::filesystem::path& catalog, std::vector<std::filesystem::path>& outMods) {
 
 
         // Find modules in the catalog.

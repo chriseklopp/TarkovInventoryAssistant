@@ -56,7 +56,7 @@ bool TCore::loadCatalog(std::filesystem::path dir) {
 }
 
 
-bool TCore::compileRawCatalog(std::filesystem::path& path, std::string name, bool makeRotations) {
+bool TCore::compileRawCatalog(const std::filesystem::path& path, std::string name, bool makeRotations) {
     return m_dataCatalog.compileCatalogFromRaw(path, name, makeRotations);
 }
 
