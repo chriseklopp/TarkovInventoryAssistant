@@ -1,8 +1,12 @@
+using Interop;
 using System.Runtime.InteropServices;
 
 
 
-var x = new Interop.CoreInterop();
+CoreInterop x = new Interop.CoreInterop();
+var y = x.getACTIVE_CATALOG();
+x.setACTIVECATALOG("C:\\MyWorkspace\\TarkovInventoryAssistant\\Data\\CompiledCatalogs\\ItemCatalog_catalogJan16_2023_wRotations");
+y = x.getACTIVE_CATALOG();
 
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions() {WebRootPath = "Source/wwwroot" });

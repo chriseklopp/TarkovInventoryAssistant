@@ -67,33 +67,37 @@ namespace WebInterface {
     }
 
 
-    const char* TWebInterface::getDATA_DIR() const {
-        return m_core.getConfigPtr()->getDATA_DIR().string().c_str(); // pretty sure this will go out of scope and fucking die.
+    void TWebInterface::getDATA_DIR(char* out, int size) const {
+        strcpy_s(out, size, m_core.getConfigPtr()->getDATA_DIR().string().c_str());
     }
 
-    const char* TWebInterface::getACTIVE_CATALOG() const {
-        return m_core.getConfigPtr()->getACTIVE_CATALOG().string().c_str(); // pretty sure this will go out of scope and fucking die.
+    void TWebInterface::getACTIVE_CATALOG(char* out, int size) const {
+        strcpy_s(out, size, m_core.getConfigPtr()->getACTIVE_CATALOG().string().c_str());
     }
 
 
-    const char* TWebInterface::getRAW_CATALOGS_DIR() const {
-        return new char[12] {"Hello World"};
+    void TWebInterface::getRAW_CATALOGS_DIR(char* out, int size) const {
+        strcpy_s(out, size, m_core.getConfigPtr()->getRAW_CATALOGS_DIR().string().c_str());
     }
 
-    const char* TWebInterface::getCATALOGS_DIR() const {
-        return new char[12] {"Hello World"};
+    void TWebInterface::getCATALOGS_DIR(char* out, int size) const {
+        strcpy_s(out, size, m_core.getConfigPtr()->getCATALOGS_DIR().string().c_str());
     }
 
-    const char* TWebInterface::getROOT_DIR() const{
-        return new char[12] {"Hello World"};
+    void TWebInterface::getROOT_DIR(char* out, int size) const{
+        strcpy_s(out, size, m_core.getConfigPtr()->getROOT_DIR().string().c_str());
     }
 
     void TWebInterface::setDATA_DIR(const char* dir){
         m_core.setDATA_DIR(std::string(dir));
     }
 
-    void TWebInterface::setACTIVECATALOG(const char* dir){
-        m_core.setACTIVECATALOG(std::string(dir));
+    bool TWebInterface::setACTIVECATALOG(const char* dir){
+        if (m_core.loadCatalog(dir)) {
+            m_core.setACTIVECATALOG(dir);
+            return true;
+        }
+        return false;
     }
 
     void TWebInterface::setRAW_CATALOGS_DIR(const char* dir){
@@ -104,94 +108,94 @@ namespace WebInterface {
         m_core.setCATALOGS_DIR(std::string(dir));
     }
 
-    // Save config settings to file.
+
     void TWebInterface::saveConfig(){
+        m_core.saveConfig();
     }
 
-
-    // Loads the config specified.
-    // If empty, will attempt to load catalog specified by the config.
     bool TWebInterface::loadCatalog(const char* dir){
-        return false;
+        return m_core.loadCatalog(dir);
     }
 
-    // Create a compiled catalog from a raw catalog.
     bool TWebInterface::compileRawCatalog(const char* path, const char* name, bool makeRotations){
-        return false;
+        return m_core.compileRawCatalog(path, name, makeRotations);
     }
 
-
-
-
-
-
 }
 
 
-extern "C" _declspec(dllexport) const char* getDATA_DIR(WebInterface::TWebInterface* iface) {
-    if (!iface)
-        return 0;
-    return iface->getDATA_DIR();
+extern "C" _declspec(dllexport) void getDATA_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
+    if (iface)
+        iface->getDATA_DIR(str, size);
+    return;
 }
 
-extern "C" _declspec(dllexport) const char* getACTIVE_CATALOG(WebInterface::TWebInterface* iface) {
-    if (!iface)
-        return 0;
-    return iface->getACTIVE_CATALOG();
+extern "C" _declspec(dllexport) void getACTIVE_CATALOG_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
+    if (iface)
+        iface->getACTIVE_CATALOG(str, size);
+    return;
+
 }
 
-extern "C" _declspec(dllexport) const char* getRAW_CATALOGS_DIR(WebInterface::TWebInterface* iface) {
-    if (!iface)
-        return 0;
-    return iface->getRAW_CATALOGS_DIR();
+extern "C" _declspec(dllexport) void getRAW_CATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
+    if (iface)
+        iface->getRAW_CATALOGS_DIR(str, size);
+    return;
 }
 
-extern "C" _declspec(dllexport) const char* getCATALOGS_DIR(WebInterface::TWebInterface* iface) {
-    if (!iface)
-        return 0;
-    return iface->getCATALOGS_DIR();
+extern "C" _declspec(dllexport) void getCATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
+    if (iface)
+        iface->getCATALOGS_DIR(str, size);
+    return;
+
 }
 
-extern "C" _declspec(dllexport) const char* getROOT_DIR(WebInterface::TWebInterface* iface) {
-    if (!iface)
-        return 0;
-    return iface->getROOT_DIR();
+extern "C" _declspec(dllexport) void getROOT_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
+    if (iface)
+        iface->getROOT_DIR(str, size);
+    return;
 }
 
-extern "C" _declspec(dllexport) void setDATA_DIR(WebInterface::TWebInterface* iface, char* dir) {
-    if (!iface)
-        return;
-    return iface->setDATA_DIR(dir);
+extern "C" _declspec(dllexport) void setDATA_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
+    if (iface)
+        iface->setDATA_DIR(dir);
+    return;
 }
 
-extern "C" _declspec(dllexport) void setACTIVECATALOG(WebInterface::TWebInterface* iface, char* dir) {
-    if (!iface)
-        return;
-    return iface->setACTIVECATALOG(dir);
+extern "C" _declspec(dllexport) bool setACTIVECATALOG_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
+    bool ret = false;
+    if (iface)
+        ret = iface->setACTIVECATALOG(dir);
+    return ret;
 }
 
-
-
-extern "C" _declspec(dllexport) void setRAW_CATALOGS_DIR(WebInterface::TWebInterface* iface, char* dir) {
-    if (!iface)
-        return;
-    return iface->setRAW_CATALOGS_DIR(dir);
+extern "C" _declspec(dllexport) void setRAW_CATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
+    if (iface)
+        iface->setRAW_CATALOGS_DIR(dir);
+    return;
 }
 
-extern "C" _declspec(dllexport) void setCATALOGS_DIR(WebInterface::TWebInterface * iface, char* dir) {
-    if (!iface)
-        return;
-    return iface->setCATALOGS_DIR(dir);
+extern "C" _declspec(dllexport) void setCATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
+    if (iface)
+        iface->setCATALOGS_DIR(dir);
+    return;
 }
 
+extern "C" _declspec(dllexport) void saveConfig_INTEROP(WebInterface::TWebInterface* iface) {
+    if (iface)
+        iface->saveConfig();
+    return;
+}
 
-extern "C" _declspec(dllexport) WebInterface::TWebInterface* CreateCoreInterface()
+extern "C" _declspec(dllexport) WebInterface::TWebInterface* CreateCoreInterface_INTEROP()
 {
     return new WebInterface::TWebInterface();
 }
 
-extern "C" _declspec(dllexport) WebInterface::DetectionResultMarshal detectImageContent(WebInterface::TWebInterface* iface, int image) {
+extern "C" _declspec(dllexport) WebInterface::DetectionResultMarshal detectImageContent_INTEROP(WebInterface::TWebInterface* iface, int image) {
     if (iface)
         return iface->detectImageContent(image);
+    //return WebInterface::DetectionResultMarshal::DetectionResultMarshal();
+    // TODO: add return statement to fix undefined behavior
 }
 

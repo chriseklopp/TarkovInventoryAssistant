@@ -35,7 +35,7 @@ namespace WebInterface {
     public:
         TWebInterface() {
             // TEST
-            m_core.loadCatalog("C:\\MyWorkspace\\TarkovInventoryAssistant\\Data\\CompiledCatalogs\\ItemCatalog_catalogJan16_2023_wRotations");
+            m_core.loadCatalog();
         }
 
         int getUsefulNumber() { return 69; }
@@ -43,19 +43,20 @@ namespace WebInterface {
 
         DetectionResultMarshal detectImageContent(int image);
 
-        const char* getDATA_DIR() const;
+        void getDATA_DIR(char* out, int size) const;
 
-        const char* getACTIVE_CATALOG() const;
+        void getACTIVE_CATALOG(char* out, int size) const;
 
-        const char* getRAW_CATALOGS_DIR() const;
+        void getRAW_CATALOGS_DIR(char* out, int size) const;
 
-        const char* getCATALOGS_DIR() const;
+        void getCATALOGS_DIR(char* out, int size) const;
 
-        const char* getROOT_DIR() const;
+        void getROOT_DIR(char* out, int size) const;
 
         void setDATA_DIR(const char* dir);
 
-        void setACTIVECATALOG(const char* dir);
+        // Returns true if catalog was successfully loaded
+        bool setACTIVECATALOG(const char* dir);
 
         void setRAW_CATALOGS_DIR(const char* dir);
 
@@ -65,7 +66,7 @@ namespace WebInterface {
         void saveConfig();
 
 
-        // Loads the config specified.
+        // Loads the catalog
         // If empty, will attempt to load catalog specified by the config.
         bool loadCatalog(const char* dir = "");
 
