@@ -7,10 +7,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}
     FILES ${HEADERS} ${SOURCES}
 )
 
-
-
-
-
 set(OpenCV_DIR "C:/MyWorkspace/opencv/Opencv_4.6/opencv/build")
 FIND_PACKAGE( OpenCV REQUIRED )
 #find_package(wxWidgets REQUIRED COMPONENTS net core base)
@@ -60,7 +56,7 @@ set(TIA_SOURCES
 
 
 # Add source to this project's executable.
-add_library (TIA_CORE  SHARED ${TIA_HEADERS})
+add_library (TIA_CORE SHARED ${TIA_HEADERS})
 
 target_sources (TIA_CORE PRIVATE ${TIA_SOURCES})
 
@@ -71,9 +67,16 @@ target_include_directories(TIA_CORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} )
 
 
 TARGET_LINK_LIBRARIES (TIA_CORE ${OpenCV_LIBS})
-#TARGET_LINK_LIBRARIES(TIA_CORE ${wxWidgets_LIBRARIES})
+
 set_property(TARGET TIA_CORE PROPERTY CXX_STANDARD 17)
-# TODO: Add tests and install targets if needed.
+
+add_custom_command(TARGET TIA_CORE POST_BUILD 
+  COMMAND "${CMAKE_COMMAND}" -E copy 
+     "$<TARGET_FILE:TIA_CORE>"
+       "${TIA_SERVER_SOURCE}/build/x64/$<CONFIG>/net6.0/"
+  COMMENT "Copying to TIA_Server output directory")
+
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES CACHE BOOL "Export all symbols")
 install(
     TARGETS TIA_CORE
@@ -81,3 +84,5 @@ install(
     #ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
 )
+
+
