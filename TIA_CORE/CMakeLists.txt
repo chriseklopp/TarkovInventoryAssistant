@@ -26,11 +26,8 @@ set(TIA_HEADERS
     "./DataSupport/VPTree.h"
 
     "./Interfaces/TAppInterface.h"
-    "./Interfaces/TWebInterface.h"
 
     "./Tests/TTestLibrary.h"
-
-
 )
 
 
@@ -47,18 +44,15 @@ set(TIA_SOURCES
     "./DataSupport/VPTree.cpp"
 
     "./Interfaces/TAppInterface.cpp"
-    "./Interfaces/TWebInterface.cpp"
 
     "./Tests/TTestLibrary.cpp"
-
-    "./DLL/dllmain.cpp"
 )
 
 
 # Add source to this project's executable.
-add_library (TIA_CORE SHARED ${TIA_HEADERS})
 
-target_sources (TIA_CORE PRIVATE ${TIA_SOURCES})
+add_library(TIA_CORE ${TIA_HEADERS} ${TIA_SOURCES})
+
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${TIA_SOURCES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${TIA_HEADERS})
@@ -70,14 +64,8 @@ TARGET_LINK_LIBRARIES (TIA_CORE ${OpenCV_LIBS})
 
 set_property(TARGET TIA_CORE PROPERTY CXX_STANDARD 17)
 
-add_custom_command(TARGET TIA_CORE POST_BUILD 
-  COMMAND "${CMAKE_COMMAND}" -E copy 
-     "$<TARGET_FILE:TIA_CORE>"
-       "${TIA_SERVER_SOURCE}/build/x64/$<CONFIG>/net6.0/"
-  COMMENT "Copying to TIA_Server output directory")
 
-
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES CACHE BOOL "Export all symbols")
+#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES CACHE BOOL "Export all symbols")
 install(
     TARGETS TIA_CORE
     LIBRARY DESTINATION lib

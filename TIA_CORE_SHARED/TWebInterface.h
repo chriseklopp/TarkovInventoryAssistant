@@ -1,5 +1,9 @@
 #pragma once
 /*
+* This project statically links to the TIA_CORE library and compiles into a DLL
+* This makes it easy to export to TarkovInventoryAssistant_Server without making TarkovInventoryAssistant_App angry, which 
+* statically links to the core library.
+* 
 Interface used as a medium between the Core library and the TarkovInventoryAssistant server.
 This will provide interfaces in a way that are friendly for interop with the C# code running the server.
 */
@@ -37,9 +41,6 @@ namespace WebInterface {
             // TEST
             m_core.loadCatalog();
         }
-
-        int getUsefulNumber() { return 69; }
-
 
         DetectionResultMarshal detectImageContent(int image);
 

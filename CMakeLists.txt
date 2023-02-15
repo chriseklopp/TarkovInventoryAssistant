@@ -39,6 +39,7 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
 set(TIA_SERVER_SOURCE "${CMAKE_SOURCE_DIR}/TarkovInventoryAssistant_Server")
 add_subdirectory(TIA_CORE)
+add_subdirectory(TIA_CORE_SHARED)
 add_subdirectory(TarkovInventoryAssistant_App)
 add_subdirectory(TIA_Testing)
 

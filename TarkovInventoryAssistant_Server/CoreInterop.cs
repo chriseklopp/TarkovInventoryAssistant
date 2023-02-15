@@ -129,41 +129,41 @@ namespace Interop
 
 
         // UnmanagedType is the cool thingy 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern IntPtr CreateCoreInterface_INTEROP();
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern DetectionResultMarshal detectImageContent_INTEROP(IntPtr core, int image);
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void setDATA_DIR_INTEROP(IntPtr core, string path);
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern bool setACTIVECATALOG_INTEROP(IntPtr core, string path);
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void setRAW_CATALOGS_DIR_INTEROP(IntPtr core, string path);
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void setCATALOGS_DIR_INTEROP(IntPtr core, string path);
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void saveConfig_INTEROP(IntPtr core);
 
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void getDATA_DIR_INTEROP(IntPtr core, StringBuilder str, int size);
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void getACTIVE_CATALOG_INTEROP(IntPtr core, StringBuilder str, int size);
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void getRAW_CATALOGS_DIR_INTEROP(IntPtr core, StringBuilder str, int size);
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void getCATALOGS_DIR_INTEROP(IntPtr core, StringBuilder str, int size);
 
-        [DllImport("TIA_Core", SetLastError = true)]
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void getROOT_DIR_INTEROP(IntPtr core, StringBuilder str, int size);
 
 
