@@ -4,6 +4,22 @@
 
 namespace WebInterface {
 
+    DetectionResultMarshal::DetectionResultMarshal() :
+        name(),
+        fleaUnit(),
+        fleaPrice(0),
+        fleaPricePerSlot(0),
+        traderUnit(),
+        traderPrice(0),
+        trader(),
+        dimHeight(0),
+        dimWidth(0),
+        x1(0),
+        y1(0),
+        x2(0),
+        y2(0)
+    {};
+
     DetectionResultMarshal::DetectionResultMarshal(const TCore& core, const TItemSupport::DetectionResult& det) :
         name(),
         fleaUnit(),
@@ -50,20 +66,36 @@ namespace WebInterface {
     }
 
 
-    DetectionResultMarshal TWebInterface::detectImageContent(int image) {
+    int TWebInterface::detectImageContent(unsigned char* image, int width, int height, int channels, DetectionResultMarshal*& out) {
+
+        cv::Mat cvImage;
+        switch (channels) {
+            case 3: {
+                cvImage = cv::Mat(height, width, CV_8UC3, image);
+                break;
+            }
+            case 4: {
+                cv::Mat temp = cv::Mat(height, width, CV_8UC4, image);
+                cv::cvtColor(temp, cvImage, cv::COLOR_BGRA2BGR); // Discard alpha channel or code will break.
+                break;
+            }
+            default: {
+                std::cout << "WARNING: Invalid Number of channels: " + channels << "\n";
+                return -1;
+            }
+        }
 
 
-        TItemTypes::TItem testy = TItemTypes::TItem();
+        std::vector<TItemSupport::DetectionResult> results = m_core.detectImageContent(cvImage);
+        int size = results.size();
 
-        TItemTypes::TItem* itm = new TItemTypes::TItem();
-        std::unique_ptr<TItemTypes::TItem> itmptr(itm);
-        TItemSupport::DetectionResult testResult = TItemSupport::DetectionResult(69,
-            std::move(itmptr),
-            420,
-            std::make_pair(cv::Point(0, 0),
-                cv::Point(0, 0)));
+        DetectionResultMarshal* detResultArray = new DetectionResultMarshal[size];
+        for (int i = 0; i < size; i++){
+            detResultArray[i] = DetectionResultMarshal(m_core, results[i]);
+        }
 
-        return DetectionResultMarshal(m_core, testResult);
+        out = detResultArray; //Set 'out' ptr to our new array for handling by the client code.
+        return size;
     }
 
 
@@ -124,78 +156,4 @@ namespace WebInterface {
 }
 
 
-extern "C" _declspec(dllexport) void getDATA_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
-    if (iface)
-        iface->getDATA_DIR(str, size);
-    return;
-}
-
-extern "C" _declspec(dllexport) void getACTIVE_CATALOG_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
-    if (iface)
-        iface->getACTIVE_CATALOG(str, size);
-    return;
-
-}
-
-extern "C" _declspec(dllexport) void getRAW_CATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
-    if (iface)
-        iface->getRAW_CATALOGS_DIR(str, size);
-    return;
-}
-
-extern "C" _declspec(dllexport) void getCATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
-    if (iface)
-        iface->getCATALOGS_DIR(str, size);
-    return;
-
-}
-
-extern "C" _declspec(dllexport) void getROOT_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
-    if (iface)
-        iface->getROOT_DIR(str, size);
-    return;
-}
-
-extern "C" _declspec(dllexport) void setDATA_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
-    if (iface)
-        iface->setDATA_DIR(dir);
-    return;
-}
-
-extern "C" _declspec(dllexport) bool setACTIVECATALOG_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
-    bool ret = false;
-    if (iface)
-        ret = iface->setACTIVECATALOG(dir);
-    return ret;
-}
-
-extern "C" _declspec(dllexport) void setRAW_CATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
-    if (iface)
-        iface->setRAW_CATALOGS_DIR(dir);
-    return;
-}
-
-extern "C" _declspec(dllexport) void setCATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
-    if (iface)
-        iface->setCATALOGS_DIR(dir);
-    return;
-}
-
-extern "C" _declspec(dllexport) void saveConfig_INTEROP(WebInterface::TWebInterface* iface) {
-    if (iface)
-        iface->saveConfig();
-    return;
-}
-
-extern "C" _declspec(dllexport) WebInterface::TWebInterface* CreateCoreInterface_INTEROP()
-{
-    return new WebInterface::TWebInterface();
-}
-
-extern "C" _declspec(dllexport) WebInterface::DetectionResultMarshal detectImageContent_INTEROP(WebInterface::TWebInterface* iface, int image) {
-    if (iface)
-        return iface->detectImageContent(image);
-    //return WebInterface::DetectionResultMarshal::DetectionResultMarshal();
-    // TODO: add return statement to fix undefined behavior
-}
 

@@ -1,11 +1,16 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
+using Image = System.Drawing.Image;
 
 namespace Interop
 {
 
     // Current Size = 102 (consider reducing this, somehow?)
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack =0)]
     public struct DetectionResultMarshal {
 
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 60)]
@@ -50,7 +55,7 @@ namespace Interop
 
 
 
-
+    [SupportedOSPlatform("windows")]
     public class CoreInterop
     {
         public CoreInterop()
@@ -58,11 +63,41 @@ namespace Interop
             m_core = CreateCoreInterface_INTEROP();
         }
 
-
-
-        public DetectionResultMarshal detectImageContent(int image)
+        ~CoreInterop()
         {
-            return detectImageContent_INTEROP(m_core, image);
+            DeleteCoreInterface_INTEROP(m_core);
+        }
+
+        public DetectionResultMarshal[] detectImageContent(int fakImage)
+        {
+
+            Bitmap image = new Bitmap("C:\\MyWorkspace\\TarkovInventoryAssistant\\Data\\screenshots\\raw\\tucker1.png");
+            int width = image.Width;
+            int height = image.Height;
+            int channels = System.Drawing.Image.GetPixelFormatSize(image.PixelFormat)/8;
+
+            Rectangle rect = new Rectangle(0, 0, width, height);
+            BitmapData bmpData = image.LockBits(rect, ImageLockMode.ReadWrite, image.PixelFormat);
+
+            int byteCount = bmpData.Stride * image.Height; 
+            byte[] imageData = new byte[byteCount];
+            Marshal.Copy(bmpData.Scan0, imageData, 0, byteCount);
+
+
+            IntPtr res = new IntPtr();
+            int size = detectImageContent_INTEROP(m_core, imageData, width, height, channels, out res);
+
+            DetectionResultMarshal[] results = new DetectionResultMarshal[size];
+            IntPtr inc = res;
+            for (int i = 0; i < size; i++)
+            {
+                results[i] = (DetectionResultMarshal)Marshal.PtrToStructure(inc, typeof(DetectionResultMarshal));
+                inc += Marshal.SizeOf(typeof(DetectionResultMarshal)); // Pointer artihmetic in C#!
+            }
+
+            disposeDetectionResults_INTEROP(res);
+
+            return results;
         }
 
         public void setDATA_DIR(string path)
@@ -128,12 +163,16 @@ namespace Interop
 
 
 
-        // UnmanagedType is the cool thingy 
         [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern IntPtr CreateCoreInterface_INTEROP();
 
+ 
         [DllImport("TIA_CORE_SHARED", SetLastError = true)]
-        private static extern DetectionResultMarshal detectImageContent_INTEROP(IntPtr core, int image);
+        private static extern void DeleteCoreInterface_INTEROP(IntPtr core);
+
+
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
+        private static extern int detectImageContent_INTEROP(IntPtr core, byte[] image, int width, int height, int channels,  out IntPtr resultPtr);
 
         [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void setDATA_DIR_INTEROP(IntPtr core, string path);
@@ -165,6 +204,11 @@ namespace Interop
 
         [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void getROOT_DIR_INTEROP(IntPtr core, StringBuilder str, int size);
+
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
+        private static extern void disposeDetectionResults_INTEROP(IntPtr resultPtr);
+
+
 
 
         private readonly IntPtr m_core;

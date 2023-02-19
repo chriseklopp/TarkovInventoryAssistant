@@ -25,7 +25,7 @@
         <Compile Include="Source\Models\ErrorViewModel.cs">
             <Link>Models\ErrorViewModel.cs</Link>
         </Compile>
-        <Compile Include ="Source\Models\DetectionResultsModel.cs">
+        <Compile Include="Source\Models\DetectionResultsModel.cs">
             <Link>Models\DetectionResultsModel.cs</Link>
         </Compile>
 
@@ -228,9 +228,11 @@
             <Link>Program.cs</Link>
         </Compile>
     </ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.2" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.2" />
+        <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
     </ItemGroup>
 </Project>
