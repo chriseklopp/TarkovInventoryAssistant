@@ -59,8 +59,8 @@ namespace TDataTypes
         std::string ret(stringVal.size() + numCommas, ' ');
 
         int count = 0;
-        int retItr = ret.size() - 1;
-        int i = stringVal.size() - 1;
+        size_t retItr = ret.size() - 1;
+        size_t i = stringVal.size() - 1;
         while(i >= 0) {
 
             if (count < 3) {
@@ -97,6 +97,14 @@ namespace TDataTypes
         this->j = p.second;
     };
 
+
+    TCurrency::TCurrency() :
+        m_value(0),
+        m_unit(),
+        m_isPrependedUnit(false)
+        {};
+
+
     TCurrency::TCurrency(const std::string& currString) {
         if (currString.empty()) {
             m_unit = "";
@@ -106,7 +114,7 @@ namespace TDataTypes
         }
 
         int lastDigitIdx = -1;
-        for (int i = currString.size() - 1; i > 0; i--) {
+        for (size_t i = currString.size() - 1; i > 0; i--) {
             if (std::isdigit(static_cast<unsigned char>(currString[i]))) {
                 lastDigitIdx = i;
                 break;

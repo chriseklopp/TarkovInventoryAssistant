@@ -78,7 +78,7 @@ namespace TDataTypes
     class TCurrency {
 
     public:
-        TCurrency() {};
+        TCurrency();
         TCurrency(const std::string& currString);
         ~TCurrency() {};
 

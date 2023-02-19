@@ -331,7 +331,6 @@ bool TImageReader::isEmptySpace(const cv::Mat& hsvImg) {
     * V = [7,10]
     */
     cv::Scalar avgHSV = cv::mean(hsvImg);
-    std::cout << avgHSV << std::endl;
     if (avgHSV.channels < 3 || (avgHSV[0] < 10 && avgHSV[1] < 10 && avgHSV[2] < 30)) // Being generous since edge lines throw off the mean.
         return true;
 
