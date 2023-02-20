@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <EnableDefaultContentItems>true</EnableDefaultContentItems>
+        <BaseOutputPath>build\</BaseOutputPath>
+        <BaseIntermediateOutputPath>build\obj\</BaseIntermediateOutputPath>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <OutputType>Exe</OutputType>
+        <Configurations>Debug;Release;s</Configurations>
+        <Platforms>AnyCPU;x64</Platforms>
+        <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+    </PropertyGroup>
+
+   
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug|x64'">
+        <OutputPath>..\Debug\</OutputPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Release|x64'">
+        <OutputPath>..\Release\</OutputPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <None Remove="Settings.ini" />
+      <None Remove="TIA_CORE.dll" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="SkiaSharp" Version="2.88.3" />
+        <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+    </ItemGroup>
+</Project>

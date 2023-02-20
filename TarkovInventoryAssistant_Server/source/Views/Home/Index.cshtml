@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@model ImageModel
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+
+@*    <form asp-controller="Home" asp-action="SubmitImage" method="post">
+        <input asp-for=ImageFile type="file" class="form-control" />
+        <button type ="submit" class="btn btn-primary mt-1 mx-auto">Submit Image</button>
+    </form>
+*@
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="imageInput">Select an image:</label>
+        <input type="file" class="form-control-file" id="imageInput" name="image">
+    </div>
+        <button type="submit" class="btn btn-primary" asp-action="SubmitImage">Upload</button>
+</form>
+
+</div>
