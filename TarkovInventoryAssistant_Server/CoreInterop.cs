@@ -1,8 +1,10 @@
-﻿using System.Drawing;
+﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
 using Image = System.Drawing.Image;
 
@@ -71,6 +73,20 @@ namespace Interop
         public DetectionResultMarshal[] detectImageContent(int fakImage)
         {
 
+            if (m_isUpdating)
+            {
+                System.Threading.SpinWait.SpinUntil(() => !m_isUpdating); // Wait until we are no longer updating to allow access.
+            }
+
+            lock (m_refLock)
+            {
+                if (m_isUpdating) // By checking this again we prevent a race condition.
+                {
+                    System.Threading.SpinWait.SpinUntil(() => !m_isUpdating);
+                }
+                m_refCount++;
+            }
+
             Bitmap image = new Bitmap("C:\\MyWorkspace\\TarkovInventoryAssistant\\Data\\screenshots\\raw\\tucker1.png");
             int width = image.Width;
             int height = image.Height;
@@ -96,7 +112,10 @@ namespace Interop
             }
 
             disposeDetectionResults_INTEROP(res);
-
+            lock (m_refLock)
+            {
+                m_refCount--; // TODO: Might have to catch all exceptions in this method so this is guaranteed to decrement.
+            }
             return results;
         }
 
@@ -105,9 +124,28 @@ namespace Interop
             setDATA_DIR_INTEROP(m_core, path);
         }
 
+        public bool compileRawCatalog(string path, string name, bool makeRotations)
+        {
+            return compileRawCatalog_INTEROP(m_core, path, name, makeRotations);
+        }
+
         public void setACTIVECATALOG(string path)
         {
-            setACTIVECATALOG_INTEROP(m_core, path);
+            // By locking the refLock here we prevent a deadlock.
+            lock (m_refLock)
+            {
+                m_isUpdating = true; // Blocks further threads from accessing our catalog.
+            }
+            System.Threading.SpinWait.SpinUntil(() => m_refCount == 0); // Wait until no threads are reading from our catalog.
+
+            bool success = setACTIVECATALOG_INTEROP(m_core, path);
+            m_isUpdating = false; // Unblock access to the catalog.
+
+            if (success)
+            {
+                saveConfig();
+            }
+
         }
 
         public void setRAW_CATALOGS_DIR(string path)
@@ -178,6 +216,9 @@ namespace Interop
         private static extern void setDATA_DIR_INTEROP(IntPtr core, string path);
 
         [DllImport("TIA_CORE_SHARED", SetLastError = true)]
+        private static extern bool compileRawCatalog_INTEROP(IntPtr core, string path, string name, bool makeRotations);
+
+        [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern bool setACTIVECATALOG_INTEROP(IntPtr core, string path);
 
         [DllImport("TIA_CORE_SHARED", SetLastError = true)]
@@ -208,9 +249,9 @@ namespace Interop
         [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void disposeDetectionResults_INTEROP(IntPtr resultPtr);
 
-
-
-
+        private readonly object m_refLock = new object();
+        private int m_refCount = 0;
+        private bool m_isUpdating = false;
         private readonly IntPtr m_core;
 
     };

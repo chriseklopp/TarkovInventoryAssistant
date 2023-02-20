@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Interop;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using TarkovInventoryAssistant_Server.Models;
 
@@ -6,11 +7,11 @@ namespace TarkovInventoryAssistant_Server.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly CoreInterop m_core;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(CoreInterop core)
         {
-            _logger = logger;
+            m_core = core;
         }
 
         public IActionResult Index()
@@ -23,10 +24,29 @@ namespace TarkovInventoryAssistant_Server.Controllers
             return View();
         }
 
+        public IActionResult Result(List<DetectionResultsModel> detections)
+        {
+            return View(detections);
+        }
+
+        public IActionResult SubmitImage(ImageModel imageModel)
+        {
+            DetectionResultMarshal[] detMat = m_core.detectImageContent(69);
+            List<DetectionResultsModel> results = new List<DetectionResultsModel>(detMat.Length);
+            for(int i = 0; i < detMat.Length; i++)
+            {
+                results.Add(new DetectionResultsModel(detMat[i]));
+            }
+            return View("Result", results);
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
+
     }
 }

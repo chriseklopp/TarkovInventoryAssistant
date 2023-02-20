@@ -1,3 +1,5 @@
+using Interop;
+
 namespace TarkovInventoryAssistant_Server.Models
 {
     public class DetectionResultsModel
@@ -6,6 +8,19 @@ namespace TarkovInventoryAssistant_Server.Models
         public DetectionResultsModel()
         {
 
+        }
+
+        public DetectionResultsModel(DetectionResultMarshal drm)
+        {
+            catalogImage = 69;
+            sourceImage = 420;
+            name = drm.name;
+            dim = drm.dimHeight.ToString() + 'x' + drm.dimWidth.ToString();
+            fleaPrice = drm.fleaUnit + drm.fleaprice.ToString();
+            pricePerSlot = drm.fleaUnit + drm.fleaPricePerSlot.ToString();
+            traderPrice = drm.traderUnit + drm.traderPrice.ToString();
+            trader = drm.trader;
+            parentImageID = 666;
         }
 
         public string? RequestId { get; set; }
@@ -18,11 +33,11 @@ namespace TarkovInventoryAssistant_Server.Models
 
         public string dim { get; set; } = "";
 
-        public int fleaPrice { get; set; }
+        public string fleaPrice { get; set; }
 
-        public int pricePerSlot { get; set; }
+        public string pricePerSlot { get; set; }
 
-        public int traderPrice { get; set; }
+        public string traderPrice { get; set; }
 
         public string trader { get; set; } = "";
 

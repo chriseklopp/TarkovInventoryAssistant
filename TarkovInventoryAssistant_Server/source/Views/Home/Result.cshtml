@@ -1,0 +1,62 @@
+﻿@{
+}
+@model List<DetectionResultsModel>
+
+<div class="text-center">
+    <h1 class="display-4">RESULTS:</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">This is where detection results should go!</a>.</p>
+</div>
+
+
+
+<div class="card-body">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Catalog Image
+                </th>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Dim
+                </th>
+                <th>
+                    Flea Price
+                </th>
+                <th>
+                    Trader Price
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count() > 0)
+            {
+
+                @foreach (DetectionResultsModel det in Model)
+                {
+                    <tr>
+                        <td>
+                            @det.catalogImage
+                        </td>
+                        <td>
+                            @det.name
+                        </td>
+                        <td>
+                            @det.dim
+                        </td>
+                        <td>
+                            @det.fleaPrice
+                        </td>
+                        <td>
+                            @det.traderPrice
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+
+    </table>
+
+</div>

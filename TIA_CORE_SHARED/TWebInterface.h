@@ -123,32 +123,41 @@ extern "C" _declspec(dllexport) void getCATALOGS_DIR_INTEROP(WebInterface::TWebI
 
 }
 
-extern "C" _declspec(dllexport) void getROOT_DIR_INTEROP(WebInterface::TWebInterface * iface, char* str, int size) {
+extern "C" _declspec(dllexport) void getROOT_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
     if (iface)
         iface->getROOT_DIR(str, size);
     return;
 }
 
-extern "C" _declspec(dllexport) void setDATA_DIR_INTEROP(WebInterface::TWebInterface * iface, char* dir) {
+extern "C" _declspec(dllexport) void setDATA_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
     if (iface)
         iface->setDATA_DIR(dir);
     return;
 }
 
-extern "C" _declspec(dllexport) bool setACTIVECATALOG_INTEROP(WebInterface::TWebInterface * iface, char* dir) {
+
+extern "C" _declspec(dllexport) bool compileRawCatalog_INTEROP(WebInterface::TWebInterface* iface, const char* path, const char* name, bool makeRotations) {
+    bool ret = false;
+    if (iface)
+        ret = iface->compileRawCatalog(path,name,makeRotations);
+    return ret;
+}
+
+
+extern "C" _declspec(dllexport) bool setACTIVECATALOG_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
     bool ret = false;
     if (iface)
         ret = iface->setACTIVECATALOG(dir);
     return ret;
 }
 
-extern "C" _declspec(dllexport) void setRAW_CATALOGS_DIR_INTEROP(WebInterface::TWebInterface * iface, char* dir) {
+extern "C" _declspec(dllexport) void setRAW_CATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
     if (iface)
         iface->setRAW_CATALOGS_DIR(dir);
     return;
 }
 
-extern "C" _declspec(dllexport) void setCATALOGS_DIR_INTEROP(WebInterface::TWebInterface * iface, char* dir) {
+extern "C" _declspec(dllexport) void setCATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
     if (iface)
         iface->setCATALOGS_DIR(dir);
     return;
