@@ -1,4 +1,10 @@
 using Interop;
+using Microsoft.AspNetCore.Mvc;
+using SkiaSharp;
+using System.Net.Mime;
+using System.Text;
+using static SkiaSharp.SKImageFilter;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TarkovInventoryAssistant_Server.Models
 {
@@ -10,24 +16,31 @@ namespace TarkovInventoryAssistant_Server.Models
 
         }
 
-        public DetectionResultsModel(DetectionResultMarshal drm)
+
+
+        public DetectionResultsModel(DetectionResultMarshal drm, string catalogPath)
         {
-            catalogImage = 69;
-            sourceImage = 420;
+            string filePath = catalogPath + "/images/" + drm.name + ".bmp";
+
+            catalogImage = filePath;
             name = drm.name;
             dim = drm.dimHeight.ToString() + 'x' + drm.dimWidth.ToString();
-            fleaPrice = drm.fleaUnit + drm.fleaprice.ToString();
-            pricePerSlot = drm.fleaUnit + drm.fleaPricePerSlot.ToString();
-            traderPrice = drm.traderUnit + drm.traderPrice.ToString();
+
+            int nullIndex = Array.IndexOf(drm.fleaUnit, (byte)0);
+            string fleaUnit = Encoding.UTF8.GetString(drm.fleaUnit, 0, nullIndex);
+            fleaPrice = fleaUnit + drm.fleaprice.ToString();
+            pricePerSlot = fleaUnit + drm.fleaPricePerSlot.ToString();
+
+            nullIndex = Array.IndexOf(drm.traderUnit, (byte)0);
+            string traderunit = Encoding.UTF8.GetString(drm.traderUnit, 0, nullIndex);
+            traderPrice = traderunit + drm.traderPrice.ToString();
             trader = drm.trader;
             parentImageID = 666;
         }
 
         public string? RequestId { get; set; }
 
-        public int catalogImage { get; set; }
-
-        public int sourceImage { get; set; }
+        public string catalogImage { get; set; }
 
         public string name { get; set; } = "";
 

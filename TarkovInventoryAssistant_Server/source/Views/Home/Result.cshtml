@@ -14,7 +14,7 @@
         <thead>
             <tr>
                 <th>
-                    Catalog Image
+                    Image
                 </th>
                 <th>
                     Name
@@ -38,7 +38,7 @@
                 {
                     <tr>
                         <td>
-                            @det.catalogImage
+                            <img src="@Url.Action("ShowImage", new { filePath = det.catalogImage, fileName = det.name, contentType = "application/octet-stream" })" alt="File Image" />
                         </td>
                         <td>
                             @det.name
@@ -48,9 +48,16 @@
                         </td>
                         <td>
                             @det.fleaPrice
+
                         </td>
                         <td>
-                            @det.traderPrice
+                            <div>
+                                @det.traderPrice
+                            </div>
+                            <div>
+                                @det.trader
+                            </div>
+
                         </td>
                     </tr>
                 }
