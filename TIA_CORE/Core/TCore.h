@@ -42,7 +42,6 @@ public:
 
 
     // Loads the config specified.
-    // If empty, will attempt to load catalog specified by the config.
     bool loadCatalog(std::filesystem::path dir = "");
 
     // Create a compiled catalog from a raw catalog.

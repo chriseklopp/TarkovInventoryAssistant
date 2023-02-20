@@ -100,9 +100,6 @@ TIAFrame::TIAFrame()
     m_core.registerTObserver(m_consolePanel);
     m_core.registerTObserver(m_catalogPanel);
 
-
-    // Load initial catalog defined in the config.
-    m_core.loadCatalog();
 }
 
 
