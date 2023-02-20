@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using TarkovInventoryAssistant_Server.Models;
+using SkiaSharp;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TarkovInventoryAssistant_Server.Controllers
 {
@@ -29,13 +31,40 @@ namespace TarkovInventoryAssistant_Server.Controllers
             return View(detections);
         }
 
-        public IActionResult SubmitImage(ImageModel imageModel)
+
+        public IActionResult ShowImage(string filePath, string fileName, string contentType)
         {
-            DetectionResultMarshal[] detMat = m_core.detectImageContent(69);
-            List<DetectionResultsModel> results = new List<DetectionResultsModel>(detMat.Length);
-            for(int i = 0; i < detMat.Length; i++)
+            var fileContentResult = new FileContentResult(System.IO.File.ReadAllBytes(filePath), contentType)
             {
-                results.Add(new DetectionResultsModel(detMat[i]));
+                FileDownloadName = fileName
+            };
+
+            return fileContentResult;
+        }
+
+        [HttpPost]
+        public IActionResult SubmitImage()
+        {
+
+            var imageFile = HttpContext.Request.Form.Files.GetFile("image");
+            if (imageFile == null || imageFile.Length == 0)
+            {
+                return BadRequest("Please select an image file.");
+            }
+
+            SKBitmap image;
+            using (var stream = imageFile.OpenReadStream())
+            {
+                image = SKBitmap.Decode(stream);
+            }
+
+
+            DetectionResultMarshal[] detMat = m_core.detectImageContent(image);
+            List<DetectionResultsModel> results = new List<DetectionResultsModel>(detMat.Length);
+            string catalogPath = m_core.getACTIVE_CATALOG();
+            for (int i = 0; i < detMat.Length; i++)
+            {
+                results.Add(new DetectionResultsModel(detMat[i], catalogPath));
             }
             return View("Result", results);
         }

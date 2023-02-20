@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+using SkiaSharp;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
@@ -18,8 +19,8 @@ namespace Interop
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 60)]
         public string name;
 
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
-        public string fleaUnit;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] fleaUnit;
 
         [MarshalAs(UnmanagedType.I4)]
         public int fleaprice;
@@ -27,8 +28,8 @@ namespace Interop
         [MarshalAs(UnmanagedType.I4)]
         public int fleaPricePerSlot;
 
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
-        public string traderUnit;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public byte[] traderUnit;
 
         [MarshalAs(UnmanagedType.I4)]
         public int traderPrice;
@@ -57,7 +58,6 @@ namespace Interop
 
 
 
-    [SupportedOSPlatform("windows")]
     public class CoreInterop
     {
         public CoreInterop()
@@ -70,7 +70,7 @@ namespace Interop
             DeleteCoreInterface_INTEROP(m_core);
         }
 
-        public DetectionResultMarshal[] detectImageContent(int fakImage)
+        public DetectionResultMarshal[] detectImageContent(SKBitmap image)
         {
 
             if (m_isUpdating)
@@ -86,22 +86,9 @@ namespace Interop
                 }
                 m_refCount++;
             }
-
-            Bitmap image = new Bitmap("C:\\MyWorkspace\\TarkovInventoryAssistant\\Data\\screenshots\\raw\\tucker1.png");
-            int width = image.Width;
-            int height = image.Height;
-            int channels = System.Drawing.Image.GetPixelFormatSize(image.PixelFormat)/8;
-
-            Rectangle rect = new Rectangle(0, 0, width, height);
-            BitmapData bmpData = image.LockBits(rect, ImageLockMode.ReadWrite, image.PixelFormat);
-
-            int byteCount = bmpData.Stride * image.Height; 
-            byte[] imageData = new byte[byteCount];
-            Marshal.Copy(bmpData.Scan0, imageData, 0, byteCount);
-
-
+            
             IntPtr res = new IntPtr();
-            int size = detectImageContent_INTEROP(m_core, imageData, width, height, channels, out res);
+            int size = detectImageContent_INTEROP(m_core, image.Bytes, image.Width, image.Height, image.BytesPerPixel, out res);
 
             DetectionResultMarshal[] results = new DetectionResultMarshal[size];
             IntPtr inc = res;
