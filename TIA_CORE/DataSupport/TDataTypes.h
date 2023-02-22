@@ -34,12 +34,88 @@ namespace TDataTypes
     std::string prettifyToString(int val);
 
 
-
     // Denotes what type of storage a TContainerItem contains.
     enum gridType {
         ARRAY = 0, // A contiguous block/grid of item slots.
         DYNAMIC = 1 // Could have disconnected slots of varying sizes and positions.
     };
+
+
+    enum class currencyType {
+        UNKNOWN,
+        RUBLE,
+        DOLLAR,
+        EURO,
+    };
+
+    currencyType getCurrencyType(const std::string& currency);
+
+    constexpr int convertToRubles(int count, currencyType curr) {
+        // These values from https://escapefromtarkov.fandom.com/wiki/Currency
+        switch (curr) {
+            case currencyType::RUBLE:
+                return count;
+
+            case currencyType::DOLLAR:
+                return 116*count;
+
+            case currencyType::EURO:
+                return 127 * count;
+
+            default:
+                return 0;
+        }
+    }
+
+
+    enum class trader {
+        Unknown,
+        Prapor,
+        Therapist,
+        Fence,
+        Skier,
+        Peacekeeper,
+        Mechanic,
+        Ragman,
+        Jaeger
+    };
+
+    trader toTraderEnum(const std::string& traderString);
+
+
+    // Multiplier at which a trader will buy back an item.
+    constexpr float traderBuybackMultiplier(trader buyer) {
+        // These values from https://escapefromtarkov.fandom.com/wiki/Trading
+        switch (buyer) {
+            case trader::Prapor:
+                return 0.50f;
+
+            case trader::Therapist:
+                return 0.63f;
+
+            case trader::Fence:
+                return 0.4f;
+
+            case trader::Skier:
+                return 0.49f;
+
+            case trader::Peacekeeper:
+                return 0.45f;
+
+            case trader::Mechanic:
+                return 0.56f;
+
+            case trader::Ragman:
+                return 0.62f;
+
+            case trader::Jaeger:
+                return 0.60f;
+
+            default:
+                return -1.0f;
+        }
+    }
+
 
 
     class TCurrency {
@@ -72,6 +148,9 @@ namespace TDataTypes
         bool m_isPrependedUnit;
     };
   
+    // Calculates whether selling an item to the trader or on the flea is better.
+    bool isFleaOptimal(TCurrency fleaCurr, TCurrency traderCurr, trader trad);
+
 }
 
 namespace Hash {
