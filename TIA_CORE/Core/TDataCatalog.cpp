@@ -97,9 +97,9 @@ namespace TDataCatalog {
                                                   bool makeRotations) {
 
         // The defined ordering of read and write to compiled catalog string shall be:
-        // Name, path, dims, containerDims, avgPrice, PPS, traderPrice, bestTrader, rotation, hash
+        // Name, path, dims, containerDims, avgPrice, PPS, traderPrice, bestTrader, isFleaOptimal, rotation, hash
         // The file format shall be CSV with - delimiting between array values.
-        // EX: Dog,Dog.img,4-5,2-2, $10, $5, $2, prapor, 0,23-43-677-234-893
+        // EX: Dog,Dog.img,4-5,2-2, $10, $5, $2, prapor,1 , 0,23-43-677-234-893
         std::ifstream in;
         in.open(file);
 
@@ -121,6 +121,26 @@ namespace TDataCatalog {
                     std::cout << "Attempted to load invalid image: skipping it \n";
                     continue;
                 }
+
+                // Calculate optimal selling method bool.
+
+                /*
+                HACK! HACK! I hate everything about the way these files are read and written >:(
+                Use the built in extractors from TCurrency to extract the integer values from the strings.
+                */
+                std::string fleaPriceString = fields.at(4);
+                std::replace(fleaPriceString.begin(), fleaPriceString.end(), '\'', ',');
+                TDataTypes::TCurrency fleaCurrency = TDataTypes::TCurrency(fleaPriceString);
+
+
+                std::string traderPriceString = fields.at(6);
+                std::replace(traderPriceString.begin(), traderPriceString.end(), '\'', ',');
+                TDataTypes::TCurrency traderCurrency = TDataTypes::TCurrency(traderPriceString);
+
+                TDataTypes::trader trader = TDataTypes::toTraderEnum(fields.at(7));
+
+                bool fleaOptimal = TDataTypes::isFleaOptimal(fleaCurrency, traderCurrency, trader);
+                fleaOptimal ? fields.push_back("1") : fields.push_back("0");
 
                 // Make rotated items.
                 std::vector<std::string> rotFields;
@@ -186,9 +206,9 @@ namespace TDataCatalog {
 
     std::unique_ptr<TItemTypes::TItem> TDataCatalog::makeTItemFromCompiledString(const std::string& instring) {
         // The defined ordering of read and write to compiled catalog string shall be:
-        // Name, path, dims, containerDims, avgPrice, PPS, traderPrice, bestTrader, rotation, hash
+        // Name, path, dims, containerDims, avgPrice, PPS, traderPrice, bestTrader, isFleaOptimal, rotation, hash
         // The file format shall be CSV with - delimiting between array values.
-        // EX: Dog,Dog.img,4-5,2-2, $10, $5, $2, prapor, 0,23-43-677-234-893
+        // EX: Dog,Dog.img,4-5,2-2, $10, $5, $2, prapor,1 , 0,23-43-677-234-893
 
         std::vector<std::string> fields;
         TDataTypes::splitString(instring, ',', fields);
@@ -225,20 +245,23 @@ namespace TDataCatalog {
             std::string bestTrader = fields.at(7);
             std::replace(bestTrader.begin(), bestTrader.end(), '\'', ',');
 
-            TItemSupport::PriceInfo priceData = TItemSupport::PriceInfo(avgPrice, pricePerSlot, traderPrice, bestTrader);
+            // Sell to trader OR on flea?
+            bool sellOnFlea = fields.at(8) == "1" ? true : false;
+
+            TItemSupport::PriceInfo priceData = TItemSupport::PriceInfo(avgPrice, pricePerSlot, traderPrice, bestTrader, sellOnFlea);
 
 
             //Rotation
             bool rotation;
-            if (fields.at(8) == "1")
+            if (fields.at(9) == "1")
                 rotation = true;
-            else if (fields.at(8) == "0")
+            else if (fields.at(9) == "0")
                 rotation = false;
             else
                 throw std::invalid_argument("Invalid rotation");
 
             //Hash
-            TDataTypes::splitString(fields.at(9), '-', temp);
+            TDataTypes::splitString(fields.at(10), '-', temp);
             cv::Mat hashVals = cv::Mat(temp).t();
             hashVals.convertTo(hashVals, CV_8U);
 
