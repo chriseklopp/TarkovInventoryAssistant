@@ -22,7 +22,7 @@ namespace TUI {
         const wxPoint& pos,
         const wxSize& size,
         long 	style,
-        const wxString& name) : m_coreptr(core), m_collapseSimilarItems(false), m_showActiveOnly(true),m_highlightThreshold(.80), wxPanel(parent,
+        const wxString& name) : m_coreptr(core), m_collapseSimilarItems(false), m_showActiveOnly(true), wxPanel(parent,
             id,
             pos,
             size,
@@ -214,9 +214,6 @@ namespace TUI {
         refreshOutputList();
     }
 
-    void OutputPanel::setHighlightThreshold(int thresh) {
-        m_highlightThreshold = thresh;
-    }
 
     bool OutputPanel::addToCountMap(const TItemSupport::DetectionResult& det) {
         if (m_itemIDCountMap.find(det.catalogItem) != m_itemIDCountMap.end()) {
@@ -281,7 +278,7 @@ namespace TUI {
         if (!itm)
             return;
 
-        if (double(itm->getTraderSellPrice().getValue()) / double(itm->getPrice().getValue()) >= m_highlightThreshold) {
+        if (!itm->isFleaOptimal()) {
             m_outputList->SetCellBackgroundColour(row, m_columnIndexMap.at("FleaPrice"), wxColor(0, 200, 0));
             m_outputList->SetCellBackgroundColour(row, m_columnIndexMap.at("TraderPrice"), wxColor(0, 200, 0));
         }

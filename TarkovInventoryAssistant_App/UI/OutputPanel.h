@@ -38,8 +38,6 @@ namespace TUI {
 
         void OnToggleActiveOnly(wxCommandEvent& evt);
 
-        void setHighlightThreshold(int thresh);
-
         virtual void TEventReceived(TEvent::TEvent e) override;
 
     private:
@@ -84,8 +82,6 @@ namespace TUI {
 
         wxGrid* m_outputList;
 
-        // Ratio threshold at which a row where the flea and trader prices are similar are highlighted.
-        double m_highlightThreshold;
         // Tool bar widgets.
         wxToolBar* m_toolbar;
         wxCheckBox* m_toggleCollapse;
