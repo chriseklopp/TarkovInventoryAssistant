@@ -79,25 +79,6 @@ namespace TDataTypes
         return ret;
     }
 
-    TPixelCoordinate::TPixelCoordinate()
-    {
-        // Default constructor
-        i = 0;
-        j = 0;
-    };
-
-    TPixelCoordinate::TPixelCoordinate(int i, int j) 
-    {
-        this->i = i;
-        this->j = j;
-    };
-    TPixelCoordinate::TPixelCoordinate(std::pair<int, int> p) 
-    {
-        this->i = p.first;
-        this->j = p.second;
-    };
-
-
     TCurrency::TCurrency() :
         m_value(0),
         m_unit(),
