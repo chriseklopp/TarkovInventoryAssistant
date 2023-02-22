@@ -54,9 +54,9 @@ namespace WebInterface {
 
         strcpy_s(trader, sizeof(trader) / sizeof(char), catItem->getTrader().c_str());
 
-        dimHeight = catItem->getDim().first;
+        dimWidth = catItem->getDim().first;
 
-        dimWidth = catItem->getDim().second;
+        dimHeight = catItem->getDim().second;
 
         x1 = det.imageLoc.first.x;
         y1 = det.imageLoc.first.y;
