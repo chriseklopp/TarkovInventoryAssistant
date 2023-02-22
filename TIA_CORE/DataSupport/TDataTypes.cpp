@@ -59,8 +59,8 @@ namespace TDataTypes
         std::string ret(stringVal.size() + numCommas, ' ');
 
         int count = 0;
-        size_t retItr = ret.size() - 1;
-        size_t i = stringVal.size() - 1;
+        int retItr = ret.size() - 1;
+        int i = stringVal.size() - 1;
         while(i >= 0) {
 
             if (count < 3) {
@@ -78,25 +78,6 @@ namespace TDataTypes
         }
         return ret;
     }
-
-    TPixelCoordinate::TPixelCoordinate()
-    {
-        // Default constructor
-        i = 0;
-        j = 0;
-    };
-
-    TPixelCoordinate::TPixelCoordinate(int i, int j) 
-    {
-        this->i = i;
-        this->j = j;
-    };
-    TPixelCoordinate::TPixelCoordinate(std::pair<int, int> p) 
-    {
-        this->i = p.first;
-        this->j = p.second;
-    };
-
 
     TCurrency::TCurrency() :
         m_value(0),
@@ -146,9 +127,6 @@ namespace TDataTypes
 
     const std::string TCurrency::getCurrencyString(bool prettify) const {
         if (m_value) {
-            if (m_unit == "$") {
-                std::cout << "wed";
-            }
             if(!prettify)
                 return m_isPrependedUnit ? m_unit + std::to_string(m_value) : std::to_string(m_value) + m_unit;
             else
@@ -187,6 +165,105 @@ namespace TDataTypes
         m_value -= rhs.m_value;
         return *this;
     }
+
+    currencyType getCurrencyType(const std::string& currency) {
+        if (currency == "$")
+            return currencyType::DOLLAR;
+
+        else if (currency == u8"\u20BD") // This is a Ruble 
+            return currencyType::RUBLE;
+
+        else if (currency == u8"\u20AC") // This is a Euro
+            return currencyType::EURO;
+
+        return currencyType::UNKNOWN;
+    }
+
+    trader toTraderEnum(const std::string& traderString) {
+        if (traderString == "Prapor")
+            return trader::Prapor;
+        else if (traderString == "Therapist")
+            return trader::Therapist;
+        else if (traderString == "Fence")
+            return trader::Fence;
+        else if (traderString == "Skier")
+            return trader::Skier;
+        else if (traderString == "Peacekeeper")
+            return trader::Peacekeeper;
+        else if (traderString == "Mechanic")
+            return trader::Mechanic;
+        else if (traderString == "Ragman")
+            return trader::Ragman;
+        else if (traderString == "Jaeger")
+            return trader::Jaeger;
+        else
+            return trader::Unknown;
+    }
+
+
+    bool isFleaOptimal(TCurrency fleaCurr, TCurrency traderCurr, trader trad) {
+
+        /*
+        * https://escapefromtarkov.fandom.com/wiki/Trading
+        The formula for calculating the flea market "Tax" is:
+
+        Tax = (V0 * Ti * 4^Po * Q) + (VR * TR * 4^PR * Q)
+
+        V0 = total value of offer: Base Price * Total item count / Q
+        VR = total value of the requirements. Sum( Base Price * Amount)
+        Po = log10(V0/VR)
+            - if VR < Vo then Po is raised to the power of 1.08
+        PR = log10(VR/V0)
+            - if VR is >= V0 then PR is raised to the power of 1.08
+        Q = quantity of items
+        Ti = constant = 0.035
+        TR = constant = 0.06
+
+        Base Price = TraderPrice / traderBuybackMultiplier
+        
+        ---------------------------------------------------------------
+        Simplified formula:
+        (Assuming quantity is one and selling and buying for only rubles)
+
+        Tax = (Base_Price * 0.035 * 4^Po) + (fleaPrice * 0.06 * 4^PR)
+
+        Po = log10 (Base_Price/fleaPrice)
+            - if fleaPrice < Base_price, Po is raised to 1.08
+        PR = log10 (fleaPrice/Base_Price)
+            if fleaPrice >= Base_Price, PR is raised to 1.08
+        */
+
+        int fleaPrice = convertToRubles(fleaCurr.getValue(), getCurrencyType(fleaCurr.getUnit()));
+
+        int traderPrice = convertToRubles(traderCurr.getValue(), getCurrencyType(traderCurr.getUnit()));
+
+        if (!fleaPrice)
+            return false;
+
+        if (!traderPrice)
+            return true;
+
+        const constexpr float Ti = 0.035;
+
+        const constexpr float Tr = 0.06;
+
+        double basePrice = traderPrice / traderBuybackMultiplier(trad);
+
+        double Po = log10(basePrice / fleaPrice);
+        if (fleaPrice < basePrice)
+            Po = pow(Po, 1.08);
+
+        double PR = log10(fleaPrice / basePrice);
+        if (fleaPrice >= basePrice)
+            PR = pow(PR, 1.08);
+
+        
+        double tax = round( (basePrice * Ti * pow(4, Po)) + (fleaPrice * .06 * pow(4, PR)) );
+
+        return fleaPrice - tax > traderPrice;
+
+    }
+
 };
 
 namespace Hash {

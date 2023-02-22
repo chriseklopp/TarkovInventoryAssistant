@@ -12,24 +12,28 @@ namespace TItemSupport {
 
     struct PriceInfo {
 
-        PriceInfo() {};
+        PriceInfo(): isFleaOptimal(false) {};
 
         PriceInfo(std::string price,
             std::string pricePerSlot,
             std::string traderPrice,
-            std::string trader
+            std::string trader,
+            bool fleaOptimal
         ) :
 
             price(price),
             pricePerSlot(pricePerSlot),
             traderPrice(traderPrice),
-            trader(trader) {}
+            trader(trader),
+            isFleaOptimal(fleaOptimal)
+        {}
 
 
         const TDataTypes::TCurrency price;
         const TDataTypes::TCurrency pricePerSlot;
         const TDataTypes::TCurrency traderPrice;
         const std::string trader;
+        const bool isFleaOptimal; // True if selling on flea is better than selling to trader.
 
     };
 
@@ -98,8 +102,11 @@ namespace TItemTypes {
         // Get name of best trader to sell to.
         const std::string& getTrader() const;
 
+        // True if selling on flea is better than selling to trader.
+        const bool isFleaOptimal() const;
 
-        cv::Mat m_imageHash; // TODO: change this to proper type.
+
+        cv::Mat m_imageHash;
         std::string m_name;
         std::pair<int, int> m_dim; // (Width, Height)
 

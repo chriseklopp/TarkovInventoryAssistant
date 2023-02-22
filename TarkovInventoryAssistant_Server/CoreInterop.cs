@@ -38,10 +38,10 @@ namespace Interop
         public string trader;
 
         [MarshalAs(UnmanagedType.U1)]
-        public byte dimHeight;
+        public byte dimWidth;
 
         [MarshalAs(UnmanagedType.U1)]
-        public byte dimWidth;
+        public byte dimHeight;
 
         [MarshalAs(UnmanagedType.U2)]
         public ushort x1;

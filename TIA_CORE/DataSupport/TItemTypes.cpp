@@ -84,6 +84,9 @@ namespace TItemTypes {
         return m_priceInfo.trader;
     }
 
+    const bool TItem::isFleaOptimal() const {
+        return m_priceInfo.isFleaOptimal;
+    }
 
 
 

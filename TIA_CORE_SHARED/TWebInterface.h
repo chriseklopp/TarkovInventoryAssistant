@@ -26,8 +26,8 @@ namespace WebInterface {
         char traderUnit[4];
         int traderPrice;
         char trader[12];
-        uint8_t dimHeight;
         uint8_t dimWidth;
+        uint8_t dimHeight;
         uint16_t x1;
         uint16_t y1;
         uint16_t x2;
