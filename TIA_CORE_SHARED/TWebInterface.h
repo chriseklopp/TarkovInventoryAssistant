@@ -11,7 +11,7 @@ This will provide interfaces in a way that are friendly for interop with the C# 
 
 namespace WebInterface {
 
-    // Current Size = 102
+    // Current Size = 103
     struct DetectionResultMarshal {
 
         DetectionResultMarshal();
@@ -26,12 +26,14 @@ namespace WebInterface {
         char traderUnit[4];
         int traderPrice;
         char trader[12];
+        bool sellOnFlea;
         uint8_t dimWidth;
         uint8_t dimHeight;
         uint16_t x1;
         uint16_t y1;
         uint16_t x2;
         uint16_t y2;
+
     };
 
 
