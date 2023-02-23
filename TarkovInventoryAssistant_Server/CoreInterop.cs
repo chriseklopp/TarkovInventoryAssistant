@@ -12,7 +12,7 @@ using Image = System.Drawing.Image;
 namespace Interop
 {
 
-    // Current Size = 102 (consider reducing this, somehow?)
+    // Current Size = 103 (consider reducing this, somehow?)
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack =0)]
     public struct DetectionResultMarshal {
 
@@ -36,6 +36,9 @@ namespace Interop
 
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 12)]
         public string trader;
+
+        [MarshalAs(UnmanagedType.I1)]
+        public bool sellOnFlea;
 
         [MarshalAs(UnmanagedType.U1)]
         public byte dimWidth;

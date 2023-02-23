@@ -12,6 +12,7 @@ namespace WebInterface {
         traderUnit(),
         traderPrice(0),
         trader(),
+        sellOnFlea(false),
         dimHeight(0),
         dimWidth(0),
         x1(0),
@@ -28,6 +29,7 @@ namespace WebInterface {
         traderUnit(),
         traderPrice(0),
         trader(),
+        sellOnFlea(false),
         dimHeight(0),
         dimWidth(0),
         x1(0),
@@ -53,6 +55,8 @@ namespace WebInterface {
         traderPrice = catItem->getTraderSellPrice().getValue();
 
         strcpy_s(trader, sizeof(trader) / sizeof(char), catItem->getTrader().c_str());
+
+        sellOnFlea = catItem->isFleaOptimal();
 
         dimWidth = catItem->getDim().first;
 
