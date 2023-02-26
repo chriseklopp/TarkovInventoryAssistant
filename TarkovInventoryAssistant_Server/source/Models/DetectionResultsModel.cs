@@ -28,12 +28,12 @@ namespace TarkovInventoryAssistant_Server.Models
 
             int nullIndex = Array.IndexOf(drm.fleaUnit, (byte)0);
             string fleaUnit = Encoding.UTF8.GetString(drm.fleaUnit, 0, nullIndex);
-            fleaPrice = fleaUnit + drm.fleaprice.ToString();
-            pricePerSlot = fleaUnit + drm.fleaPricePerSlot.ToString();
+            fleaPrice = fleaUnit + drm.fleaprice.ToString("N0");
+            pricePerSlot = fleaUnit + drm.fleaPricePerSlot.ToString("N0");
 
             nullIndex = Array.IndexOf(drm.traderUnit, (byte)0);
             string traderunit = Encoding.UTF8.GetString(drm.traderUnit, 0, nullIndex);
-            traderPrice = traderunit + drm.traderPrice.ToString();
+            traderPrice = traderunit + drm.traderPrice.ToString("N0");
             trader = drm.trader;
             parentImageID = 666;
         }
