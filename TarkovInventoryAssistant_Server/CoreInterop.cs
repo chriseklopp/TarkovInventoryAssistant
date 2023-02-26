@@ -76,37 +76,30 @@ namespace Interop
         public DetectionResultMarshal[] detectImageContent(SKBitmap image)
         {
 
-            if (m_isUpdating)
-            {
-                System.Threading.SpinWait.SpinUntil(() => !m_isUpdating); // Wait until we are no longer updating to allow access.
-            }
+            m_lock.EnterReadLock();
 
-            lock (m_refLock)
+            try
             {
-                if (m_isUpdating) // By checking this again we prevent a race condition.
+                IntPtr res = new IntPtr();
+                int size = detectImageContent_INTEROP(m_core, image.Bytes, image.Width, image.Height, image.BytesPerPixel, out res);
+
+                DetectionResultMarshal[] results = new DetectionResultMarshal[size];
+                IntPtr inc = res;
+                for (int i = 0; i < size; i++)
                 {
-                    System.Threading.SpinWait.SpinUntil(() => !m_isUpdating);
+                    results[i] = (DetectionResultMarshal)Marshal.PtrToStructure(inc, typeof(DetectionResultMarshal));
+                    inc += Marshal.SizeOf(typeof(DetectionResultMarshal)); // Pointer artihmetic in C#!
                 }
-                m_refCount++;
-            }
-            
-            IntPtr res = new IntPtr();
-            int size = detectImageContent_INTEROP(m_core, image.Bytes, image.Width, image.Height, image.BytesPerPixel, out res);
 
-            DetectionResultMarshal[] results = new DetectionResultMarshal[size];
-            IntPtr inc = res;
-            for (int i = 0; i < size; i++)
-            {
-                results[i] = (DetectionResultMarshal)Marshal.PtrToStructure(inc, typeof(DetectionResultMarshal));
-                inc += Marshal.SizeOf(typeof(DetectionResultMarshal)); // Pointer artihmetic in C#!
+                disposeDetectionResults_INTEROP(res);
+                return results;
             }
 
-            disposeDetectionResults_INTEROP(res);
-            lock (m_refLock)
+            finally
             {
-                m_refCount--; // TODO: Might have to catch all exceptions in this method so this is guaranteed to decrement.
+                m_lock.ExitReadLock();
             }
-            return results;
+
         }
 
         public void setDATA_DIR(string path)
@@ -121,16 +114,20 @@ namespace Interop
 
         public void setACTIVECATALOG(string path)
         {
-            // By locking the refLock here we prevent a deadlock.
-            lock (m_refLock)
+
+            m_lock.EnterWriteLock();
+
+            bool success = false;
+            try
             {
-                m_isUpdating = true; // Blocks further threads from accessing our catalog.
+                success = setACTIVECATALOG_INTEROP(m_core, path);
             }
-            System.Threading.SpinWait.SpinUntil(() => m_refCount == 0); // Wait until no threads are reading from our catalog.
+            finally
+            {
+                m_lock.ExitWriteLock();
+            }
 
-            bool success = setACTIVECATALOG_INTEROP(m_core, path);
-            m_isUpdating = false; // Unblock access to the catalog.
-
+            // This operation is thread safe so we can release the lock before this.
             if (success)
             {
                 saveConfig();
@@ -239,9 +236,8 @@ namespace Interop
         [DllImport("TIA_CORE_SHARED", SetLastError = true)]
         private static extern void disposeDetectionResults_INTEROP(IntPtr resultPtr);
 
-        private readonly object m_refLock = new object();
-        private int m_refCount = 0;
-        private bool m_isUpdating = false;
+
+        private readonly ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         private readonly IntPtr m_core;
 
     };
