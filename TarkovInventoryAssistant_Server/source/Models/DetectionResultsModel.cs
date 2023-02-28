@@ -17,7 +17,7 @@ namespace TarkovInventoryAssistant_Server.Models
         }
 
 
-
+        // Convert a single DRMarshall to a a DetectionResultsModel.
         public DetectionResultsModel(DetectionResultMarshal drm, string catalogPath)
         {
             string filePath = catalogPath + "/images/" + drm.name + ".bmp";
@@ -36,6 +36,13 @@ namespace TarkovInventoryAssistant_Server.Models
             traderPrice = traderunit + drm.traderPrice.ToString("N0");
             trader = drm.trader;
             parentImageID = 666;
+            count = 1;
+        }
+
+        // Convert the DRMarshall and set the count value.
+        public DetectionResultsModel(DetectionResultMarshal drm, string catalogPath, int similarCount) : this(drm,catalogPath)
+        {
+            count = similarCount;
         }
 
         public string? RequestId { get; set; }
@@ -56,5 +63,6 @@ namespace TarkovInventoryAssistant_Server.Models
 
         public int parentImageID { get; set; }
 
+        public int count { get; set; }
     }
 }

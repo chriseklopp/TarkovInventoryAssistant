@@ -41,6 +41,9 @@
                             <img src="@Url.Action("ShowImage", new { filePath = det.catalogImage, fileName = det.name, contentType = "application/octet-stream" })" alt="File Image" />
                         </td>
                         <td>
+                            @det.count
+                        </td>
+                        <td>
                             @det.name
                         </td>
                         <td>

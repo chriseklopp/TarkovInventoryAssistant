@@ -42,6 +42,8 @@ namespace TarkovInventoryAssistant_Server.Controllers
             return fileContentResult;
         }
 
+
+
         [HttpPost]
         public IActionResult SubmitImage()
         {
@@ -58,14 +60,45 @@ namespace TarkovInventoryAssistant_Server.Controllers
                 image = SKBitmap.Decode(stream);
             }
 
-
             DetectionResultMarshal[] detMat = m_core.detectImageContent(image);
+
+            bool collapseSimilar = true; // TODO: this needs to be an option in the View.
+
             List<DetectionResultsModel> results = new List<DetectionResultsModel>(detMat.Length);
             string catalogPath = m_core.getACTIVE_CATALOG();
-            for (int i = 0; i < detMat.Length; i++)
+
+            if (collapseSimilar)
             {
-                results.Add(new DetectionResultsModel(detMat[i], catalogPath));
+                // name, <detMatIndex, count> detMatIndex is index of the first item of the given name.
+                Dictionary<string, Utilities.Pair<int,int>> uniqueDetectionMap = new Dictionary<string, Utilities.Pair<int, int>>();
+
+                for (int i = 0; i < detMat.Length; i++)
+                {
+                    DetectionResultMarshal drm = detMat[i];
+                    if (uniqueDetectionMap.ContainsKey(drm.name))
+                    {
+                        uniqueDetectionMap[drm.name].Second++;
+                    }
+                    else
+                    {
+                        uniqueDetectionMap[drm.name] = new Utilities.Pair<int, int>(i,1);
+                    }
+                }
+                foreach (string name in uniqueDetectionMap.Keys)
+                {
+                    results.Add(new DetectionResultsModel(detMat[uniqueDetectionMap[name].First], catalogPath, uniqueDetectionMap[name].Second));
+                }
+
             }
+            else
+            {
+                // Simply add every DetectionResult
+                for (int i = 0; i < detMat.Length; i++)
+                {
+                    results.Add(new DetectionResultsModel(detMat[i], catalogPath));
+                }
+            }
+
             return View("Result", results);
         }
 
