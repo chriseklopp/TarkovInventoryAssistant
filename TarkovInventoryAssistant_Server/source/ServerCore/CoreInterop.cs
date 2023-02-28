@@ -102,14 +102,19 @@ namespace Interop
 
         }
 
+
+        // Config setters are NOT thread safe!!
         public void setDATA_DIR(string path)
         {
             setDATA_DIR_INTEROP(m_core, path);
         }
-
-        public bool compileRawCatalog(string path, string name, bool makeRotations)
+        public void setRAW_CATALOGS_DIR(string path)
         {
-            return compileRawCatalog_INTEROP(m_core, path, name, makeRotations);
+            setRAW_CATALOGS_DIR_INTEROP(m_core, path);
+        }
+        public void setCATALOGS_DIR(string path)
+        {
+            setCATALOGS_DIR_INTEROP(m_core, path);
         }
 
         public void setACTIVECATALOG(string path)
@@ -134,15 +139,11 @@ namespace Interop
             }
 
         }
+        ////////////////////////////////////////////
 
-        public void setRAW_CATALOGS_DIR(string path)
+        public bool compileRawCatalog(string path, string name, bool makeRotations)
         {
-            setRAW_CATALOGS_DIR_INTEROP(m_core, path);
-        }
-
-        public void setCATALOGS_DIR(string path)
-        {
-            setCATALOGS_DIR_INTEROP(m_core, path);
+            return compileRawCatalog_INTEROP(m_core, path, name, makeRotations);
         }
 
         public void saveConfig()
