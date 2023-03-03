@@ -29,25 +29,8 @@ namespace TarkovInventoryAssistant_Server.Controllers
         }
 
 
-        public IActionResult Result(List<DetectionResultsModel> detections)
-        {
-            return View(detections);
-        }
-
-
         [HttpPost]
-        public IActionResult DisplayResults(IFormFile image)
-        {
-
-            if(image != null && image.Length > 0)
-            {
-                // Do something with the image file
-            }
-            return PartialView("Result");
-        }
-
-        [HttpPost]
-        public IActionResult SubmitImage(IFormFile imageFile)
+        public IActionResult DisplayResults(IFormFile imageFile)
         {
 
             //var imageFile = HttpContext.Request.Form.Files.GetFile("image");
@@ -102,7 +85,6 @@ namespace TarkovInventoryAssistant_Server.Controllers
             }
 
             return PartialView("Result", results);
-            //return View("Result", results);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -41,7 +41,7 @@
                 formData.append('imageFile', $('#image-input')[0].files[0]);
 
                 $.ajax({
-                    url: '@Url.Action("SubmitImage")',
+                    url: '@Url.Action("DisplayResults")',
                     type: 'POST',
                     data: formData,
                     contentType: false,
