@@ -4,11 +4,7 @@
 @model ImageModel
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-
-
-
+    <h1 class="display-4">Tarkov Inventory Assistant</h1>
 </div>
 
 <html>
@@ -17,6 +13,10 @@
 </head>
 
 <body>
+
+    <div>
+        <img id="activeImage" />
+</div>
 
     <div id="imageInput">
         <p>Upload an image file using the form below:</p>
@@ -31,7 +31,7 @@
     </div>
 
 
-    <!-- JavaScript code for AJAX request -->
+    <!-- Submit an image file to be converted to Detection Results. -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
@@ -56,6 +56,31 @@
             });
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+            $('#image-form').submit(function (event) {
+                event.preventDefault();
+                var formData = new FormData();
+                formData.append('image', $('#image-input')[0].files[0]);
+
+                $.ajax({
+                    url: '@Url.Action("AddImage")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        $('#activeImage').html(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
+            });
+        });
+    </script>
+
 
 
 </body>

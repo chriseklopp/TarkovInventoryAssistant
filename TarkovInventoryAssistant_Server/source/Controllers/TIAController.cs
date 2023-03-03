@@ -16,7 +16,16 @@ namespace TarkovInventoryAssistant_Server.Controllers
             m_core = core;
         }
 
+        // Show the selected image from the active catalog.
+        public IActionResult ShowCatalogImage(string filePath, string fileName, string contentType)
+        {
+            var fileContentResult = new FileContentResult(System.IO.File.ReadAllBytes(filePath), contentType)
+            {
+                FileDownloadName = fileName
+            };
 
+            return fileContentResult;
+        }
 
         public IActionResult Index()
         {
@@ -30,13 +39,27 @@ namespace TarkovInventoryAssistant_Server.Controllers
 
 
         [HttpPost]
+        public IActionResult AddImage(IFormFile image)
+        {
+            if (image != null && image.Length > 0)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    image.CopyTo(memoryStream);
+                    byte[] bytes = memoryStream.ToArray();
+                    return new FileContentResult(bytes, "image/png"); // Change "image/jpeg" to the appropriate content type for your image
+                }
+            }
+            return Content("<p>No image was uploaded.</p>");
+        }
+
+        [HttpPost]
         public IActionResult DisplayResults(IFormFile imageFile)
         {
 
-            //var imageFile = HttpContext.Request.Form.Files.GetFile("image");
             if (imageFile == null || imageFile.Length == 0)
             {
-                return BadRequest("Please select an image file.");
+                return BadRequest("Invalid Image file. ");
             }
 
             SKBitmap image;
