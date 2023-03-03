@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@model ImageModel
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+
+
+</div>
+
+<html>
+<head>
+
+</head>
+
+<body>
+
+    <div id="imageInput">
+        <p>Upload an image file using the form below:</p>
+        <form id="image-form" enctype="multipart/form-data">
+            <input type="file" name="image" id="image-input" />
+            <input type="submit" value="Upload" />
+        </form>
+    </div>
+
+    <div id="result">
+
+    </div>
+
+
+    <!-- JavaScript code for AJAX request -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#image-form').submit(function (event) {
+                event.preventDefault();
+                var formData = new FormData();
+                formData.append('imageFile', $('#image-input')[0].files[0]);
+
+                $.ajax({
+                    url: '@Url.Action("SubmitImage")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        $('#result').html(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
+            });
+        });
+    </script>
+
+
+</body>
+</html>

@@ -1,20 +1,22 @@
 ﻿using Interop;
 using Microsoft.AspNetCore.Mvc;
+using SkiaSharp;
 using System.Diagnostics;
 using TarkovInventoryAssistant_Server.Models;
-using SkiaSharp;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace TarkovInventoryAssistant_Server.Controllers
 {
-    public class HomeController : Controller
+    public class TIAController : Controller
     {
-        private readonly CoreInterop m_core;
 
-        public HomeController(CoreInterop core)
+
+
+        public TIAController(CoreInterop core)
         {
             m_core = core;
         }
+
+
 
         public IActionResult Index()
         {
@@ -26,29 +28,29 @@ namespace TarkovInventoryAssistant_Server.Controllers
             return View();
         }
 
+
         public IActionResult Result(List<DetectionResultsModel> detections)
         {
             return View(detections);
         }
 
 
-        public IActionResult ShowImage(string filePath, string fileName, string contentType)
+        [HttpPost]
+        public IActionResult DisplayResults(IFormFile image)
         {
-            var fileContentResult = new FileContentResult(System.IO.File.ReadAllBytes(filePath), contentType)
-            {
-                FileDownloadName = fileName
-            };
 
-            return fileContentResult;
+            if(image != null && image.Length > 0)
+            {
+                // Do something with the image file
+            }
+            return PartialView("Result");
         }
 
-
-
         [HttpPost]
-        public IActionResult SubmitImage()
+        public IActionResult SubmitImage(IFormFile imageFile)
         {
 
-            var imageFile = HttpContext.Request.Form.Files.GetFile("image");
+            //var imageFile = HttpContext.Request.Form.Files.GetFile("image");
             if (imageFile == null || imageFile.Length == 0)
             {
                 return BadRequest("Please select an image file.");
@@ -70,7 +72,7 @@ namespace TarkovInventoryAssistant_Server.Controllers
             if (collapseSimilar)
             {
                 // name, <detMatIndex, count> detMatIndex is index of the first item of the given name.
-                Dictionary<string, Utilities.Pair<int,int>> uniqueDetectionMap = new Dictionary<string, Utilities.Pair<int, int>>();
+                Dictionary<string, Utilities.Pair<int, int>> uniqueDetectionMap = new Dictionary<string, Utilities.Pair<int, int>>();
 
                 for (int i = 0; i < detMat.Length; i++)
                 {
@@ -81,7 +83,7 @@ namespace TarkovInventoryAssistant_Server.Controllers
                     }
                     else
                     {
-                        uniqueDetectionMap[drm.name] = new Utilities.Pair<int, int>(i,1);
+                        uniqueDetectionMap[drm.name] = new Utilities.Pair<int, int>(i, 1);
                     }
                 }
                 foreach (string name in uniqueDetectionMap.Keys)
@@ -99,7 +101,8 @@ namespace TarkovInventoryAssistant_Server.Controllers
                 }
             }
 
-            return View("Result", results);
+            return PartialView("Result", results);
+            //return View("Result", results);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -109,6 +112,7 @@ namespace TarkovInventoryAssistant_Server.Controllers
         }
 
 
+        private readonly CoreInterop m_core;
 
     }
 }
