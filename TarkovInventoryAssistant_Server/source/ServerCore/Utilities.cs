@@ -37,16 +37,14 @@ namespace TarkovInventoryAssistant_Server
                 if (drm.sellOnFlea)
                 {
                     int nullIndex = Array.IndexOf(drm.fleaUnit, (byte)0);
-                    string fleaUnit = Encoding.UTF8.GetString(drm.fleaUnit, 0, nullIndex);
-                    unit = fleaUnit;
+                    unit = Encoding.UTF8.GetString(drm.fleaUnit, 0, nullIndex);
                     value = drm.fleaprice;
                 }
                 else
                 {
                     int nullIndex = Array.IndexOf(drm.traderUnit, (byte)0);
-                    string traderunit = Encoding.UTF8.GetString(drm.traderUnit, 0, nullIndex);
-                    unit = traderunit;
-                    value = drm.fleaprice;
+                    unit = Encoding.UTF8.GetString(drm.traderUnit, 0, nullIndex);
+                    value = drm.traderPrice;
                 }
 
                 if (m_unitValueMap.ContainsKey(unit))
