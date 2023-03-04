@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using SkiaSharp;
 using System.Diagnostics;
+using System.Runtime.Intrinsics.Arm;
 using TarkovInventoryAssistant_Server.Models;
+using TarkovInventoryAssistant_Server.source.Models;
+using TarkovInventoryAssistant_Server.Utilities;
 
 namespace TarkovInventoryAssistant_Server.Controllers
 {
@@ -72,8 +75,11 @@ namespace TarkovInventoryAssistant_Server.Controllers
 
             bool collapseSimilar = true; // TODO: this needs to be an option in the View.
 
-            List<DetectionResultsModel> results = new List<DetectionResultsModel>(detMat.Length);
+
             string catalogPath = m_core.getACTIVE_CATALOG();
+
+            ResultsListModel rlmodel = new ResultsListModel();
+
 
             if (collapseSimilar)
             {
@@ -83,6 +89,7 @@ namespace TarkovInventoryAssistant_Server.Controllers
                 for (int i = 0; i < detMat.Length; i++)
                 {
                     DetectionResultMarshal drm = detMat[i];
+                    rlmodel.totalvaluecounter.addResultEntry(drm);
                     if (uniqueDetectionMap.ContainsKey(drm.name))
                     {
                         uniqueDetectionMap[drm.name].Second++;
@@ -94,7 +101,7 @@ namespace TarkovInventoryAssistant_Server.Controllers
                 }
                 foreach (string name in uniqueDetectionMap.Keys)
                 {
-                    results.Add(new DetectionResultsModel(detMat[uniqueDetectionMap[name].First], catalogPath, uniqueDetectionMap[name].Second));
+                    rlmodel.results.Add(new DetectionResultsModel(detMat[uniqueDetectionMap[name].First], catalogPath, uniqueDetectionMap[name].Second));
                 }
 
             }
@@ -103,11 +110,12 @@ namespace TarkovInventoryAssistant_Server.Controllers
                 // Simply add every DetectionResult
                 for (int i = 0; i < detMat.Length; i++)
                 {
-                    results.Add(new DetectionResultsModel(detMat[i], catalogPath));
+                    rlmodel.totalvaluecounter.addResultEntry(detMat[i]);
+                    rlmodel.results.Add(new DetectionResultsModel(detMat[i], catalogPath));
                 }
             }
 
-            return PartialView("Result", results);
+            return PartialView("Result", rlmodel);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

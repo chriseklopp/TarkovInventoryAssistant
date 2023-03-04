@@ -1,6 +1,6 @@
 ﻿@{
 }
-@model List<DetectionResultsModel>
+@model TarkovInventoryAssistant_Server.source.Models.ResultsListModel
 
 <div class="text-center">
     <h1 class="display-4">RESULTS:</h1>
@@ -29,10 +29,10 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model != null && Model.Count() > 0)
+            @if (Model != null && Model.results.Count() > 0)
             {
 
-                @foreach (DetectionResultsModel det in Model)
+                @foreach (DetectionResultsModel det in Model.results)
                 {
                     <tr>
                         <td>
