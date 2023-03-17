@@ -12,7 +12,6 @@ TCore::TCore():
         std::cout << "ERROR: Config file invalid";
         throw std::exception("Config invalid");
     }
-    loadCatalog(m_config->getACTIVE_CATALOG());
 };
 
 std::vector<TItemSupport::DetectionResult> TCore::detectImageContent(cv::Mat image, int imID) {
@@ -31,7 +30,7 @@ std::vector<TItemSupport::DetectionResult> TCore::detectImageContent(cv::Mat ima
         detResults.push_back(TItemSupport::DetectionResult(catalogMatch, std::move(res[i]),
             imID, resLocs[i], false));
     }
-    return std::move(detResults);
+    return detResults;
 }
 
 

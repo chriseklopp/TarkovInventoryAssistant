@@ -100,6 +100,7 @@ TIAFrame::TIAFrame()
     m_core.registerTObserver(m_consolePanel);
     m_core.registerTObserver(m_catalogPanel);
 
+    m_core.loadCatalog(m_core.getConfigPtr()->getACTIVE_CATALOG());
 }
 
 
