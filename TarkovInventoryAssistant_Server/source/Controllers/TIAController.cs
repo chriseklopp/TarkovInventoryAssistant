@@ -49,27 +49,26 @@ namespace TarkovInventoryAssistant_Server.Controllers
                 using (var memoryStream = new MemoryStream())
                 {
                     image.CopyTo(memoryStream);
-                    byte[] bytes = memoryStream.ToArray();
-                    return new FileContentResult(bytes, "image/png"); // Change "image/jpeg" to the appropriate content type for your image
+                    byte[] bytes = memoryStream.ToArray();// Change "image/jpeg" to the appropriate content type for your image
+                    return new FileContentResult(bytes, "image/png"); 
                 }
             }
             return Content("<p>No image was uploaded.</p>");
         }
 
+
         [HttpPost]
-        public IActionResult DisplayResults(IFormFile imageFile)
+        public IActionResult DisplayResults(string ImageString)
         {
+            if (ImageString == null)
+                return BadRequest(new { error = "Invalid input" });
+            byte[] imageBytes = Convert.FromBase64String(ImageString);
 
-            if (imageFile == null || imageFile.Length == 0)
-            {
-                return BadRequest("Invalid Image file. ");
-            }
+            // Create a MemoryStream from the byte array
+            using MemoryStream ms = new MemoryStream(imageBytes);
 
-            SKBitmap image;
-            using (var stream = imageFile.OpenReadStream())
-            {
-                image = SKBitmap.Decode(stream);
-            }
+            // Create an SKBitmap object from the MemoryStream
+            using SKBitmap image = SKBitmap.Decode(ms);
 
             DetectionResultMarshal[] detMat = m_core.detectImageContent(image);
 

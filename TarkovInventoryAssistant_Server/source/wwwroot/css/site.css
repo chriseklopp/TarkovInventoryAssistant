@@ -1,18 +1,84 @@
+
+
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    background-color: #141414;
+    color: #ffffff;
 }
+
+
+
+.highlight-client-image {
+    border: 2px solid red;
+}
+
+
+.image-bar {
+    display: flex;
+    position: relative;
+    border: 2px solid yellow;
+}
+
+
+
+
+.image-container {
+    overflow-x: auto;
+    width: 80%;
+    white-space: nowrap;
+    direction: rtl;
+    background-color: #999393;
+
+}
+
+    .image-container img {
+        width: 360px; /* Set a fixed width for each image */
+        height: 200px; /* Set a fixed height for each image */
+        object-fit: cover; /* Prevent images from being stretched or distorted */
+        margin-right: 3px; /* Add margin between each image */
+ 
+    }
+
+
+.static-image {
+    position: absolute;
+    right: 0;
+    width: 200px; /* Set a fixed width for each image */
+    height: 200px; /* Set a fixed height for each image */
+    object-fit: cover; /* Prevent images from being stretched or distorted */
+    background-color: #ffffff;
+}
+
+
+#uploadClientImage {
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+}
+
+#uploadClientImageLabel {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+}
+
+    #uploadClientImageLabel img {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }

@@ -3,84 +3,73 @@
 }
 @model ImageModel
 
-<div class="text-center">
-    <h1 class="display-4">Tarkov Inventory Assistant</h1>
-</div>
-
 <html>
 <head>
 
 </head>
 
+
+
 <body>
+
+
+
+    <div class="text-center">
+        <h1 class="display-4">Tarkov Inventory Assistant</h1>
+    </div>
+
+    <!--Image display div -->
+    <div class='image-bar'>
+        <div class="image-container" id="client-images"></div>
+        <div style="display: inline-block" id="content">
+            <input class="static-image" id="uploadClientImage" type="file" onChange="addClientImage()" />
+            <label class="static-image" for="uploadClientImage" id="uploadClientImageLabel">
+                <img src=@Url.Content("~/Resources/Plus_symbol.svg") alt="Choose file">
+            </label>
+        </div>
+    </div>
+
 
     <div>
         <img id="activeImage" />
-</div>
-
-    <div id="imageInput">
-        <p>Upload an image file using the form below:</p>
-        <form id="image-form" enctype="multipart/form-data">
-            <input type="file" name="image" id="image-input" />
-            <input type="submit" value="Upload" />
-        </form>
     </div>
+
 
     <div id="result">
-
     </div>
 
 
-    <!-- Submit an image file to be converted to Detection Results. -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#image-form').submit(function (event) {
-                event.preventDefault();
-                var formData = new FormData();
-                formData.append('imageFile', $('#image-input')[0].files[0]);
 
-                $.ajax({
-                    url: '@Url.Action("DisplayResults")',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (data) {
-                        $('#result').html(data);
-                    },
-                    error: function (xhr, status, error) {
-                        console.log('Error:', error);
-                    }
-                });
+        function ProcessImageContents(clientImageId) {
+
+            var formData = new FormData();
+
+            const img = document.getElementById(clientImageId);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            const base64String = canvas.toDataURL().split(',')[1];
+
+            formData.append("ImageString", base64String);
+
+
+            $.ajax({
+                url: '@Url.Action("DisplayResults")',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    $('#result').html(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log('Error:', error);
+                }
             });
-        });
+        }
     </script>
-
-    <script>
-        $(document).ready(function () {
-            $('#image-form').submit(function (event) {
-                event.preventDefault();
-                var formData = new FormData();
-                formData.append('image', $('#image-input')[0].files[0]);
-
-                $.ajax({
-                    url: '@Url.Action("AddImage")',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (data) {
-                        $('#activeImage').html(data);
-                    },
-                    error: function (xhr, status, error) {
-                        console.log('Error:', error);
-                    }
-                });
-            });
-        });
-    </script>
-
 
 
 </body>

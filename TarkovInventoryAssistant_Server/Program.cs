@@ -5,7 +5,7 @@ using TarkovInventoryAssistant_Server.source.Services;
 
 
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions() { ContentRootPath = Directory.GetCurrentDirectory()+"/source" });
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions() { ContentRootPath = Directory.GetCurrentDirectory()+"/source", WebRootPath = Directory.GetCurrentDirectory() + "/source/wwwroot" });
 CoreInterop core = new CoreInterop();
 // TODO: Remove hardcoding
 //core.setACTIVECATALOG("C:\\MyWorkspace\\TarkovInventoryAssistant\\Data\\CompiledCatalogs\\ItemCatalog_catalogJan16_2023_wRotations");

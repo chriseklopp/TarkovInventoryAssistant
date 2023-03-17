@@ -4,15 +4,14 @@
 
 <div class="text-center">
     <h1 class="display-4">RESULTS:</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">This is where detection results should go!</a>.</p>
 </div>
 
 
 <div class="card-body">
-    <table class="table">
-          <tr>
-    <th"> Total Value: @Model.totalvaluecounter.getValueString()</th>
-  </tr>
+    <table class="table" style="color: #ffffff;">
+        <tr>
+            <th"> Total Value: @Model.totalvaluecounter.getValueString()</th>
+        </tr>
         <thead>
             <tr>
                 <th>
@@ -36,36 +35,36 @@
             @if (Model != null && Model.results.Count() > 0)
             {
 
-                @foreach (DetectionResultsModel det in Model.results)
-                {
-                    <tr>
-                        <td>
-                            <img src="@Url.Action("ShowCatalogImage", new { filePath = det.catalogImage, fileName = det.name, contentType = "application/octet-stream" })" alt="File Image" />
-                        </td>
-                        <td>
-                            @det.count
-                        </td>
-                        <td>
-                            @det.name
-                        </td>
-                        <td>
-                            @det.dim
-                        </td>
-                        <td>
-                            @det.fleaPrice
+            @foreach (DetectionResultsModel det in Model.results)
+            {
+            <tr >
+                <td>
+                    <img src="@Url.Action("ShowCatalogImage", new { filePath = det.catalogImage, fileName = det.name, contentType = "application/octet-stream" })" alt="File Image" />
+                </td>
+                <td>
+                    @det.count
+                </td>
+                <td>
+                    @det.name
+                </td>
+                <td>
+                    @det.dim
+                </td>
+                <td>
+                    @det.fleaPrice
 
-                        </td>
-                        <td>
-                            <div>
-                                @det.traderPrice
-                            </div>
-                            <div>
-                                @det.trader
-                            </div>
+                </td>
+                <td>
+                    <div>
+                        @det.traderPrice
+                    </div>
+                    <div>
+                        @det.trader
+                    </div>
 
-                        </td>
-                    </tr>
-                }
+                </td>
+            </tr>
+            }
             }
         </tbody>
 

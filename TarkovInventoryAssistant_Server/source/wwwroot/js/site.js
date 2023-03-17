@@ -23,7 +23,14 @@ function addClientImage() {
     // Add click event handler
     const clientImageElement = document.getElementById(newImg.id);
     clientImageElement.addEventListener("click", function () {
-        clientImageElement.classList.toggle("highlight");
+
+
+        const children = clientImageElement.parentElement.children;
+        for (let i = 0; i < children.length; i++) {
+                children[i].classList.remove("highlight-client-image")
+            }
+        clientImageElement.classList.toggle("highlight-client-image");
+
         ProcessImageContents(clientImageElement.id);
     });
 
