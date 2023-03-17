@@ -47,7 +47,7 @@ namespace WebInterface {
             m_core.loadCatalog();
         }
 
-        int TWebInterface::detectImageContent(unsigned char* image, int width, int height, int channels, DetectionResultMarshal*& out);
+        int detectImageContent(unsigned char* image, int width, int height, int channels, DetectionResultMarshal*& out);
 
         void getDATA_DIR(char* out, int size) const;
 
