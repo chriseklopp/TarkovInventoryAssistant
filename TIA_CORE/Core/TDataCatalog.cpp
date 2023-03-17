@@ -401,7 +401,7 @@ namespace TDataCatalog {
 
         std::string line;
         // Skip header. (For now; maybe I'll utilize this in future to make it more robust).
-        std::getline(in, line);
+        //std::getline(in, line);
         while (std::getline(in, line)) {
             std::unique_ptr<TItemTypes::TItem> item(makeTItemFromCompiledString(line));
             if (!item)
@@ -453,6 +453,7 @@ namespace TDataCatalog {
         m_dimensionalTrees.clear();
         m_itemIDList.clear();
         m_rotatedItemAliasMap.clear();
+        m_reverseItemMap.clear();
 
     };
 
