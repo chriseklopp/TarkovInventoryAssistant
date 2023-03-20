@@ -307,19 +307,23 @@ namespace TDataCatalog {
 
         // Get 10 nearest results, then use template matching to more accurately determine the best choice.
         // TODO: This still needs to be improved. 
-        std::vector<TItemTypes::TItem*> items;
-        std::vector<double> dist;
+        const int n_Nearest = 10;
 
-        getNNearestMatches(in, items, dist, 10);
+        std::vector<TItemTypes::TItem*> items;
+        items.reserve(n_Nearest);
+        std::vector<double> dist;
+        dist.reserve(n_Nearest);
+
+        getNNearestMatches(in, items, dist, n_Nearest);
 
         if (!items.size())
             return -1;
 
 
-        TItemTypes::TItem* bestIt;
+        TItemTypes::TItem* bestIt = nullptr;
         double best = 10;
 
-        for (auto it : items) {
+        for (const auto it : items) {
             auto res = Hash::templateMatch(in.getImage(), it->getImage());
             if (res.at<float>(cv::Point(0, 0)) < best) {
                 best = res.at<float>(cv::Point(0, 0));
@@ -327,7 +331,7 @@ namespace TDataCatalog {
             }
         }
 
-        if (!bestIt)
+        if (bestIt == nullptr)
             return -1; // This should be impossible
 
 

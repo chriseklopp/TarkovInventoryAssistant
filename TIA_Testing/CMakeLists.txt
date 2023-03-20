@@ -39,7 +39,8 @@ target_link_libraries(TIA_Testing benchmark::benchmark)
 
 
 if(MSVC)
-#add_compile_options(TIA_Testing /LTCG, /GL, /arch:AVX2, /fp:fast, /Gv)
+target_link_options(TIA_Testing PRIVATE "/DEBUG")
+target_compile_options(TIA_Testing PRIVATE "/Zi")
 endif()
 
 set_property(TARGET TIA_Testing PROPERTY CXX_STANDARD 17)
