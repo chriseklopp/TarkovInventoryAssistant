@@ -8,14 +8,16 @@ Eventually will probably scrape flea market data from another website.
 
 CTRl + SHIFT + C makes your life easier.
 """
+import aiofiles
 
-
+import aiohttp
 import bs4
 import pandas as pd
 import requests
 import os
 import shutil
 import time
+import asyncio
 from PIL import Image
 from TScrapeTarkovMarket import MarketScraper
 
@@ -70,7 +72,11 @@ class TWebScraper:
 
             os.chdir(image_directory)
             print("Downloading Images")
-            self.image_downloader(table_df)
+            #self.image_downloader(table_df)
+
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(self.image_downloader_async(table_df))
+
 
             os.chdir(page_directory)
 
@@ -126,7 +132,12 @@ class TWebScraper:
 
         if "Dims" not in table_df.columns:
             if "Item_url" in table_df.columns:
-                table_df["Dims"] = table_df['Item_url'].apply(self.supplemental_item_information_gatherer)
+                loop = asyncio.get_event_loop()
+                loop.run_until_complete(self.supplemental_item_information_gatherer_async(table_df))
+
+
+
+                #table_df["Dims"] = table_df['Item_url'].apply(self.supplemental_item_information_gatherer)
             else:
                 print("No Item_url column found")
 
@@ -230,9 +241,53 @@ class TWebScraper:
         df['Image_url'] = df.apply(self.download_image, axis=1)
         df.rename({'Image_url': 'ImagePath'}, axis=1, inplace=True)
 
+    async def image_downloader_async(self, df: pd.DataFrame):
+
+        df_columns = df.columns
+
+        if "Image_url" not in df_columns:
+            return
+        if "Name" not in df_columns:
+            return
+
+        df['Image_url'] = await asyncio.gather(*(self.download_image_async(row) for _, row in df.iterrows()))
+
+        df.rename({'Image_url': 'ImagePath'}, axis=1, inplace=True)
+
+
+    @staticmethod
+    async def download_image_async(df_row):  # downloads image and replaces url with path.
+        url = df_row["Image_url"]
+        if not url:
+            print("Image_url is empty")
+            return
+
+        if ".gif" not in url:
+            async with aiohttp.ClientSession() as session:
+                resp = await session.get(url, allow_redirects=False)
+                if resp.status == 200:
+                    f = await aiofiles.open(f"{df_row['Name']}.bmp", mode='wb')
+                    await f.write(await resp.read())
+                    await f.close()
+                    return f"{df_row['Name']}.bmp"
+
+        else:
+            # occasionally the images are gifs that need to be dealt with properly.
+            # Need to save them as is, and reopen them and save as bmp.
+            async with aiohttp.ClientSession() as session:
+                resp = await session.get(url, allow_redirects=False)
+                if resp.status == 200:
+                    f = await aiofiles.open(f"{df_row['Name']}.gif", mode='wb')
+                    await f.write(await resp.read())
+                    await f.close()
+                    gif_path = os.path.join(os.getcwd(), f"{df_row['Name']}.gif")
+                    im = Image.open(gif_path)
+                    im.save(f"{df_row['Name']}.bmp")
+                    return f"{df_row['Name']}.bmp"
+
+
     @staticmethod
     def download_image(df_row):  # downloads image and replaces url with path.
-        cwd = os.getcwd()
         url = df_row["Image_url"]
         if not url:
             print("Image_url is empty")
@@ -271,6 +326,47 @@ class TWebScraper:
 
     def price_catalog_builder(self):
         pass
+
+
+
+    async def supplemental_item_information_gatherer_async(self, df):
+        df["Dims"] = await asyncio.gather(*(self.gatherItemInfo_Async(url)
+                                                  for url in df['Item_url']))
+
+    @staticmethod
+    async def gatherItemInfo_Async(url):
+        # This name is terrible.
+        # Some information needs to be grabbed from an items specific page, (specifically we want its dimensions)
+        # This will act on an Item_url and return the necessary information as a dict
+        # Currently only returns raw string of dims, because its all I want rn.
+
+        # This is similar to the non async versiuon but should have vroom vroom speed
+        print(f"Dimensions being gathered for:{url}")
+        async with aiohttp.ClientSession() as session:
+            resp = await session.get(url, allow_redirects=False)
+            source = await resp.text()
+            soup = bs4.BeautifulSoup(source, 'lxml')
+            information_dict = {}
+
+            if not soup:
+                return ""
+            item_table = soup.find('table', class_='va-infobox')
+            if not item_table:
+                return ""
+            table_rows = item_table.findAll('tr')
+            for element in table_rows:
+                infobox_labels = element.find('td', class_='va-infobox-label')  # type: bs4.element.Tag
+                if infobox_labels:
+                    if "Grid" in str(infobox_labels.string):
+                        information_dict['dims'] = element.find('td', class_='va-infobox-content').string.replace("x", "-")
+                        break
+                    else:
+                        continue
+
+            return information_dict.get("dims")
+
+
+
 
     @staticmethod
     def supplemental_item_information_gatherer(url: str) -> str:
@@ -480,7 +576,6 @@ class TWebScraper:
         if "outer" in name_lower:
             return "Dims"
         return name
-
 
 if __name__ == "__main__":  # run this to update the catalog from the wiki.
     ms = MarketScraper()

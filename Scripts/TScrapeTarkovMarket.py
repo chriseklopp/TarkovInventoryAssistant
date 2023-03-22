@@ -10,6 +10,7 @@ import shutil
 import time
 from PIL import Image
 from selenium import webdriver
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 
 
@@ -19,11 +20,13 @@ class MarketScraper:
                  chromeDriverExe=r"C:\MyWorkspace\WebScraping\chromedriver.exe"
                  ):
         self.url = "https://tarkov-market.com"
-        self.m_driver = webdriver.Chrome(chromeDriverExe)
+        self.m_driver = uc.Chrome()
+        #self.m_driver = webdriver.Chrome(chromeDriverExe)
 
 
     def run(self):
         self.m_driver.get(self.url)
+        time.sleep(5)
         # Click btn to enable infinite scrolling
         self.clickLoadMoreBtn()
         self.scrolltobottom()
@@ -62,7 +65,7 @@ class MarketScraper:
     def clickLoadMoreBtn(self):
         # Click load more button to enable the infinite scroll.
         loadMoreBtnXpath = r'//button[@class = "big bold w-100 text-center py-10"]'
-        loadMoreBtn = self.m_driver.find_element_by_xpath(loadMoreBtnXpath)
+        loadMoreBtn = self.m_driver.find_element(By.XPATH,loadMoreBtnXpath)
         loadMoreBtn.click()
 
     def extractInformation(self):
