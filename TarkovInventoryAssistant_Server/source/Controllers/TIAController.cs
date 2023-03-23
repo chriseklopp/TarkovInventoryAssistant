@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SkiaSharp;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.Intrinsics.Arm;
 using TarkovInventoryAssistant_Server.Models;
 using TarkovInventoryAssistant_Server.source.Models;
@@ -14,9 +15,10 @@ namespace TarkovInventoryAssistant_Server.Controllers
 
 
 
-        public TIAController(CoreInterop core)
+        public TIAController(IWebHostEnvironment env, CoreInterop core)
         {
             m_core = core;
+            m_env = env;
         }
 
         // Show the selected image from the active catalog.
@@ -74,8 +76,9 @@ namespace TarkovInventoryAssistant_Server.Controllers
 
             bool collapseSimilar = true; // TODO: this needs to be an option in the View.
 
-
-            string catalogPath = m_core.getACTIVE_CATALOG();
+            // TODO: Make this line better, and protect against crash when string is empty.
+            string relativeCatalogPath = "/" + Path.GetRelativePath(m_env.WebRootPath, m_core.getACTIVE_CATALOG()).Replace("\\","/");
+            // END TODO
 
             ResultsListModel rlmodel = new ResultsListModel();
 
@@ -100,7 +103,7 @@ namespace TarkovInventoryAssistant_Server.Controllers
                 }
                 foreach (string name in uniqueDetectionMap.Keys)
                 {
-                    rlmodel.results.Add(new DetectionResultsModel(detMat[uniqueDetectionMap[name].First], catalogPath, uniqueDetectionMap[name].Second));
+                    rlmodel.results.Add(new DetectionResultsModel(detMat[uniqueDetectionMap[name].First], relativeCatalogPath, uniqueDetectionMap[name].Second));
                 }
 
             }
@@ -110,7 +113,7 @@ namespace TarkovInventoryAssistant_Server.Controllers
                 for (int i = 0; i < detMat.Length; i++)
                 {
                     rlmodel.totalvaluecounter.addResultEntry(detMat[i]);
-                    rlmodel.results.Add(new DetectionResultsModel(detMat[i], catalogPath));
+                    rlmodel.results.Add(new DetectionResultsModel(detMat[i], relativeCatalogPath));
                 }
             }
 
@@ -125,6 +128,6 @@ namespace TarkovInventoryAssistant_Server.Controllers
 
 
         private readonly CoreInterop m_core;
-
+        private readonly IWebHostEnvironment m_env;
     }
 }

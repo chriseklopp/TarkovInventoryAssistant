@@ -20,7 +20,7 @@ namespace TarkovInventoryAssistant_Server.Models
         // Convert a single DRMarshall to a a DetectionResultsModel.
         public DetectionResultsModel(DetectionResultMarshal drm, string catalogPath)
         {
-            string filePath = catalogPath + "/images/" + drm.name + ".bmp";
+            string filePath = catalogPath + "/images/" + drm.name + ".webp";
 
             catalogImage = filePath;
             name = drm.name;
