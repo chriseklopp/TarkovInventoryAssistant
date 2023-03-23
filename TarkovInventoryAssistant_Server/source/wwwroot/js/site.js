@@ -43,4 +43,9 @@ function addClientImage() {
 }
 
 
+function removeClientImage() {
+
+}
+
+
 
