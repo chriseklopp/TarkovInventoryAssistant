@@ -7,7 +7,8 @@
 function addClientImage() {
 
     var image = document.getElementById("uploadClientImage").files[0];
-
+    if (typeof image === "undefined")
+        return;
     var reader = new FileReader();
 
     // Add new entry to clientImageContainer
@@ -46,6 +47,8 @@ function addClientImage() {
 function removeClientImage() {
 
 }
+
+
 
 
 
