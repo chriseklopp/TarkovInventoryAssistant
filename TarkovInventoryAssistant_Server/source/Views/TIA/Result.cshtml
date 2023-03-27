@@ -2,11 +2,17 @@
 }
 @model TarkovInventoryAssistant_Server.source.Models.ResultsListModel
 
+
+
+
 <div class="card-body">
+
+    <div>
+        <p class="totalValueText">Total Value: @Model.totalvaluecounter.getValueString()</p>
+    </div>
+
     <table class="table" style="color: #ffffff;">
-        <tr>
-            <th"> Total Value: @Model.totalvaluecounter.getValueString()</th>
-        </tr>
+
         <thead>
             <tr>
                 <th>

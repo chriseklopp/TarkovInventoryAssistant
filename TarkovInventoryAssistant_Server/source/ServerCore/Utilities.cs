@@ -67,7 +67,7 @@ namespace TarkovInventoryAssistant_Server
                 StringBuilder sb = new StringBuilder();
                 foreach (string unit in m_unitValueMap.Keys)
                 {
-                    sb.Append(unit + m_unitValueMap[unit].ToString("N0") + "  ");
+                    sb.Append(unit + m_unitValueMap[unit].ToString("N0") + "     ");
                 }
 
                 return sb.ToString();
