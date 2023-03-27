@@ -1,0 +1,72 @@
+﻿@{
+}
+@model TarkovInventoryAssistant_Server.source.Models.ResultsListModel
+
+<div class="card-body">
+    <table class="table" style="color: #ffffff;">
+        <tr>
+            <th"> Total Value: @Model.totalvaluecounter.getValueString()</th>
+        </tr>
+        <thead>
+            <tr>
+                <th>
+                    Image
+                </th>
+                <th>
+                    Count
+                </th>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Dim
+                </th>
+                <th>
+                    Flea Price
+                </th>
+                <th>
+                    Trader Price
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.results.Count() > 0)
+            {
+
+            @foreach (DetectionResultsModel det in Model.results)
+            {
+            <tr >
+                <td>
+                    
+                    <img src=@det.catalogImage alt="Choose file">
+                </td>
+                <td>
+                    @det.count
+                </td>
+                <td>
+                    @det.name
+                </td>
+                <td>
+                    @det.dim
+                </td>
+                <td style="@(det.sellOnFlea ? "background-color: #0fb8a7":"")">
+                    @det.fleaPrice
+
+                </td>
+                <td style="@(det.sellOnFlea ? "":"background-color: #05e841;")">
+                    <div>
+                        @det.traderPrice
+                    </div>
+                    <div>
+                        @det.trader
+                    </div>
+
+                </td>
+            </tr>
+            }
+            }
+        </tbody>
+
+    </table>
+
+</div>

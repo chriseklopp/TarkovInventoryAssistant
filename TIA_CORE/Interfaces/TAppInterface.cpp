@@ -81,6 +81,7 @@ bool TAppInterface::loadImagesInDir(std::filesystem::path imDir) {
     }
     return true;
 }
+
 int TAppInterface::addImage(std::unique_ptr<cv::Mat> image) {
     imageID id = createNewImageID();
     m_idImageMap.insert({ id,std::move(image) });

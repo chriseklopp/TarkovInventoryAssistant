@@ -33,7 +33,7 @@ namespace TDataCatalog {
     }
 
 
-    bool TDataCatalog::compileCatalogFromRaw(const std::filesystem::path& rawpath, std::string name, bool makeRotatedItems) {
+    bool TDataCatalog::compileCatalogFromRaw(const std::filesystem::path& rawpath, std::string name, bool makeRotatedItems) const {
         if (!m_configptr)
             return false;
         // Compiled Catalog will contain a CSV and folder of all images.
@@ -61,11 +61,11 @@ namespace TDataCatalog {
             return false;
 
         int writeSuccesses = 0;
-        for (auto modulePath : modules) {
+        for (const std::filesystem::path& modulePath : modules) {
 
             // Write item data
             std::filesystem::directory_iterator modItr = std::filesystem::directory_iterator(modulePath);
-            for (auto modFile : modItr) {
+            for (const std::filesystem::directory_entry& modFile : modItr) {
                 if (std::filesystem::is_directory(modFile))
                     continue;
                 if (writeFileToCompiledCatalog(modFile.path(), imPath, file, makeRotatedItems))
@@ -74,7 +74,7 @@ namespace TDataCatalog {
                     continue;
             }
             // Copy images to new image directory.
-            std::filesystem::copy(modulePath / "images", imPath, std::filesystem::copy_options::update_existing);
+            std::filesystem::copy(modulePath / "images", imPath, std::filesystem::copy_options::overwrite_existing);
         }
 
         // Clean Up
@@ -94,7 +94,7 @@ namespace TDataCatalog {
     bool TDataCatalog::writeFileToCompiledCatalog(const std::filesystem::path& file,
                                                   const std::filesystem::path& compiledImagesPath,
                                                   std::ofstream& out,
-                                                  bool makeRotations) {
+                                                  bool makeRotations) const{
 
         // The defined ordering of read and write to compiled catalog string shall be:
         // Name, path, dims, containerDims, avgPrice, PPS, traderPrice, bestTrader, isFleaOptimal, rotation, hash
@@ -108,6 +108,7 @@ namespace TDataCatalog {
 
         std::string line;
         std::vector<std::string> fields;
+        fields.reserve(15);
         try {
             // Skip header. (For now; maybe I'll utilize this in future to make it more robust).
             std::getline(in, line);
@@ -144,6 +145,7 @@ namespace TDataCatalog {
 
                 // Make rotated items.
                 std::vector<std::string> rotFields;
+                rotFields.reserve(15);
                 if (makeRotations) {
                     rotFields = fields;
 
@@ -307,19 +309,23 @@ namespace TDataCatalog {
 
         // Get 10 nearest results, then use template matching to more accurately determine the best choice.
         // TODO: This still needs to be improved. 
-        std::vector<TItemTypes::TItem*> items;
-        std::vector<double> dist;
+        const int n_Nearest = 10;
 
-        getNNearestMatches(in, items, dist, 10);
+        std::vector<TItemTypes::TItem*> items;
+        items.reserve(n_Nearest);
+        std::vector<double> dist;
+        dist.reserve(n_Nearest);
+
+        getNNearestMatches(in, items, dist, n_Nearest);
 
         if (!items.size())
             return -1;
 
 
-        TItemTypes::TItem* bestIt;
+        TItemTypes::TItem* bestIt = nullptr;
         double best = 10;
 
-        for (auto it : items) {
+        for (const auto it : items) {
             auto res = Hash::templateMatch(in.getImage(), it->getImage());
             if (res.at<float>(cv::Point(0, 0)) < best) {
                 best = res.at<float>(cv::Point(0, 0));
@@ -327,7 +333,7 @@ namespace TDataCatalog {
             }
         }
 
-        if (!bestIt)
+        if (bestIt == nullptr)
             return -1; // This should be impossible
 
 
@@ -461,7 +467,7 @@ namespace TDataCatalog {
 
     };
 
-    bool TDataCatalog::loadRawCatalog(std::vector<std::filesystem::path>& outMods) {
+    bool TDataCatalog::loadRawCatalog(std::vector<std::filesystem::path>& outMods) const{
         if (!m_configptr)
             return false;
         // No path specifed. Find most recently created catalog.
@@ -489,7 +495,7 @@ namespace TDataCatalog {
         return loadRawCatalog(newestCat, outMods);
     };
 
-    bool TDataCatalog::loadRawCatalog(const std::filesystem::path& catalog, std::vector<std::filesystem::path>& outMods) {
+    bool TDataCatalog::loadRawCatalog(const std::filesystem::path& catalog, std::vector<std::filesystem::path>& outMods) const{
 
 
         // Find modules in the catalog.

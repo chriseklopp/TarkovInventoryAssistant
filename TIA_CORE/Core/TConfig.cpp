@@ -134,7 +134,7 @@ namespace TConfig {
         file.open(path, std::ios::out);
 
         if (!file.is_open())
-            return false;
+            std::filesystem::path();
 
         // Write config file
         file << "[Settings]\n";

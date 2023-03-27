@@ -22,6 +22,12 @@
         <OutputPath>..\Release\</OutputPath>
     </PropertyGroup>
     <ItemGroup>
+      <Compile Remove="source\wwwroot\Data\**" />
+      <Content Remove="source\wwwroot\Data\**" />
+      <EmbeddedResource Remove="source\wwwroot\Data\**" />
+      <None Remove="source\wwwroot\Data\**" />
+    </ItemGroup>
+    <ItemGroup>
       <None Remove="Settings.ini" />
       <None Remove="TIA_CORE.dll" />
     </ItemGroup>

@@ -20,7 +20,7 @@ namespace TarkovInventoryAssistant_Server.Models
         // Convert a single DRMarshall to a a DetectionResultsModel.
         public DetectionResultsModel(DetectionResultMarshal drm, string catalogPath)
         {
-            string filePath = catalogPath + "/images/" + drm.name + ".bmp";
+            string filePath = catalogPath + "/images/" + drm.name + ".webp";
 
             catalogImage = filePath;
             name = drm.name;
@@ -35,6 +35,9 @@ namespace TarkovInventoryAssistant_Server.Models
             string traderunit = Encoding.UTF8.GetString(drm.traderUnit, 0, nullIndex);
             traderPrice = traderunit + drm.traderPrice.ToString("N0");
             trader = drm.trader;
+
+            sellOnFlea = drm.sellOnFlea;
+
             parentImageID = 666;
             count = 1;
         }
@@ -60,6 +63,8 @@ namespace TarkovInventoryAssistant_Server.Models
         public string traderPrice { get; set; }
 
         public string trader { get; set; } = "";
+
+        public bool sellOnFlea { get; set; }
 
         public int parentImageID { get; set; }
 

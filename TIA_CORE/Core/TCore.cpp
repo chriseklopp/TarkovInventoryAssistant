@@ -21,13 +21,14 @@ std::vector<TItemSupport::DetectionResult> TCore::detectImageContent(cv::Mat ima
     m_imageReader.parseImage(image, res, resLocs);
 
     std::vector<TItemSupport::DetectionResult> detResults;
+    detResults.reserve(res.size());
     for (int i = 0; i < res.size(); i++)
     {
         TDataTypes::dcID catalogMatch = m_dataCatalog.getBestMatch(*(res[i].get()));
         if (catalogMatch == -1) // TODO: Do something smarter here...
             continue;
 
-        detResults.push_back(TItemSupport::DetectionResult(catalogMatch, std::move(res[i]),
+        detResults.emplace_back(TItemSupport::DetectionResult(catalogMatch, std::move(res[i]),
             imID, resLocs[i], false));
     }
     return detResults;

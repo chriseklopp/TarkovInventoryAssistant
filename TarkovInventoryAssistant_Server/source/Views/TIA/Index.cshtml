@@ -1,0 +1,83 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@model ImageModel
+
+<html>
+<head>
+
+</head>
+
+
+
+<body>
+
+
+
+    <div class="text-center">
+        <h1 class="display-4">Tarkov Inventory Assistant</h1>
+    </div>
+
+    <!--Image display div -->
+    <div class='image-bar'>
+        <div class="image-container" id="client-images"></div>
+        <div style="display: inline-block" id="content">
+            <input class="static-image" id="uploadClientImage" type="file" onChange="formAddImage()" />
+            <label class="static-image" for="uploadClientImage" id="uploadClientImageLabel">
+                <img src=@Url.Content("~/Resources/Plus_symbol.svg") alt="Choose file">
+            </label>
+        </div>
+    </div>
+
+
+    <div>
+        <img id="activeImage" />
+    </div>
+
+
+    <div id="result">
+    </div>
+    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('paste', pasteAddImage);
+        });
+
+    </script>
+
+    <script>
+
+        function ProcessImageContents(clientImageId) {
+
+            var formData = new FormData();
+
+            const img = document.getElementById(clientImageId);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            const base64String = canvas.toDataURL().split(',')[1];
+
+            formData.append("ImageString", base64String);
+
+
+            $.ajax({
+                url: '@Url.Action("DisplayResults")',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    $('#result').html(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log('Error:', error);
+                }
+            });
+        }
+    </script>
+
+
+</body>
+</html>

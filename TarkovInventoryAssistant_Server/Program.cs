@@ -5,10 +5,11 @@ using TarkovInventoryAssistant_Server.source.Services;
 
 
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions() { ContentRootPath = Directory.GetCurrentDirectory()+"/source" });
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions() { ContentRootPath = Directory.GetCurrentDirectory()+"/source", WebRootPath = Directory.GetCurrentDirectory() + "/source/wwwroot" });
 CoreInterop core = new CoreInterop();
 // TODO: Remove hardcoding
-//core.setACTIVECATALOG("C:\\MyWorkspace\\TarkovInventoryAssistant\\Data\\CompiledCatalogs\\ItemCatalog_catalogJan16_2023_wRotations");
+core.setDATA_DIR("C:\\MyWorkspace\\TarkovInventoryAssistant\\TarkovInventoryAssistant_Server\\source\\wwwroot\\Data");
+core.setACTIVECATALOG("C:\\MyWorkspace\\TarkovInventoryAssistant\\TarkovInventoryAssistant_Server\\source\\wwwroot\\Data\\Catalog2023-23-3--16-54-50");
 builder.Services.AddSingleton<CoreInterop>(core);
 
 builder.Services.AddHostedService<CoreUpdateService>();
@@ -29,8 +30,7 @@ app.UseEndpoints(endpoints =>
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseExceptionHandler("/TIA/Error");
     app.UseHsts();
 }
 
@@ -43,6 +43,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=TIA}/{action=Index}/{id?}");
 
 app.Run();

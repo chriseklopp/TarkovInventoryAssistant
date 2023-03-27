@@ -1,11 +1,12 @@
-/Data/
+Data/
 /.vs/
 /out/
 /build/
 /TarkovInventoryAssistant_Server/build/
 /TarkovInventoryAssistant_Server/obj/
 /TarkovInventoryAssistant_Server/.vs/
-
+/Scripts/python
 *.ini
 *.dll
 *.user
+*__pycache__

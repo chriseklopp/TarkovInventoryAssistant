@@ -9,7 +9,7 @@ Eventually will probably scrape flea market data from another website.
 CTRl + SHIFT + C makes your life easier.
 """
 import aiofiles
-
+import sys
 import aiohttp
 import bs4
 import pandas as pd
@@ -21,8 +21,9 @@ import asyncio
 from PIL import Image
 from TScrapeTarkovMarket import MarketScraper
 
+
 class TWebScraper:
-    def __init__(self, prices):
+    def __init__(self, prices, outputPath="", catalogName="catalog"):
         # self.supplemental_item_information_gatherer("https://escapefromtarkov.fandom.com/wiki/Folder_with_intelligence")
         tarkov_wiki_urls = ["https://escapefromtarkov.fandom.com/wiki/Armor_vests",
                             "https://escapefromtarkov.fandom.com/wiki/Containers",
@@ -43,8 +44,14 @@ class TWebScraper:
                             #"https://escapefromtarkov.fandom.com/wiki/Ammunition" TODO: need spec handling for this
                             ]
 
+        # Really shouldnt be chaging working directory but thats how I wrote this originally for osme horrible reason
+        # TODO someday is just pass this through as an argument and leave working directory alone.
+        if outputPath:
+            os.chdir(outputPath)
+
+        self.catalogName = catalogName
         self.priceTable = prices
-        self.directory_builder(tarkov_wiki_urls)
+        self.directory_builder(tarkov_wiki_urls, self.catalogName)
         start = time.time()  # debug
         for url in tarkov_wiki_urls:
             self.catalog_builder(url)
@@ -67,7 +74,7 @@ class TWebScraper:
             os.chdir(ogwd)  # return working directory to original.
             wd = os.getcwd()
             page_name = url.split("/")[-1]
-            page_directory = os.path.join(wd, "Data", "catalog", page_name)
+            page_directory = os.path.join(wd, self.catalogName, page_name)
             image_directory = os.path.join(page_directory, "images")
 
             os.chdir(image_directory)
@@ -198,7 +205,7 @@ class TWebScraper:
         return header_list
 
     @staticmethod
-    def directory_builder(url_list: list):
+    def directory_builder(url_list: list, catalogName: str):
         file_names = []
         for url in url_list:
             file_names.append(url.split("/")[-1])
@@ -206,22 +213,16 @@ class TWebScraper:
         # create new catalog directory. Named catalog_YYYY_MM_DD.
         wd = os.getcwd()
 
-        if not os.path.exists("Data"):  # create folder if it doesnt exist.
-            path = os.path.join(wd, 'Data')
-            os.mkdir(path)
-
-        data_dir = os.path.join(wd, 'Data')
-
-        catalog_path = os.path.join(data_dir, "catalog")
+        catalog_path = os.path.join(wd, catalogName)
 
         if os.path.exists(catalog_path):
-            old_catalog_path = os.path.join(data_dir, "catalog_old")
+            old_catalog_path = os.path.join(wd, "catalog_old")
 
             if os.path.exists(old_catalog_path):
                 shutil.rmtree(old_catalog_path)  # only want to keep 1 previous directory, delete the old one.
                 # os.remove(old_catalog_path)
 
-            os.rename(catalog_path, os.path.join(data_dir, 'catalog_old'))
+            os.rename(catalog_path, os.path.join(wd, 'catalog_old'))
 
         os.mkdir(catalog_path)
 
@@ -266,14 +267,14 @@ class TWebScraper:
             async with aiohttp.ClientSession() as session:
                 resp = await session.get(url, allow_redirects=False)
                 if resp.status == 200:
-                    f = await aiofiles.open(f"{df_row['Name']}.bmp", mode='wb')
+                    f = await aiofiles.open(f"{df_row['Name']}.webp", mode='wb')
                     await f.write(await resp.read())
                     await f.close()
-                    return f"{df_row['Name']}.bmp"
+                    return f"{df_row['Name']}.webp"
 
         else:
             # occasionally the images are gifs that need to be dealt with properly.
-            # Need to save them as is, and reopen them and save as bmp.
+            # Need to save them as is, and reopen them and save as webP.
             async with aiohttp.ClientSession() as session:
                 resp = await session.get(url, allow_redirects=False)
                 if resp.status == 200:
@@ -282,8 +283,8 @@ class TWebScraper:
                     await f.close()
                     gif_path = os.path.join(os.getcwd(), f"{df_row['Name']}.gif")
                     im = Image.open(gif_path)
-                    im.save(f"{df_row['Name']}.bmp")
-                    return f"{df_row['Name']}.bmp"
+                    im.save(f"{df_row['Name']}.webp")
+                    return f"{df_row['Name']}.webp"
 
 
     @staticmethod
@@ -297,10 +298,10 @@ class TWebScraper:
             if ".gif" not in url:
                 source = requests.get(url, stream=True)
                 if source.status_code == 200:
-                    with open(f"{df_row['Name']}.bmp", 'wb') as f:
+                    with open(f"{df_row['Name']}.webp", 'wb') as f:
                         source.raw.decode_content = True
                         shutil.copyfileobj(source.raw, f)
-                    return f"{df_row['Name']}.bmp"
+                    return f"{df_row['Name']}.webp"
                 else:
                     print("uh oh")
 
@@ -315,8 +316,8 @@ class TWebScraper:
                     im = Image.open(gif_path)
                     # transparency = im.info['transparency']
 
-                    im.save(f"{df_row['Name']}.bmp")
-                    return f"{df_row['Name']}.bmp"
+                    im.save(f"{df_row['Name']}.webp")
+                    return f"{df_row['Name']}.webp"
                 else:
                     print("uh oh")
         except(requests.ConnectionError):
@@ -579,6 +580,15 @@ class TWebScraper:
 
 if __name__ == "__main__":  # run this to update the catalog from the wiki.
     ms = MarketScraper()
+    outCatalogPath = ""
+    catName = "catalog"
+    if len(sys.argv) >= 2:
+        outCatalogPath = sys.argv[1]
+        if not os.path.exists(outCatalogPath):
+            sys.exit()
+    if len(sys.argv) >= 3:
+        catName = sys.argv[2]
+
     priceTable = ms.run() # get price data
-    priceTable.to_csv("priceTabletest.csv")
-    TWebScraper(priceTable)
+    #priceTable.to_csv("priceTabletest.csv")
+    TWebScraper(priceTable, outCatalogPath, catName)
