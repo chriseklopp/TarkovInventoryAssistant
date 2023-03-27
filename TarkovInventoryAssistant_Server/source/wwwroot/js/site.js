@@ -4,11 +4,10 @@
 // Write your JavaScript code.
 
 
-function addClientImage() {
 
-    var image = document.getElementById("uploadClientImage").files[0];
-    if (typeof image === "undefined")
-        return;
+function addClientImage(image) {
+
+
     var reader = new FileReader();
 
     // Add new entry to clientImageContainer
@@ -28,8 +27,8 @@ function addClientImage() {
 
         const children = clientImageElement.parentElement.children;
         for (let i = 0; i < children.length; i++) {
-                children[i].classList.remove("highlight-client-image")
-            }
+            children[i].classList.remove("highlight-client-image")
+        }
         clientImageElement.classList.toggle("highlight-client-image");
 
         ProcessImageContents(clientImageElement.id);
@@ -42,6 +41,25 @@ function addClientImage() {
     reader.readAsDataURL(image);
 
 }
+
+
+
+
+function formAddImage() {
+    var image = document.getElementById("uploadClientImage").files[0];
+    if (typeof image === "undefined")
+        return;
+    addClientImage(image);
+}
+
+
+function pasteAddImage(event) {
+    var clipboardData = event.clipboardData;
+    var items = clipboardData.items;
+    if (items[0].type.indexOf("image") !== -1)
+        addClientImage(items[0].getAsFile());
+}
+
 
 
 function removeClientImage() {

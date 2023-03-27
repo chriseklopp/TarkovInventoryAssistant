@@ -22,7 +22,7 @@
     <div class='image-bar'>
         <div class="image-container" id="client-images"></div>
         <div style="display: inline-block" id="content">
-            <input class="static-image" id="uploadClientImage" type="file" onChange="addClientImage()" />
+            <input class="static-image" id="uploadClientImage" type="file" onChange="formAddImage()" />
             <label class="static-image" for="uploadClientImage" id="uploadClientImageLabel">
                 <img src=@Url.Content("~/Resources/Plus_symbol.svg") alt="Choose file">
             </label>
@@ -37,7 +37,14 @@
 
     <div id="result">
     </div>
+    
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('paste', pasteAddImage);
+        });
+
+    </script>
 
     <script>
 
