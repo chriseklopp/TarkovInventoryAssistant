@@ -22,6 +22,20 @@ body {
 }
 
 
+.titleText {
+    font-family: Impact, sans-serif;
+}
+
+.infoBox {
+    background-color: #241b0a;
+    border: 2px solid #8f6d22;
+    line-height: 1;
+    max-width: 500px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+}
+
+
 
 .highlight-client-image {
     border: 2px solid red;
@@ -31,7 +45,7 @@ body {
 .image-bar {
     display: flex;
     position: relative;
-    border: 2px solid yellow;
+    border: 2px solid #8f6d22;
 }
 
 
@@ -58,10 +72,10 @@ body {
 .static-image {
     position: absolute;
     right: 0;
-    width: 200px; /* Set a fixed width for each image */
+    width: 280px; /* Set a fixed width for each image */
     height: 200px; /* Set a fixed height for each image */
-    object-fit: cover; /* Prevent images from being stretched or distorted */
-    background-color: #ffffff;
+    border: 4px solid #8f6d22;
+    background-color: #a68f0c;
 }
 
 
