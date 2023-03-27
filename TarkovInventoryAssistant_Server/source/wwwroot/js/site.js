@@ -43,7 +43,15 @@ function addClientImage(image) {
 }
 
 
+function addExampleImage() {
+    fetch("/Resources/exampleImage.png")
+        .then(response => response.blob())
+        .then(blob => {
 
+            addClientImage(blob);
+        });
+
+}
 
 function formAddImage() {
     var image = document.getElementById("uploadClientImage").files[0];
