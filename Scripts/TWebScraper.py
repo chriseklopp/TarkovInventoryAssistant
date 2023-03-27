@@ -32,7 +32,7 @@ class TWebScraper:
                             "https://escapefromtarkov.fandom.com/wiki/Provisions",
                             "https://escapefromtarkov.fandom.com/wiki/Loot",
                             "https://escapefromtarkov.fandom.com/wiki/Weapons",
-                            "https://escapefromtarkov.fandom.com/wiki/Keys_%26_Intel",
+                            #"https://escapefromtarkov.fandom.com/wiki/Keys_%26_Intel", keys ruin things >:(
                             "https://escapefromtarkov.fandom.com/wiki/Backpacks",
                             "https://escapefromtarkov.fandom.com/wiki/Headwear",
                             "https://escapefromtarkov.fandom.com/wiki/Eyewear",
@@ -585,6 +585,7 @@ if __name__ == "__main__":  # run this to update the catalog from the wiki.
     if len(sys.argv) >= 2:
         outCatalogPath = sys.argv[1]
         if not os.path.exists(outCatalogPath):
+            print("TWebScraper: bad output path")
             sys.exit()
     if len(sys.argv) >= 3:
         catName = sys.argv[2]
