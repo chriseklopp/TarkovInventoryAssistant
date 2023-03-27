@@ -93,6 +93,9 @@ int TImageReader::detectOpenContainers(const cv::Mat& image,
             approx.reserve(2);
             cv::approxPolyDP(cont, approx, .2 * peri, true);
 
+            if (approx.size() < 2)
+                continue;
+
             cv::Point lowerP = approx.at(0);
             cv::Point upperP = approx.at(1);
             
@@ -129,8 +132,8 @@ void TImageReader::resolveContainerImageItems(const cv::Mat& image,
         cv::cvtColor(containerSlice, imgHSV, cv::COLOR_BGR2HSV);
 
         // Our "Magic" threshold values to detect item outlines.
-        const cv::Scalar lower(94, 7, 50);
-        const cv::Scalar upper(105, 36, 115);
+        const cv::Scalar lower(89, 7, 50);
+        const cv::Scalar upper(105, 45, 115);
 
         cv::Mat mask;
         cv::inRange(imgHSV, lower, upper, mask);
