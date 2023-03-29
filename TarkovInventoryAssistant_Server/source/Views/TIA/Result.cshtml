@@ -3,15 +3,13 @@
 @model TarkovInventoryAssistant_Server.source.Models.ResultsListModel
 
 
-
-
 <div class="card-body">
 
     <div>
         <p class="totalValueText">Total Value: @Model.totalvaluecounter.getValueString()</p>
     </div>
 
-    <table class="table" style="color: #ffffff;">
+    <table id="resultTable" class="table sortable" style="color: #ffffff;">
 
         <thead>
             <tr>
@@ -27,10 +25,10 @@
                 <th>
                     Dim
                 </th>
-                <th>
+                <th data-sort-type="currency">
                     Flea Price
                 </th>
-                <th>
+                <th data-sort-type="currency">
                     Trader Price
                 </th>
             </tr>
@@ -39,37 +37,34 @@
             @if (Model != null && Model.results.Count() > 0)
             {
 
-            @foreach (DetectionResultsModel det in Model.results)
-            {
-            <tr >
-                <td>
-                    
-                    <img src=@det.catalogImage alt="Choose file">
-                </td>
-                <td>
-                    @det.count
-                </td>
-                <td>
-                    @det.name
-                </td>
-                <td>
-                    @det.dim
-                </td>
-                <td style="@(det.sellOnFlea ? "background-color: #0fb8a7":"")">
-                    @det.fleaPrice
+                @foreach (DetectionResultsModel det in Model.results)
+                {
+                    <tr>
+                        <td>
 
-                </td>
-                <td style="@(det.sellOnFlea ? "":"background-color: #05e841;")">
-                    <div>
-                        @det.traderPrice
-                    </div>
-                    <div>
-                        @det.trader
-                    </div>
+                            <img src=@det.catalogImage alt="Choose file">
+                        </td>
+                        <td>
+                            @det.count
+                        </td>
+                        <td>
+                            @det.name
+                        </td>
+                        <td>
+                            @det.dim
+                        </td>
+                        <td style="@(det.sellOnFlea ? "background-color: #0fb8a7":"")">
+                            <div>@det.fleaPrice</div>
 
-                </td>
-            </tr>
-            }
+
+                        </td>
+                        <td style="@(det.sellOnFlea ? "":"background-color: #05e841;")">
+                            <div>@det.traderPrice</div>
+                            <div>@det.trader</div>
+
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
 

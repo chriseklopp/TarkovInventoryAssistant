@@ -75,6 +75,82 @@ function removeClientImage() {
 }
 
 
+function currencyCompare(subject, comparee, lessThan = true) {
+    var subjectValue = parseFloat(subject.getElementsByTagName('div')[0].innerHTML.replace(/,/g, '').substring(1));
+    if (isNaN(subjectValue)) {
+        subjectValue = 0
+    }
+    var compareeValue = parseFloat(comparee.getElementsByTagName('div')[0].innerHTML.replace(/,/g, '').substring(1));
+    if (isNaN(compareeValue)) {
+        compareeValue = 0
+    }
+
+    if (lessThan) {
+        return subjectValue < compareeValue;
+    }
+    else {
+        return subjectValue > compareeValue;
+    }
+    
+}
+
+function defaultCompare(subject, comparee, lessThan = true) {
+    if (lessThan) {
+        return subject.innerHTML.toLowerCase() < comparee.innerHTML.toLowerCase();;
+    }
+    else {
+        return subject.innerHTML.toLowerCase() > comparee.innerHTML.toLowerCase();;
+    }
+}
+
+function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementsByClassName("sortable")[0];
+    var rows = table.getElementsByTagName("tr");
+
+    comparator = defaultCompare;
+    //If the column has a special comparison fucntion use that intead.
+    var sortType = rows[0].getElementsByTagName("th")[n].getAttribute("data-sort-type");
+    if (sortType == "currency") {
+        comparator = currencyCompare;
+    }
+
+    switching = true;
+    dir = "asc";
+    while (switching) {
+        switching = false;
+        rows = table.getElementsByTagName("tr");
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("td")[n];
+            y = rows[i + 1].getElementsByTagName("td")[n];
+
+            if (dir == "asc") {
+                if (comparator(x,y,false)) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+            else if (dir == "desc") {
+                if (comparator(x, y, true)) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
 
 
 

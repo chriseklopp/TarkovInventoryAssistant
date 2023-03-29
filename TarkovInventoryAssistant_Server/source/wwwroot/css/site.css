@@ -30,7 +30,7 @@ body {
     background-color: #241b0a;
     border: 2px solid #8f6d22;
     line-height: 1;
-    max-width: 500px;
+    max-width: 650px;
     margin: 0 auto;
     margin-bottom: 20px;
 }
@@ -102,4 +102,9 @@ body {
 
 .totalValueText {
     font-size: 22px;
+}
+
+
+#resultTable th {
+    cursor: pointer;
 }
