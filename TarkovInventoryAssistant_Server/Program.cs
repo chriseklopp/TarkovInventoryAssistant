@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions() { Content
 CoreInterop core = new CoreInterop();
 // TODO: Remove hardcoding
 core.setDATA_DIR("C:\\MyWorkspace\\TarkovInventoryAssistant\\TarkovInventoryAssistant_Server\\source\\wwwroot\\Data");
-core.setACTIVECATALOG("C:\\MyWorkspace\\TarkovInventoryAssistant\\TarkovInventoryAssistant_Server\\source\\wwwroot\\Data\\Catalog2023-23-3--16-54-50");
+core.setACTIVECATALOG(core.getACTIVE_CATALOG());
 builder.Services.AddSingleton<CoreInterop>(core);
 
 builder.Services.AddHostedService<CoreUpdateService>();

@@ -55,6 +55,19 @@ namespace TarkovInventoryAssistant_Server.source.Services
                     {
                         m_core.setACTIVECATALOG(m_core.getCATALOGS_DIR() + "/" + catalogName);
                         Console.WriteLine("Successfully loaded catalog: " + catalogName);
+
+                        //Remove old Compiled Catalog.
+                        try
+                        {
+
+                            Directory.Delete(previousCatalog, true);
+
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Failed to delete old catalog: {0}", e.Message);
+                        }
+
                     }
                     else
                     {
@@ -67,17 +80,6 @@ namespace TarkovInventoryAssistant_Server.source.Services
                     Console.WriteLine("Catalog Update Failed! " + resultantPath + " does not exist.");
                 }
 
-                // Remove old Compiled Catalog.
-                //try
-                //{
-
-                //    Directory.Delete(previousCatalog, true);
-
-                //}
-                //catch (Exception e)
-                //{
-                //    Console.WriteLine("The process failed: {0}", e.Message);
-                //}
 
 
                 // Wait for a certain period of time before running the next task
