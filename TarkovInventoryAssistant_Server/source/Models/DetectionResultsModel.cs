@@ -11,14 +11,8 @@ namespace TarkovInventoryAssistant_Server.Models
     public class DetectionResultsModel
     {
 
-        public DetectionResultsModel()
-        {
-
-        }
-
-
         // Convert a single DRMarshall to a a DetectionResultsModel.
-        public DetectionResultsModel(DetectionResultMarshal drm, string catalogPath)
+        public DetectionResultsModel(DetectionResultMarshal drm, string catalogPath, int itemCount = 1)
         {
             string filePath = catalogPath + "/images/" + drm.name + ".webp";
 
@@ -28,25 +22,19 @@ namespace TarkovInventoryAssistant_Server.Models
 
             int nullIndex = Array.IndexOf(drm.fleaUnit, (byte)0);
             string fleaUnit = Encoding.UTF8.GetString(drm.fleaUnit, 0, nullIndex);
-            fleaPrice = fleaUnit + drm.fleaprice.ToString("N0");
-            pricePerSlot = fleaUnit + drm.fleaPricePerSlot.ToString("N0");
+            fleaPrice = fleaUnit + (drm.fleaprice * itemCount).ToString("N0");
+            pricePerSlot = fleaUnit + (drm.fleaPricePerSlot * itemCount).ToString("N0");
 
             nullIndex = Array.IndexOf(drm.traderUnit, (byte)0);
             string traderunit = Encoding.UTF8.GetString(drm.traderUnit, 0, nullIndex);
-            traderPrice = traderunit + drm.traderPrice.ToString("N0");
+            traderPrice = traderunit + (drm.traderPrice * itemCount).ToString("N0");
             trader = drm.trader;
 
             sellOnFlea = drm.sellOnFlea;
 
-            parentImageID = 666;
-            count = 1;
+            count = itemCount;
         }
 
-        // Convert the DRMarshall and set the count value.
-        public DetectionResultsModel(DetectionResultMarshal drm, string catalogPath, int similarCount) : this(drm,catalogPath)
-        {
-            count = similarCount;
-        }
 
         public string? RequestId { get; set; }
 
@@ -65,8 +53,6 @@ namespace TarkovInventoryAssistant_Server.Models
         public string trader { get; set; } = "";
 
         public bool sellOnFlea { get; set; }
-
-        public int parentImageID { get; set; }
 
         public int count { get; set; }
     }

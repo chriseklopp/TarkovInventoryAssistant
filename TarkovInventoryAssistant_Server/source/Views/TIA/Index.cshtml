@@ -15,7 +15,16 @@
 
 
     <div class="text-center">
-        <h1 class="display-4">Tarkov Inventory Assistant</h1>
+        <h1 class="display-4 titleText">Tarkov Inventory Assistant</h1>
+    </div>
+
+
+    <div align="center" class="text-box infoBox">
+        <p><u>About:</u> This tool generates a list <b>EscapeFromTarkov</b> items from images of your stash.</p>
+        <p> <u>How to use:</u> Add an image from your device or press your "Print Screen" key and paste anywhere on this page. Click on an image to view detected content.</p>
+        <p>*Currently only works on open containers*</p>
+        <p>**May not be 100% accurate**</p>
+        <button type="button" style="background-color: #b5b1a7" onclick="addExampleImage()">Add Ex. Image</button>
     </div>
 
     <!--Image display div -->
@@ -36,8 +45,9 @@
 
 
     <div id="result">
+
     </div>
-    
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -70,6 +80,17 @@
                 processData: false,
                 success: function (data) {
                     $('#result').html(data);
+
+                    // Add the sorting functionality to the table
+                    var table = document.getElementById("result");
+                    var headers = table.querySelectorAll("th");
+
+                    for (var i = 0; i < headers.length; i++) {
+                        headers[i].addEventListener("click", function () {
+                            var n = this.cellIndex;
+                            sortTable(n);
+                        });
+                    }
                 },
                 error: function (xhr, status, error) {
                     console.log('Error:', error);
