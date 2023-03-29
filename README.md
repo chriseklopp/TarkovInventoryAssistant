@@ -6,7 +6,7 @@ This tool identifies and itemizes items using screenshots of Escape From Tarkov 
 
 
 ## How to use:
-------------------------------------------------------------------------------------------------------------------------
+
 This project features both a Web Server and a native desktop application, each with slightly varying features, though both can perform the same basic functionality.
 
 The webserver can be viewed at:
