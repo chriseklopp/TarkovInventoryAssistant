@@ -10,7 +10,7 @@ TCore::TCore():
 {
     if (!m_config->isValid()) {
         std::cout << "ERROR: Config file invalid";
-        throw std::exception("Config invalid");
+        throw std::runtime_error("Config invalid");
     }
 };
 

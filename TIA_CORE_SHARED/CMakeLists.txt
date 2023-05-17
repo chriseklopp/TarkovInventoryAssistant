@@ -7,10 +7,8 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}
     FILES ${HEADERS} ${SOURCES}
 )
 
-set(OpenCV_DIR "C:/MyWorkspace/opencv/Opencv_4.6/opencv/build")
+
 FIND_PACKAGE( OpenCV REQUIRED )
-#find_package(wxWidgets REQUIRED COMPONENTS net core base)
-#include(${wxWidgets_USE_FILE})
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 set(TIA_HEADERS
@@ -37,7 +35,6 @@ target_include_directories(TIA_CORE_SHARED PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} )
 
 include_directories(${CMAKE_SOURCE_DIR}/TIA_CORE)
 target_link_libraries(TIA_CORE_SHARED TIA_CORE)
-
 
 
 

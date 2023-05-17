@@ -1,7 +1,6 @@
 #include <TWebInterface.h>
 
 
-
 namespace WebInterface {
 
     DetectionResultMarshal::DetectionResultMarshal() :
@@ -42,19 +41,25 @@ namespace WebInterface {
         if (!catItem) // now this would be bad!!
             return;
 
-        strcpy_s(name, sizeof(name) / sizeof(char), catItem->getName().c_str());
+        strncpy(name, catItem->getName().c_str(), sizeof(name) - 1);
+        name[sizeof(name) - 1] = '\0';
 
-        strcpy_s(fleaUnit, sizeof(fleaUnit) / sizeof(char), catItem->getPrice().getUnit().c_str());
+
+        strncpy(fleaUnit, catItem->getPrice().getUnit().c_str(), sizeof(fleaUnit) - 1);
+        fleaUnit[sizeof(fleaUnit) - 1] = '\0';
 
         fleaPrice = catItem->getPrice().getValue();
 
         fleaPricePerSlot = catItem->getPricePerSlot().getValue();
 
-        strcpy_s(traderUnit, sizeof(traderUnit) / sizeof(char), catItem->getTraderSellPrice().getUnit().c_str());
+        strncpy(traderUnit, catItem->getTraderSellPrice().getUnit().c_str(), sizeof(traderUnit)-1);
+        traderUnit[sizeof(traderUnit) - 1] = '\0';
 
         traderPrice = catItem->getTraderSellPrice().getValue();
 
-        strcpy_s(trader, sizeof(trader) / sizeof(char), catItem->getTrader().c_str());
+        //strcpy_s(trader, sizeof(trader), catItem->getTrader().c_str());
+        strncpy(trader, catItem->getTrader().c_str(), sizeof(trader)-1);
+        trader[sizeof(trader) - 1] = '\0';
 
         sellOnFlea = catItem->isFleaOptimal();
 
@@ -104,24 +109,30 @@ namespace WebInterface {
 
 
     void TWebInterface::getDATA_DIR(char* out, int size) const {
-        strcpy_s(out, size, m_core.getConfigPtr()->getDATA_DIR().string().c_str());
+        strncpy(out, m_core.getConfigPtr()->getDATA_DIR().string().c_str(), size-1);
+        out[size - 1] = '\0';
+
     }
 
     void TWebInterface::getACTIVE_CATALOG(char* out, int size) const {
-        strcpy_s(out, size, m_core.getConfigPtr()->getACTIVE_CATALOG().string().c_str());
+        strncpy(out, m_core.getConfigPtr()->getACTIVE_CATALOG().string().c_str(), size-1);
+        out[size - 1] = '\0';
     }
 
 
     void TWebInterface::getRAW_CATALOGS_DIR(char* out, int size) const {
-        strcpy_s(out, size, m_core.getConfigPtr()->getRAW_CATALOGS_DIR().string().c_str());
+        strncpy(out, m_core.getConfigPtr()->getRAW_CATALOGS_DIR().string().c_str(), size - 1);
+        out[size - 1] = '\0';
     }
 
     void TWebInterface::getCATALOGS_DIR(char* out, int size) const {
-        strcpy_s(out, size, m_core.getConfigPtr()->getCATALOGS_DIR().string().c_str());
+        strncpy(out, m_core.getConfigPtr()->getCATALOGS_DIR().string().c_str(), size - 1);
+        out[size - 1] = '\0';
     }
 
     void TWebInterface::getROOT_DIR(char* out, int size) const{
-        strcpy_s(out, size, m_core.getConfigPtr()->getROOT_DIR().string().c_str());
+        strncpy(out, m_core.getConfigPtr()->getROOT_DIR().string().c_str(), size - 1);
+        out[size - 1] = '\0';
     }
 
     void TWebInterface::setDATA_DIR(const char* dir){

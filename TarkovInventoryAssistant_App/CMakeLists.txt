@@ -9,11 +9,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 
-
-
-
-set(OpenCV_DIR "C:/MyWorkspace/opencv/Opencv_4.6/opencv/build")
-FIND_PACKAGE( OpenCV REQUIRED )
 find_package(wxWidgets REQUIRED COMPONENTS net core base)
 include(${wxWidgets_USE_FILE})
 include_directories( ${OpenCV_INCLUDE_DIRS} )

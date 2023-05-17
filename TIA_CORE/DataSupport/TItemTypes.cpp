@@ -124,7 +124,7 @@ namespace TItemTypes {
         }
     };
 
-    bool TItemTypes::compareByName(TItem a, TItem b)
+    bool compareByName(TItem a, TItem b)
     {
         return a.m_name < b.m_name;
     }

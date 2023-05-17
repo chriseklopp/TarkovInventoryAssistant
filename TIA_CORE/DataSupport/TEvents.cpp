@@ -1,5 +1,5 @@
 #include <DataSupport/TEvents.h>
-
+#include <algorithm>
 
 namespace TEvent {
    

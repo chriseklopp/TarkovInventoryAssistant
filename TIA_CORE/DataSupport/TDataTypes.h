@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <opencv2/opencv.hpp>
-
+#include <vector>
 
 
 // Image id. Unique ID corresponding to a catalog item.
@@ -25,10 +25,10 @@ namespace TDataTypes
     void splitString(std::string s, char del, std::vector<int>& out);
 
     // Join vector to std::string on character delimiter.
-    std::string joinVector(std::vector<std::string>& in, char del);
+    std::string joinVector(const std::vector<std::string>& in, char del);
 
     // Join vector to std::string on character delimiter.
-    std::string joinVector(std::vector<int>& in, char del);
+    std::string joinVector(const std::vector<int>& in, char del);
 
     // Converts integer to string and adds commas where necessary.
     std::string prettifyToString(int val);
