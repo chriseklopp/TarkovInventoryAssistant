@@ -1,5 +1,6 @@
 using Interop;
 using Microsoft.AspNetCore.Mvc.Razor;
+using System.IO;
 using System.Runtime.InteropServices;
 using TarkovInventoryAssistant_Server.source.Services;
 
@@ -7,8 +8,17 @@ using TarkovInventoryAssistant_Server.source.Services;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions() { ContentRootPath = Directory.GetCurrentDirectory()+"/source", WebRootPath = Directory.GetCurrentDirectory() + "/source/wwwroot" });
 CoreInterop core = new CoreInterop();
-// TODO: Remove hardcoding
-core.setDATA_DIR("C:\\MyWorkspace\\TarkovInventoryAssistant\\TarkovInventoryAssistant_Server\\source\\wwwroot\\Data");
+
+if(args.Length > 0)
+{
+    if (System.IO.Directory.Exists(args[0]))
+        core.setDATA_DIR(args[0]);
+
+}
+
+
+//core.setDATA_DIR("C:\\MyWorkspace\\TarkovInventoryAssistant\\TarkovInventoryAssistant_Server\\source\\wwwroot\\Data");
+
 core.setACTIVECATALOG(core.getACTIVE_CATALOG());
 builder.Services.AddSingleton<CoreInterop>(core);
 

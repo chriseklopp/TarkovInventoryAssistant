@@ -499,11 +499,11 @@ namespace TDataCatalog {
 
 
         // Find modules in the catalog.
-        for (auto& itr = std::filesystem::directory_iterator(catalog); itr != std::filesystem::end(itr); ++itr) {
-            if (!std::filesystem::exists(*itr / "images"))
+        for (const auto& entry : std::filesystem::directory_iterator(catalog)) {
+            if (!std::filesystem::exists(entry.path() / "images"))
                 continue;
 
-            outMods.push_back(*itr);
+            outMods.push_back(entry.path());
         }
 
         if (!outMods.size()) {

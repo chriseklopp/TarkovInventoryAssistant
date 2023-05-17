@@ -32,7 +32,7 @@ namespace TDataTypes
     }
 
     // Join vector to std::string on character delimiter.
-    std::string joinVector(std::vector<std::string>& in, char del) {
+    std::string joinVector(const std::vector<std::string>& in, char del) {
         std::string out;
         for (auto it : in) {
             out += it + del;
@@ -42,7 +42,7 @@ namespace TDataTypes
     };
 
     // Join vector to std::string on character delimiter.
-    std::string joinVector(std::vector<int>& in, char del) {
+    std::string joinVector(const std::vector<int>& in, char del) {
         std::string out;
         for (auto it : in) {
             out  += std::to_string(it) + del;

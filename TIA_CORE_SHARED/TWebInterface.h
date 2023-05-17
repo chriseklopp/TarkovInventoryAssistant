@@ -1,4 +1,13 @@
 #pragma once
+
+#ifdef _WIN32
+#  define EXPORT __declspec( dllexport )
+#else
+#  define EXPORT
+#endif
+
+
+
 /*
 * This project statically links to the TIA_CORE library and compiles into a DLL
 * This makes it easy to export to TarkovInventoryAssistant_Server without making TarkovInventoryAssistant_App angry, which 
@@ -8,6 +17,7 @@ Interface used as a medium between the Core library and the TarkovInventoryAssis
 This will provide interfaces in a way that are friendly for interop with the C# code running the server.
 */
 #include <Core/TCore.h>
+
 
 namespace WebInterface {
 
@@ -99,46 +109,46 @@ namespace WebInterface {
 
 
 
-extern "C" _declspec(dllexport) void getDATA_DIR_INTEROP(WebInterface::TWebInterface * iface, char* str, int size) {
+extern "C" EXPORT void getDATA_DIR_INTEROP(WebInterface::TWebInterface * iface, char* str, int size) {
     if (iface)
         iface->getDATA_DIR(str, size);
     return;
 }
 
-extern "C" _declspec(dllexport) void getACTIVE_CATALOG_INTEROP(WebInterface::TWebInterface * iface, char* str, int size) {
+extern "C" EXPORT void getACTIVE_CATALOG_INTEROP(WebInterface::TWebInterface * iface, char* str, int size) {
     if (iface)
         iface->getACTIVE_CATALOG(str, size);
     return;
 
 }
 
-extern "C" _declspec(dllexport) void getRAW_CATALOGS_DIR_INTEROP(WebInterface::TWebInterface * iface, char* str, int size) {
+extern "C" EXPORT void getRAW_CATALOGS_DIR_INTEROP(WebInterface::TWebInterface * iface, char* str, int size) {
     if (iface)
         iface->getRAW_CATALOGS_DIR(str, size);
     return;
 }
 
-extern "C" _declspec(dllexport) void getCATALOGS_DIR_INTEROP(WebInterface::TWebInterface * iface, char* str, int size) {
+extern "C" EXPORT void getCATALOGS_DIR_INTEROP(WebInterface::TWebInterface * iface, char* str, int size) {
     if (iface)
         iface->getCATALOGS_DIR(str, size);
     return;
 
 }
 
-extern "C" _declspec(dllexport) void getROOT_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
+extern "C" EXPORT void getROOT_DIR_INTEROP(WebInterface::TWebInterface* iface, char* str, int size) {
     if (iface)
         iface->getROOT_DIR(str, size);
     return;
 }
 
-extern "C" _declspec(dllexport) void setDATA_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
+extern "C" EXPORT void setDATA_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
     if (iface)
         iface->setDATA_DIR(dir);
     return;
 }
 
 
-extern "C" _declspec(dllexport) bool compileRawCatalog_INTEROP(WebInterface::TWebInterface* iface, const char* path, const char* name, bool makeRotations) {
+extern "C" EXPORT bool compileRawCatalog_INTEROP(WebInterface::TWebInterface* iface, const char* path, const char* name, bool makeRotations) {
     bool ret = false;
     if (iface)
         ret = iface->compileRawCatalog(path,name,makeRotations);
@@ -146,37 +156,37 @@ extern "C" _declspec(dllexport) bool compileRawCatalog_INTEROP(WebInterface::TWe
 }
 
 
-extern "C" _declspec(dllexport) bool setACTIVECATALOG_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
+extern "C" EXPORT bool setACTIVECATALOG_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
     bool ret = false;
     if (iface)
         ret = iface->setACTIVECATALOG(dir);
     return ret;
 }
 
-extern "C" _declspec(dllexport) void setRAW_CATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
+extern "C" EXPORT void setRAW_CATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
     if (iface)
         iface->setRAW_CATALOGS_DIR(dir);
     return;
 }
 
-extern "C" _declspec(dllexport) void setCATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
+extern "C" EXPORT void setCATALOGS_DIR_INTEROP(WebInterface::TWebInterface* iface, char* dir) {
     if (iface)
         iface->setCATALOGS_DIR(dir);
     return;
 }
 
-extern "C" _declspec(dllexport) void saveConfig_INTEROP(WebInterface::TWebInterface* iface) {
+extern "C" EXPORT void saveConfig_INTEROP(WebInterface::TWebInterface* iface) {
     if (iface)
         iface->saveConfig();
     return;
 }
 
-extern "C" _declspec(dllexport) WebInterface::TWebInterface* CreateCoreInterface_INTEROP()
+extern "C" EXPORT WebInterface::TWebInterface* CreateCoreInterface_INTEROP()
 {
     return new WebInterface::TWebInterface();
 }
 
-extern "C" _declspec(dllexport) void DeleteCoreInterface_INTEROP(WebInterface::TWebInterface* iface)
+extern "C" EXPORT void DeleteCoreInterface_INTEROP(WebInterface::TWebInterface* iface)
 {
     if (iface)
         delete iface;
@@ -184,14 +194,14 @@ extern "C" _declspec(dllexport) void DeleteCoreInterface_INTEROP(WebInterface::T
 
 
 
-extern "C" _declspec(dllexport) int detectImageContent_INTEROP(WebInterface::TWebInterface* iface, unsigned char* image, int width, int height, int channels, WebInterface::DetectionResultMarshal*& out) {
+extern "C" EXPORT int detectImageContent_INTEROP(WebInterface::TWebInterface* iface, unsigned char* image, int width, int height, int channels, WebInterface::DetectionResultMarshal*& out) {
     if (iface)
         return iface->detectImageContent(image, width, height, channels, out);
     return 0;
 }
 
 // Deletes a result aray from a ptr.
-extern "C" _declspec(dllexport) void disposeDetectionResults_INTEROP(WebInterface::DetectionResultMarshal* in) {
+extern "C" EXPORT void disposeDetectionResults_INTEROP(WebInterface::DetectionResultMarshal* in) {
     if (in) {
         delete[] in;
     }
